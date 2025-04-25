@@ -63,8 +63,7 @@ class _BookDetailsState extends State<BookDetails> {
                         border: OutlineInputBorder(),
                       ),
                       onSubmitted: (newTitle) => setState(() {
-                        // TODO: update this
-                        // widget.book.name = newTitle;
+                        widget.book.name = newTitle;
                       }),
                     ),
                   ),
@@ -73,19 +72,18 @@ class _BookDetailsState extends State<BookDetails> {
                     // specify padding only from top and bottom
                     padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
                     child: Autocomplete<String>(
-                      // set initial value
                       initialValue: TextEditingValue(text: widget.book.author),
                       optionsBuilder: (TextEditingValue textEditingValue) {
                         return allAuthors.where((a) => a
                             .toLowerCase()
                             .contains(textEditingValue.text.toLowerCase()));
                       },
-                      // when selected
-                      onSelected: (sel) =>
-                          // TODO:
-                          // update appbar, and json?
-                          // does this update globaly?
-                          debugPrint('Selected author: $sel'),
+                      onSelected: (sel) {
+                        setState(() {
+                          debugPrint('Selected author: $sel');
+                          widget.book.author = sel;
+                        });
+                      },
                       fieldViewBuilder: (
                         BuildContext context,
                         TextEditingController textEditingController,
@@ -99,10 +97,10 @@ class _BookDetailsState extends State<BookDetails> {
                             labelText: 'Author',
                             border: OutlineInputBorder(),
                           ),
-                          onSubmitted: (value) => setState(() {
-                            // TODO: update this
-                            // widget.book.name = newTitle;
-                          }),
+                          onSubmitted: (value) {
+                            // tell the autocomplete to treat this as a selection
+                            onFieldSubmitted();
+                          },
                         );
                       },
                     ),
@@ -124,11 +122,7 @@ class _BookDetailsState extends State<BookDetails> {
                           .contains(textEditingValue.text.toLowerCase()));
                     },
                     // when selected
-                    onSelected: (sel) =>
-                        // TODO:
-                        // update appbar, and json?
-                        // does this update globaly?
-                        debugPrint('Selected tag: $sel'),
+                    onSelected: (sel) => debugPrint('Selected tag: $sel'),
                     fieldViewBuilder: (
                       BuildContext context,
                       TextEditingController textEditingController,
