@@ -3,8 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/book.dart';
 import 'book_details.dart';
 
-class Library extends StatelessWidget {
+class Library extends StatefulWidget {
   const Library({super.key});
+
+  @override
+  State<Library> createState() => _LibraryState();
+}
+
+class _LibraryState extends State<Library> {
+  // setting up dummy
+  // TODO: load from json
+  late List<Book> temporaryBooks;
+  @override
+  void initState() {
+    super.initState();
+    temporaryBooks = List.generate(
+        20, (i) =>
+         Book("name$i", "author", "link", ["tag1", "tag2", "tag3"],
+            "coverPath", false, false));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,19 +29,9 @@ class Library extends StatelessWidget {
       builder: (context, constraints) {
         // setting button size
         final double maxWidth = constraints.maxWidth;
-        int columns = (maxWidth / 300).floor(); // modify the maxWidth / number to change size
+        int columns = (maxWidth / 300)
+            .floor(); // modify the maxWidth / number to change size
         if (columns < 1) columns = 1;
-
-        // setting up example data
-        // replace this with loading a json
-        List<Book> temporaryBooks = [];
-
-        for (int i = 0; i < 20; i++) {
-          var book = Book("name$i",
-          "author", "link", ["tag1", "tag2", "tag3"],
-           "coverPath", false, false);
-           temporaryBooks.add(book);
-        }
 
         // make the gridview
         return GridView.builder(
@@ -44,13 +51,17 @@ class Library extends StatelessWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   // pulls up the book details
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => BookDetails(book: temporaryBooks[index]),
+                        builder: (_) =>
+                            BookDetails(book: temporaryBooks[index]),
                       ),
                     );
+                    setState( // updating library state after returning from BookDetails
+                      () {},
+                    ); 
                   },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
