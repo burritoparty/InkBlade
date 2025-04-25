@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_manga_reader/book.dart';
+import 'book_details.dart';
 
 class Library extends StatelessWidget {
   const Library({super.key});
@@ -11,31 +12,19 @@ class Library extends StatelessWidget {
       builder: (context, constraints) {
         // setting button size
         final double maxWidth = constraints.maxWidth;
-        int columns = (maxWidth / 325).floor(); // modify the maxWidth / number to change size
+        int columns = (maxWidth / 300).floor(); // modify the maxWidth / number to change size
         if (columns < 1) columns = 1;
 
         // setting up example data
-        // replace this with loading a json 
-        var book1 = Book(
-            "Book Name1",
-            "Author Name",
-            "Link to book",
-            ["tag1", "tag2"],
-            "C:\\Placeholder\\Path",
-            false,
-            true);
-        var book2 = Book(
-            "Book Name2",
-            "Author Name",
-            "Link to book",
-            ["tag1", "tag2"],
-            "C:\\Placeholder\\Path",
-            false,
-            true);
+        // replace this with loading a json
+        List<Book> temporaryBooks = [];
 
-        List<Book> books = [];
-        books.add(book1);
-        books.add(book2);
+        for (int i = 0; i < 20; i++) {
+          var book = Book("name$i",
+          "author", "link", ["tag1", "tag2", "tag3"],
+           "coverPath", false, false);
+           temporaryBooks.add(book);
+        }
 
         // make the gridview
         return GridView.builder(
@@ -46,7 +35,7 @@ class Library extends StatelessWidget {
             mainAxisSpacing: 8,
             childAspectRatio: 0.667, // adjust for button shape
           ),
-          itemCount: books.length,
+          itemCount: temporaryBooks.length,
           // building the buttons
           itemBuilder: (context, index) {
             return ClipRRect(
@@ -54,9 +43,14 @@ class Library extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  // set the function to be called
+                  // pulls up the book details
                   onTap: () {
-                    debugPrint('tapped on ${books[index].name}');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BookDetails(book: temporaryBooks[index]),
+                      ),
+                    );
                   },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -66,7 +60,7 @@ class Library extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             vertical: 4.0, horizontal: 8.0),
                         child: Text(
-                          books[index].name,
+                          temporaryBooks[index].name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
@@ -78,7 +72,9 @@ class Library extends StatelessWidget {
                       ),
 
                       // cover, filling remaining space
-                      const Expanded(child: Placeholder(),)
+                      const Expanded(
+                        child: Placeholder(),
+                      )
                       // uncomment this to actually get the image
                       // Expanded(
                       //   child: Image.file(

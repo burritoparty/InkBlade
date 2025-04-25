@@ -4,3 +4,4 @@ export 'tags.dart';
 export 'search.dart';
 export 'favorites.dart';
 export 'filter.dart';
+export 'book_details.dart';
