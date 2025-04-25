@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/book.dart';
 
+import 'package:textfield_tags/textfield_tags.dart';
+
 class BookDetails extends StatefulWidget {
   final Book book;
   const BookDetails({super.key, required this.book});
@@ -15,6 +17,7 @@ class _BookDetailsState extends State<BookDetails> {
     // controller for text editing field
     final TextEditingController titleController =
         TextEditingController(text: widget.book.name);
+    final _stringTagController = StringTagController();
 
     // mock data
     // grab the authors
@@ -110,56 +113,75 @@ class _BookDetailsState extends State<BookDetails> {
             ),
             // tag handling
             // TODO: modify how tags are handled
+            // Expanded(
+            //   // modify flex for how much space is taken
+            //   flex: 1,
+            //   child: Column(
+            //     children: [
+            //       Autocomplete<String>(
+            //         optionsBuilder: (TextEditingValue textEditingValue) {
+            //           return allTags.where((a) => a
+            //               .toLowerCase()
+            //               .contains(textEditingValue.text.toLowerCase()));
+            //         },
+            //         // when selected
+            //         onSelected: (sel) => debugPrint('Selected tag: $sel'),
+            //         fieldViewBuilder: (
+            //           BuildContext context,
+            //           TextEditingController textEditingController,
+            //           FocusNode focusNode,
+            //           VoidCallback onFieldSubmitted,
+            //         ) {
+            //           return TextField(
+            //             controller: textEditingController,
+            //             focusNode: focusNode,
+            //             decoration: const InputDecoration(
+            //               labelText: 'Add tag',
+            //               border: OutlineInputBorder(),
+            //             ),
+            //             onSubmitted: (value) => setState(() {
+            //               widget.book.tags.add(value);
+            //             }),
+            //           );
+            //         },
+            //       ),
+            //       SizedBox(
+            //         height: 40,
+            //         child: ListView(
+            //           scrollDirection: Axis.horizontal,
+            //           children: widget.book.tags.map((tag) {
+            //             return Padding(
+            //               padding: const EdgeInsets.symmetric(horizontal: 4),
+            //               child: InputChip(
+            //                 label: Text(tag),
+            //                 onDeleted: () => setState(() {
+            //                   widget.book.tags.remove(tag);
+            //                 }),
+            //               ),
+            //             );
+            //           }).toList(),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             Expanded(
-              // modify flex for how much space is taken
-              flex: 1,
-              child: Column(
-                children: [
-                  Autocomplete<String>(
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      return allTags.where((a) => a
-                          .toLowerCase()
-                          .contains(textEditingValue.text.toLowerCase()));
-                    },
-                    // when selected
-                    onSelected: (sel) => debugPrint('Selected tag: $sel'),
-                    fieldViewBuilder: (
-                      BuildContext context,
-                      TextEditingController textEditingController,
-                      FocusNode focusNode,
-                      VoidCallback onFieldSubmitted,
-                    ) {
-                      return TextField(
-                        controller: textEditingController,
-                        focusNode: focusNode,
-                        decoration: const InputDecoration(
-                          labelText: 'Add tag',
-                          border: OutlineInputBorder(),
-                        ),
-                        onSubmitted: (value) => setState(() {
-                          widget.book.tags.add(value);
-                        }),
-                      );
-                    },
-                  ),
-                  SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: widget.book.tags.map((tag) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: InputChip(
-                            label: Text(tag),
-                            onDeleted: () => setState(() {
-                              widget.book.tags.remove(tag);
-                            }),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
+              child: TextFieldTags<String>(
+                textfieldTagsController: _stringTagController,
+                initialTags: allTags,
+                textSeparators: const [' ', ','],
+                validator: (String tag) {
+                  if (tag == 'php') {
+                    return 'Php not allowed';
+                  }
+                  return null;
+                },
+                inputFieldBuilder: (context, inputFieldValues) {
+                  return TextField(
+                    controller: inputFieldValues.textEditingController,
+                    focusNode: inputFieldValues.focusNode,
+                  );
+                },
               ),
             ),
           ],

@@ -200,6 +200,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
+  textfield_tags:
+    dependency: "direct main"
+    description:
+      name: textfield_tags
+      sha256: d1f2204114157a1296bb97c20d7f8c8c7fd036212812afb2e19de7bb34acc55b
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   vector_math:
     dependency: transitive
     description:
@@ -218,4 +226,4 @@ packages:
     version: "0.1.4-beta"
 sdks:
   dart: ">=3.1.2 <4.0.0"
-  flutter: ">=1.16.0"
+  flutter: ">=1.17.0"
