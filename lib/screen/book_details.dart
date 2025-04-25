@@ -114,6 +114,9 @@ class _BookDetailsState extends State<BookDetails> {
               // modify flex for how much space is taken
               flex: 1,
               child: Column(
+                crossAxisAlignment:
+                // align
+                    CrossAxisAlignment.start,
                 children: [
                   Autocomplete<String>(
                     optionsBuilder: (TextEditingValue textEditingValue) {
@@ -143,24 +146,23 @@ class _BookDetailsState extends State<BookDetails> {
                         ),
                         onSubmitted: (value) => setState(() {
                           onFieldSubmitted();
-                          // widget.book.tags.add(value);
                         }),
                       );
                     },
                   ),
-                  SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
+                  Padding(
+                    // padding above the tag
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Wrap(
+                      // Use Wrap instead of ListView
+                      spacing: 8.0, // space between chips
+                      runSpacing: 4.0, // space between lines
                       children: widget.book.tags.map((tag) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: InputChip(
-                            label: Text(tag),
-                            onDeleted: () => setState(() {
-                              widget.book.tags.remove(tag);
-                            }),
-                          ),
+                        return InputChip(
+                          label: Text(tag),
+                          onDeleted: () => setState(() {
+                            widget.book.tags.remove(tag);
+                          }),
                         );
                       }).toList(),
                     ),
