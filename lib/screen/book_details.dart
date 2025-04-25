@@ -15,6 +15,9 @@ class _BookDetailsState extends State<BookDetails> {
     // controller for text editing field
     final TextEditingController titleController =
         TextEditingController(text: widget.book.name);
+    // controller for link editing field
+    final TextEditingController linkController =
+        TextEditingController(text: widget.book.link);
 
     // mock data
     // grab the authors
@@ -110,6 +113,21 @@ class _BookDetailsState extends State<BookDetails> {
                           },
                         ),
                       ),
+                      //TODO: here
+                      Padding(
+                        // specify padding only from top and bottom
+                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                        child: TextField(
+                          controller: linkController,
+                          decoration: const InputDecoration(
+                            labelText: "Link",
+                            border: OutlineInputBorder(),
+                          ),
+                          onSubmitted: (newLink) => setState(() {
+                            widget.book.link = newLink;
+                          }),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -184,12 +202,12 @@ class _BookDetailsState extends State<BookDetails> {
                   crossAxisCount: imagesPerRow,
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 12,
-                  childAspectRatio: 2 / 3, 
+                  childAspectRatio: 2 / 3,
                 ),
                 itemCount: totalPages,
                 itemBuilder: (context, index) {
                   // TODO: replace with Image.File
-                  return const Placeholder(); 
+                  return const Placeholder();
                 },
               ),
             ),
