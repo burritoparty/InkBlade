@@ -1,118 +1,171 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/book.dart';
 
-class BookDetails extends StatelessWidget {
+class BookDetails extends StatefulWidget {
   final Book book;
   const BookDetails({super.key, required this.book});
 
   @override
+  State<BookDetails> createState() => _BookDetailsState();
+}
+
+class _BookDetailsState extends State<BookDetails> {
+  @override
   Widget build(BuildContext context) {
     // controller for text editing field
     final TextEditingController titleController =
-        TextEditingController(text: book.name);
+        TextEditingController(text: widget.book.name);
 
     // mock data
     // grab the authors
-    List<String> authors = [];
+    List<String> allAuthors = [];
     for (int i = 0; i < 1000; i++) {
-      authors.add("authorname$i");
+      allAuthors.add("authorname$i");
     }
-    List<String> tags = [];
+    List<String> allTags = [];
     for (int i = 0; i < 15; i++) {
-      tags.add("tagname$i");
+      allTags.add("tagname$i");
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(book.name)),
+      appBar: AppBar(title: Text(widget.book.name)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // cover image
-            const Flexible(
-              child: FractionallySizedBox(
-                widthFactor: 0.3, // 30% of the rows width
-                child: AspectRatio(
-                  // use your cover’s width/height ratio, e.g. 100/150 == 2/3
-                  aspectRatio: 2 / 3,
-                  // TODO insert actual image
-                  child: Placeholder(),
-                ),
+            const Expanded(
+              // modify flex for how much space is taken
+              flex: 1,
+              child: AspectRatio(
+                aspectRatio: 2 / 3,
+                child: Placeholder(),
               ),
             ),
             // details column
             Expanded(
+              // modify flex for how much space is taken
+              flex: 2,
               // pad out from the image
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  // name of the book
-                  children: [
-                    // title
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: titleController,
-                        decoration: const InputDecoration(
-                          labelText: "Title",
-                          border: OutlineInputBorder(),
-                        ),
-                        onSubmitted: (newTitle) {
-                          debugPrint(newTitle);
-                          // TODO change details 
-                          // update appbar, and json?
-                          // does this update globaly?
-                        },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                // name of the book
+                children: [
+                  // title
+                  Padding(
+                    // specify padding only from top and bottom
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                    child: TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: "Title",
+                        border: OutlineInputBorder(),
                       ),
+                      onSubmitted: (newTitle) => setState(() {
+                        // TODO: update this
+                        // widget.book.name = newTitle;
+                      }),
                     ),
-                    // author handling
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Autocomplete<String>(
-                        // set initial value
-                        initialValue: TextEditingValue(text: book.author),
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          return authors.where((a) => a
-                              .toLowerCase()
-                              .contains(textEditingValue.text.toLowerCase()));
-                        },
-                        // when selected
-                        onSelected: (sel) =>
+                  ),
+                  // author handling
+                  Padding(
+                    // specify padding only from top and bottom
+                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                    child: Autocomplete<String>(
+                      // set initial value
+                      initialValue: TextEditingValue(text: widget.book.author),
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        return allAuthors.where((a) => a
+                            .toLowerCase()
+                            .contains(textEditingValue.text.toLowerCase()));
+                      },
+                      // when selected
+                      onSelected: (sel) =>
                           // TODO:
                           // update appbar, and json?
                           // does this update globaly?
                           debugPrint('Selected author: $sel'),
-                        fieldViewBuilder: (
-                          BuildContext context,
-                          TextEditingController textEditingController,
-                          FocusNode focusNode,
-                          VoidCallback onFieldSubmitted,
-                        ) {
-                          return TextField(
-                            controller: textEditingController,
-                            focusNode: focusNode,
-                            decoration: const InputDecoration(
-                              labelText: 'Author',
-                              border: OutlineInputBorder(),
-                            ),
-                            onSubmitted: (value) => onFieldSubmitted(),
-                          );
-                        },
-                      ),
+                      fieldViewBuilder: (
+                        BuildContext context,
+                        TextEditingController textEditingController,
+                        FocusNode focusNode,
+                        VoidCallback onFieldSubmitted,
+                      ) {
+                        return TextField(
+                          controller: textEditingController,
+                          focusNode: focusNode,
+                          decoration: const InputDecoration(
+                            labelText: 'Author',
+                            border: OutlineInputBorder(),
+                          ),
+                          onSubmitted: (value) => setState(() {
+                            // TODO: update this
+                            // widget.book.name = newTitle;
+                          }),
+                        );
+                      },
                     ),
-                    // tag handling
-                    // TODO: modify how tags are handled
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Tags: ${book.tags.join(', ')}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+                  ),
+                ],
+              ),
+            ),
+            // tag handling
+            // TODO: modify how tags are handled
+            Expanded(
+              // modify flex for how much space is taken
+              flex: 1,
+              child: Column(
+                children: [
+                  Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      return allTags.where((a) => a
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase()));
+                    },
+                    // when selected
+                    onSelected: (sel) =>
+                        // TODO:
+                        // update appbar, and json?
+                        // does this update globaly?
+                        debugPrint('Selected tag: $sel'),
+                    fieldViewBuilder: (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TextField(
+                        controller: textEditingController,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Add tag',
+                          border: OutlineInputBorder(),
+                        ),
+                        onSubmitted: (value) => setState(() {
+                          widget.book.tags.add(value);
+                        }),
+                      );
+                    },
+                  ),
+                  SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: widget.book.tags.map((tag) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: InputChip(
+                            label: Text(tag),
+                            onDeleted: () => setState(() {
+                              widget.book.tags.remove(tag);
+                            }),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
