@@ -122,7 +122,12 @@ class _BookDetailsState extends State<BookDetails> {
                           .contains(textEditingValue.text.toLowerCase()));
                     },
                     // when selected
-                    onSelected: (sel) => debugPrint('Selected tag: $sel'),
+                    onSelected: (sel) {
+                      setState(() {
+                        debugPrint('Selected tag: $sel');
+                        widget.book.tags.add(sel);
+                      });
+                    },
                     fieldViewBuilder: (
                       BuildContext context,
                       TextEditingController textEditingController,
@@ -137,7 +142,8 @@ class _BookDetailsState extends State<BookDetails> {
                           border: OutlineInputBorder(),
                         ),
                         onSubmitted: (value) => setState(() {
-                          widget.book.tags.add(value);
+                          onFieldSubmitted();
+                          // widget.book.tags.add(value);
                         }),
                       );
                     },
