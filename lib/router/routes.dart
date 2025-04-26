@@ -1,16 +1,18 @@
 // lib/router/routes.dart
 
-import 'package:flutter/material.dart';                               // <- for Route, MaterialPageRoute, RouteSettings
-import 'package:flutter_manga_reader/models/book.dart';               // <- your Book model
-import 'package:flutter_manga_reader/screen/library.dart';           // <- LibraryScreen
-import 'package:flutter_manga_reader/screen/book/book_details.dart'; // <- BookDetailsScreen
-import 'package:flutter_manga_reader/screen/book/book_reader.dart';  // <- BookReaderScreen
+import 'package:flutter/material.dart';
+import 'package:flutter_manga_reader/models/book.dart';
+import 'package:flutter_manga_reader/screen/library.dart';
+import 'package:flutter_manga_reader/screen/book/book_details.dart';
+import 'package:flutter_manga_reader/screen/book/book_reader.dart';
+import 'package:flutter_manga_reader/authors/authors_details.dart';
 
 class Routes {
-  static const home    = '/';
+  static const home = '/';
   static const library = '/library';
   static const details = '/book/details';
-  static const reader  = '/book/reader';
+  static const reader = '/book/reader';
+  static const author = '/authors/details';
 }
 
 class AppRouter {
@@ -28,6 +30,18 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => BookReader(book: book),
         );
+      case Routes.author:
+      // unpack the given map
+        final args = settings.arguments as Map<String, dynamic>;
+        final author = args['author'] as String;
+        final allAuthors = List<String>.from(args['allAuthors'] as List);
+        return MaterialPageRoute(
+          builder: (_) => AuthorDetails(
+            author: author,
+            allAuthors: allAuthors,
+          ),
+        );
+
       default:
         return null; // or a “NotFound” page
     }
