@@ -1,4 +1,4 @@
-export 'authors.dart';
+export '../authors/authors.dart';
 export 'tags.dart';
 export 'search.dart';
 export 'favorites.dart';
