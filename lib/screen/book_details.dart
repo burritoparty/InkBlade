@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/book.dart';
+import 'book_reader.dart';
 import 'dart:io';
 
 class BookDetails extends StatefulWidget {
@@ -40,7 +41,7 @@ class _BookDetailsState extends State<BookDetails> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CoverImage(),
+                  CoverImage(book: widget.book),
                   Expanded(
                     // modify flex for how much space is taken
                     flex: 2,
@@ -124,21 +125,37 @@ class _BookDetailsState extends State<BookDetails> {
   }
 }
 
+
 class CoverImage extends StatelessWidget {
-  const CoverImage({super.key});
+  final Book book;
+  // requires the book as a param
+  const CoverImage({ Key? key, required this.book }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Expanded(
-      // modify flex for how much space is taken
+    return Expanded(
       flex: 1,
-      child: AspectRatio(
-        aspectRatio: 2 / 3,
-        child: Placeholder(),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          // switch to the bookreader page
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => BookReader(book: book)),
+            );
+          },
+          child: const AspectRatio(
+            aspectRatio: 2 / 3,
+            child: Placeholder(),
+          ),
+        ),
       ),
     );
   }
 }
+
+
 
 class BookTitleField extends StatelessWidget {
   final TextEditingController controller;
