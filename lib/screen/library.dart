@@ -71,7 +71,7 @@ class _LibraryState extends State<Library> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 4.0, horizontal: 8.0),
                         child: Text(
-                          temporaryBooks[index].name,
+                          temporaryBooks[index].title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,

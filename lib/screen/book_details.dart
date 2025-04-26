@@ -15,7 +15,7 @@ class _BookDetailsState extends State<BookDetails> {
   Widget build(BuildContext context) {
     // controller for text editing field
     final TextEditingController titleController =
-        TextEditingController(text: widget.book.name);
+        TextEditingController(text: widget.book.title);
     // controller for link editing field
     final TextEditingController linkController =
         TextEditingController(text: widget.book.link);
@@ -34,7 +34,7 @@ class _BookDetailsState extends State<BookDetails> {
     int totalPages = 30;
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.book.name)),
+      appBar: AppBar(title: Text(widget.book.title)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -73,7 +73,7 @@ class _BookDetailsState extends State<BookDetails> {
                               border: OutlineInputBorder(),
                             ),
                             onSubmitted: (newTitle) => setState(() {
-                              widget.book.name = newTitle;
+                              widget.book.title = newTitle;
                             }),
                           ),
                         ),

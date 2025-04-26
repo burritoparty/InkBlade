@@ -1,18 +1,20 @@
 // import 'package:flutter/material.dart';
 class Book {
-  String name;
+  String title;
   String author;
-  String link;
   List<String> tags;
+  String link;
+  String path;
   String coverPath;
   bool readLater;
   bool favorite; 
 
   Book(
-    this.name,
+    this.title,
     this.author,
-    this.link,
     this.tags,
+    this.link,
+    this.path,
     this.coverPath,
     this.readLater,
     this.favorite
