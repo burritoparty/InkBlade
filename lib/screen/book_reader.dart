@@ -41,6 +41,45 @@ class BookReaderState extends State<BookReader> {
     );
   }
 
+  void _showJumpToPageDialog() async {
+    // start with empty input field
+    final input = TextEditingController();
+    final picked = await showDialog<int>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Go to page'),
+        content: TextField(
+          controller: input,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Page number',
+          ),
+          onSubmitted: (value) {
+            final num = int.tryParse(value);
+            Navigator.pop(context, num);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final num = int.tryParse(input.text);
+              Navigator.pop(context, num);
+            },
+            child: const Text('Go'),
+          ),
+        ],
+      ),
+    );
+    if (picked != null) {
+      _goToPage(picked - 1);
+    }
+  }
+
   void _handleKey(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       final key = event.logicalKey;
@@ -88,7 +127,13 @@ class BookReaderState extends State<BookReader> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: Text('${_currentPage + 1} of $totalPages'),
+          title: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: _showJumpToPageDialog,
+              child: Text('${_currentPage + 1} of $totalPages'),
+            ),
+          ),
           centerTitle: true,
         ),
         body: PageView.builder(
@@ -142,19 +187,16 @@ class BookReaderState extends State<BookReader> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Jump to first page
               IconButton(
                 icon: const Icon(Icons.first_page, color: Colors.white),
                 onPressed: () => _goToPage(0),
                 tooltip: 'First page',
               ),
-              // Previous page
               IconButton(
                 icon: const Icon(Icons.chevron_left, color: Colors.white),
                 onPressed: () => _goToPage(_currentPage - 1),
                 tooltip: 'Previous page',
               ),
-              // Zoom toggle
               IconButton(
                 icon: Icon(
                   _zoomedIn ? Icons.zoom_out : Icons.zoom_in,
@@ -168,13 +210,11 @@ class BookReaderState extends State<BookReader> {
                 }),
                 tooltip: _zoomedIn ? 'Zoom Out' : 'Zoom In',
               ),
-              // Next page
               IconButton(
                 icon: const Icon(Icons.chevron_right, color: Colors.white),
                 onPressed: () => _goToPage(_currentPage + 1),
                 tooltip: 'Next page',
               ),
-              // Jump to last page
               IconButton(
                 icon: const Icon(Icons.last_page, color: Colors.white),
                 onPressed: () => _goToPage(totalPages - 1),
