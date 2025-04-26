@@ -19,8 +19,8 @@ class _LibraryState extends State<Library> {
     super.initState();
     temporaryBooks = List.generate(
         20, (i) =>
-         Book("name$i", "author", "link", ["tag1", "tag2", "tag3"],
-            "coverPath", false, false));
+         Book("name$i", "author", ["tag1", "tag2", "tag3"], "link",
+            "C:\\path", "coverPath", false, false));
   }
 
   @override
