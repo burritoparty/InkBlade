@@ -149,7 +149,7 @@ class BookReaderState extends State<BookReader> {
           },
           itemBuilder: (context, index) {
             final file = File(
-              r'c:\Users\burrito\Desktop\Burrito Manga Reader\Burrito Manga Reader Library\(C86) [Saigado] ASUKA28 (Neon Genesis Evangelion) [English] [Chocolate + LWB]\02.jpg',
+              r'lib\placeholders\landscape.jpg',
             );
             if (_zoomedIn) {
               const zoomFactor = 0.6;
