@@ -149,7 +149,7 @@ class BookReaderState extends State<BookReader> {
           },
           itemBuilder: (context, index) {
             final file = File(
-              r'lib\placeholders\landscape.jpg',
+              r'lib\placeholders\portrait.jpg',
             );
             if (_zoomedIn) {
               const zoomFactor = 0.6;

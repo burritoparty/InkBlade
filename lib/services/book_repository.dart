@@ -20,7 +20,9 @@ class BookGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         // calculate how many columns fit at ~300px each
-        int columns = (constraints.maxWidth / 300).floor().clamp(1, books.length);
+        final maxCols = (constraints.maxWidth ~/ 300);
+        final upper = books.isNotEmpty ? books.length : 1;
+        final columns = maxCols.clamp(1, upper);
 
         return GridView.builder(
           padding: const EdgeInsets.all(8),
@@ -28,7 +30,7 @@ class BookGrid extends StatelessWidget {
             crossAxisCount: columns,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            childAspectRatio: 2/3, // tweak for tile shape
+            childAspectRatio: 2 / 3, // tweak for tile shape
           ),
           itemCount: books.length,
           itemBuilder: (context, i) => BookTile(
@@ -65,8 +67,8 @@ class BookTile extends StatelessWidget {
             children: [
               // book title at top, ellipsize if too long
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 4.0, horizontal: 8.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                 child: Text(
                   book.title,
                   maxLines: 1,
@@ -87,4 +89,3 @@ class BookTile extends StatelessWidget {
     );
   }
 }
-
