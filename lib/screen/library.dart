@@ -21,7 +21,7 @@ class LibraryState extends State<Library> {
     super.initState();
     // generate dummy books for now
     temporaryBooks = List.generate(
-      1,
+      10,
       (i) => Book(
         "name$i",
         "author",

@@ -20,9 +20,10 @@ class BookGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         // calculate how many columns fit at ~300px each
-        final maxCols = (constraints.maxWidth ~/ 300);
-        final upper = books.isNotEmpty ? books.length : 1;
-        final columns = maxCols.clamp(1, upper);
+        // compute how many 300px-wide tiles fit…
+        final calculated = (constraints.maxWidth / 300).floor();
+        // never go below 2 columns
+        final columns = calculated < 2 ? 2 : calculated;
 
         return GridView.builder(
           padding: const EdgeInsets.all(8),
