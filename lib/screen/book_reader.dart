@@ -32,10 +32,10 @@ class BookReaderState extends State<BookReader> {
     super.dispose();
   }
 
-  void _goToPage(int delta) {
-    final next = (_currentPage + delta).clamp(0, totalPages - 1);
+  void _goToPage(int index) {
+    final target = index.clamp(0, totalPages - 1);
     _pageController.animateToPage(
-      next,
+      target,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
@@ -54,18 +54,20 @@ class BookReaderState extends State<BookReader> {
           }
         });
       } else if (key == LogicalKeyboardKey.keyA || key == LogicalKeyboardKey.arrowLeft) {
-        _goToPage(-1);
+        _goToPage(_currentPage - 1);
       } else if (key == LogicalKeyboardKey.keyD || key == LogicalKeyboardKey.arrowRight) {
-        _goToPage(1);
+        _goToPage(_currentPage + 1);
       } else if (_zoomedIn && (key == LogicalKeyboardKey.keyW || key == LogicalKeyboardKey.arrowUp)) {
-        final newOffset = (_scrollController.offset - 100).clamp(0.0, _scrollController.position.maxScrollExtent);
+        final newOffset = (_scrollController.offset - 100)
+            .clamp(0.0, _scrollController.position.maxScrollExtent);
         _scrollController.animateTo(
           newOffset,
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
         );
       } else if (_zoomedIn && (key == LogicalKeyboardKey.keyS || key == LogicalKeyboardKey.arrowDown)) {
-        final newOffset = (_scrollController.offset + 100).clamp(0.0, _scrollController.position.maxScrollExtent);
+        final newOffset = (_scrollController.offset + 100)
+            .clamp(0.0, _scrollController.position.maxScrollExtent);
         _scrollController.animateTo(
           newOffset,
           duration: const Duration(milliseconds: 200),
@@ -135,16 +137,24 @@ class BookReaderState extends State<BookReader> {
         ),
         bottomNavigationBar: Container(
           color: Colors.blueGrey[900],
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           height: 56,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              // Jump to first page
+              IconButton(
+                icon: const Icon(Icons.first_page, color: Colors.white),
+                onPressed: () => _goToPage(0),
+                tooltip: 'First page',
+              ),
+              // Previous page
               IconButton(
                 icon: const Icon(Icons.chevron_left, color: Colors.white),
-                onPressed: () => _goToPage(-1),
+                onPressed: () => _goToPage(_currentPage - 1),
                 tooltip: 'Previous page',
               ),
+              // Zoom toggle
               IconButton(
                 icon: Icon(
                   _zoomedIn ? Icons.zoom_out : Icons.zoom_in,
@@ -158,10 +168,17 @@ class BookReaderState extends State<BookReader> {
                 }),
                 tooltip: _zoomedIn ? 'Zoom Out' : 'Zoom In',
               ),
+              // Next page
               IconButton(
                 icon: const Icon(Icons.chevron_right, color: Colors.white),
-                onPressed: () => _goToPage(1),
+                onPressed: () => _goToPage(_currentPage + 1),
                 tooltip: 'Next page',
+              ),
+              // Jump to last page
+              IconButton(
+                icon: const Icon(Icons.last_page, color: Colors.white),
+                onPressed: () => _goToPage(totalPages - 1),
+                tooltip: 'Last page',
               ),
             ],
           ),
