@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screen/screens.dart';
+import 'router/routes.dart';
 
 // entry point: inflate the widget tree
 void main() => runApp(const MyApp());
@@ -13,11 +14,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.dark(),
       home: const HomeScaffold(),
+      // custom router, go through AppRouter.onGenerateRoute
+      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }
 
-// main scaffold: 
+// main scaffold:
 // holds AppBar, body, FAB, bottom nav & drawer
 class HomeScaffold extends StatefulWidget {
   const HomeScaffold({super.key});
@@ -55,7 +58,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
                 onPressed: () => setState(() => _selectedIndex = 0),
               )
             : null,
-        title: const Text('Manga Reader'),  // app title
+        title: const Text('Manga Reader'), // app title
       ),
 
       // main content = the currently selected page
@@ -100,7 +103,7 @@ class MainBottomNav extends StatelessWidget {
   Widget build(BuildContext c) {
     return BottomNavigationBar(
       // highlight current tab
-      currentIndex: currentIndex,  
+      currentIndex: currentIndex,
       onTap: onTap,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -139,14 +142,13 @@ class NavDrawer extends StatelessWidget {
   }
 
   // helper to build a listtile and handle navigation
-  Widget _buildItem(
-      BuildContext ctx, IconData icon, String label, int idx) {
+  Widget _buildItem(BuildContext ctx, IconData icon, String label, int idx) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
       onTap: () {
-        Navigator.pop(ctx);        // close drawer
-        onTap(idx);                // switch to that page
+        Navigator.pop(ctx); // close drawer
+        onTap(idx); // switch to that page
       },
     );
   }

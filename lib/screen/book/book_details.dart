@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_manga_reader/book.dart';
-import 'book_reader.dart';
+import 'package:flutter_manga_reader/models/book.dart';
+import '../../router/routes.dart';
 import 'dart:io';
 
 class BookDetails extends StatefulWidget {
@@ -125,11 +125,10 @@ class _BookDetailsState extends State<BookDetails> {
   }
 }
 
-
 class CoverImage extends StatelessWidget {
   final Book book;
   // requires the book as a param
-  const CoverImage({ Key? key, required this.book }) : super(key: key);
+  const CoverImage({Key? key, required this.book}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -140,9 +139,10 @@ class CoverImage extends StatelessWidget {
         child: InkWell(
           // switch to the bookreader page
           onTap: () {
-            Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(builder: (_) => BookReader(book: book)),
+              Routes.reader, // path to reader
+              arguments: book, // object passed it
             );
           },
           child: const AspectRatio(
@@ -154,8 +154,6 @@ class CoverImage extends StatelessWidget {
     );
   }
 }
-
-
 
 class BookTitleField extends StatelessWidget {
   final TextEditingController controller;

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_manga_reader/book.dart';
+import 'package:flutter_manga_reader/models/book.dart';
 
 class BookReader extends StatefulWidget {
   final Book book;
