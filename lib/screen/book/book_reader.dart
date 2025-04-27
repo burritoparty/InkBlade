@@ -16,7 +16,10 @@ class BookReaderState extends State<BookReader> {
   late PageController _pageController;
   late ScrollController _scrollController;
   int _currentPage = 0;
+
+  // check if zoomed in
   bool _zoomedIn = false;
+  // tracking for if up and down key are held
   bool _upHeld = false;
   bool _downHeld = false;
 
@@ -27,6 +30,7 @@ class BookReaderState extends State<BookReader> {
     _scrollController = ScrollController();
   }
 
+  // for clearing controllers
   @override
   void dispose() {
     _pageController.dispose();
@@ -34,12 +38,15 @@ class BookReaderState extends State<BookReader> {
     super.dispose();
   }
 
+  // change scroll position to top
+  // for changing pages
   void _resetScroll() {
     if (_scrollController.hasClients) {
       _scrollController.jumpTo(0);
     }
   }
 
+  // jump to a page given the index, as long as in range
   void _goToPage(int index) {
     final target = index.clamp(0, totalPages - 1);
     if (target == _currentPage) return;
@@ -51,6 +58,7 @@ class BookReaderState extends State<BookReader> {
     });
   }
 
+  // page jump dialog box
   void _showJumpToPageDialog() async {
     final input = TextEditingController();
     final picked = await showDialog<int>(
@@ -68,7 +76,9 @@ class BookReaderState extends State<BookReader> {
           },
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () {
               final num = int.tryParse(input.text);
@@ -82,8 +92,10 @@ class BookReaderState extends State<BookReader> {
     if (picked != null) _goToPage(picked - 1);
   }
 
+  // keyboard events for nav and zoom
   void _handleKey(RawKeyEvent event) {
     final key = event.logicalKey;
+    // track the up/down or w/s states
     if (key == LogicalKeyboardKey.keyW || key == LogicalKeyboardKey.arrowUp) {
       _upHeld = event is RawKeyDownEvent;
     }
@@ -93,20 +105,31 @@ class BookReaderState extends State<BookReader> {
 
     if (event is RawKeyDownEvent) {
       if (key == LogicalKeyboardKey.escape) {
+        // escape, go back a page
         Navigator.pop(context);
       } else if (key == LogicalKeyboardKey.space) {
+        // alter zoom state, reset the scroll position to top
         _zoomedIn = !_zoomedIn;
         _resetScroll();
         setState(() {});
-      } else if (key == LogicalKeyboardKey.keyA || key == LogicalKeyboardKey.arrowLeft) {
-        if (!_zoomedIn || (!_upHeld && !_downHeld)) {
-          _goToPage(_currentPage - 1);
-        }
-      } else if (key == LogicalKeyboardKey.keyD || key == LogicalKeyboardKey.arrowRight) {
-        if (!_zoomedIn || (!_upHeld && !_downHeld)) {
-          _goToPage(_currentPage + 1);
-        }
+      } else if (key == LogicalKeyboardKey.keyA ||
+          key == LogicalKeyboardKey.arrowLeft) {
+        // turn page previous
+        _goToPage(_currentPage - 1);
+        // check if zoomed in, if holding up or down, dont change page
+        // if (!_zoomedIn || (!_upHeld && !_downHeld)) {
+        //   _goToPage(_currentPage - 1);
+        // }
+      } else if (key == LogicalKeyboardKey.keyD ||
+          key == LogicalKeyboardKey.arrowRight) {
+        // turn page next
+        _goToPage(_currentPage + 1);
+        // check if zoomed in, if holding up or down, dont change page
+        // if (!_zoomedIn || (!_upHeld && !_downHeld)) {
+        //   _goToPage(_currentPage + 1);
+        // }
       } else if (_zoomedIn && _scrollController.hasClients) {
+        // when zoomed in scroll up down when held
         if (_upHeld) {
           final newOffset = (_scrollController.offset - 100)
               .clamp(0.0, _scrollController.position.maxScrollExtent);
@@ -123,17 +146,24 @@ class BookReaderState extends State<BookReader> {
   @override
   Widget build(BuildContext context) {
     return RawKeyboardListener(
+      // makes sure this recieves the key events
       focusNode: FocusNode()..requestFocus(),
       onKey: _handleKey,
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-          title: GestureDetector(onTap: _showJumpToPageDialog, child: Text('${_currentPage + 1} of $totalPages')),
+          leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context)),
+          // show page indicator, opens dialog on tap
+          title: GestureDetector(
+              onTap: _showJumpToPageDialog,
+              child: Text('${_currentPage + 1} of $totalPages')),
           centerTitle: true,
         ),
         body: PageView.builder(
           controller: _pageController,
           itemCount: totalPages,
+          // reset scroll and update page
           onPageChanged: (i) {
             _resetScroll();
             setState(() {
@@ -143,15 +173,17 @@ class BookReaderState extends State<BookReader> {
           itemBuilder: (context, index) {
             final file = File(r'lib\placeholders\portrait.jpg');
             if (_zoomedIn) {
+              // scale zoomed in view to x of screen width
               final screenW = MediaQuery.of(context).size.width;
               return SingleChildScrollView(
                 controller: _scrollController,
                 child: Center(
                   child: Image.file(
                     file,
-                    width: screenW * 0.6,
+                    width: screenW * 0.6, // change screen width here
                     fit: BoxFit.fitWidth,
-                    errorBuilder: (_, __, ___) => const Center(child: Text('Image not found')),
+                    errorBuilder: (_, __, ___) =>
+                        const Center(child: Text('Image not found')),
                   ),
                 ),
               );
@@ -159,11 +191,12 @@ class BookReaderState extends State<BookReader> {
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: AspectRatio(
-                  aspectRatio: 2/3,
+                  aspectRatio: 2 / 3,
                   child: Image.file(
                     file,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Center(child: Text('Image not found')),
+                    errorBuilder: (_, __, ___) =>
+                        const Center(child: Text('Image not found')),
                   ),
                 ),
               );
@@ -177,18 +210,32 @@ class BookReaderState extends State<BookReader> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              IconButton(icon: const Icon(Icons.first_page, color: Colors.white), onPressed: () => _goToPage(0)),
-              IconButton(icon: const Icon(Icons.chevron_left, color: Colors.white), onPressed: () => _goToPage(_currentPage - 1)),
+              // button to jump to first page
               IconButton(
-                icon: Icon(_zoomedIn ? Icons.zoom_out : Icons.zoom_in, color: Colors.white),
+                  icon: const Icon(Icons.first_page, color: Colors.white),
+                  onPressed: () => _goToPage(0)),
+              // button to jump to previous page
+              IconButton(
+                  icon: const Icon(Icons.chevron_left, color: Colors.white),
+                  onPressed: () => _goToPage(_currentPage - 1)),
+              // zoom toggle
+              IconButton(
+                icon: Icon(_zoomedIn ? Icons.zoom_out : Icons.zoom_in,
+                    color: Colors.white),
                 onPressed: () {
                   _zoomedIn = !_zoomedIn;
                   _resetScroll();
                   setState(() {});
                 },
               ),
-              IconButton(icon: const Icon(Icons.chevron_right, color: Colors.white), onPressed: () => _goToPage(_currentPage + 1)),
-              IconButton(icon: const Icon(Icons.last_page, color: Colors.white), onPressed: () => _goToPage(totalPages - 1)),
+              // button next page
+              IconButton(
+                  icon: const Icon(Icons.chevron_right, color: Colors.white),
+                  onPressed: () => _goToPage(_currentPage + 1)),
+              // button previous page
+              IconButton(
+                  icon: const Icon(Icons.last_page, color: Colors.white),
+                  onPressed: () => _goToPage(totalPages - 1)),
             ],
           ),
         ),
