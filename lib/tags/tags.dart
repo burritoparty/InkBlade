@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_manga_reader/router/routes.dart';
 
 class Tags extends StatefulWidget {
   const Tags({super.key});
