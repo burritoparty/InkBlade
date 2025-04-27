@@ -124,22 +124,22 @@ class BookReaderState extends State<BookReader> {
         final newOffset = (_scrollController.offset - 100)
             .clamp(0.0, _scrollController.position.maxScrollExtent);
         // changed scroll down to jump instead of animate
-        // _scrollController.jumpTo(newOffset);
-        _scrollController.animateTo(
-          newOffset,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-        );
+        _scrollController.jumpTo(newOffset);
+        // _scrollController.animateTo(
+        //   newOffset,
+        //   duration: const Duration(milliseconds: 200),
+        //   curve: Curves.easeInOut,
+        // );
       } else if (_zoomedIn && _downHeld) {
         final newOffset = (_scrollController.offset + 100)
             .clamp(0.0, _scrollController.position.maxScrollExtent);
         // changed scroll down to jump instead of animate
-        // _scrollController.jumpTo(newOffset);
-        _scrollController.animateTo(
-          newOffset,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-        );
+        _scrollController.jumpTo(newOffset);
+        // _scrollController.animateTo(
+        //   newOffset,
+        //   duration: const Duration(milliseconds: 200),
+        //   curve: Curves.easeInOut,
+        // );
       }
     }
   }
