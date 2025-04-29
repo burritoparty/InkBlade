@@ -36,10 +36,11 @@ class LibraryState extends State<Library> {
         false,
       ),
     );
-    // show all
+
+    // show all to start
     filteredBooks = List.of(allBooks);
 
-    // whenever the text changes, refilter
+    // controller to whenever the text changes, refilter
     _searchController.addListener(
       () {
         final q = _searchController.text.toLowerCase();
