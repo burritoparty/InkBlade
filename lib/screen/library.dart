@@ -15,12 +15,15 @@ class Library extends StatefulWidget {
 class LibraryState extends State<Library> {
   // temporary in‐memory list until we load from JSON
   late List<Book> temporaryBooks;
+  late final List<Book> allBooks;
+  late List<Book> filteredBooks;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // generate dummy books for now
-    temporaryBooks = List.generate(
+    // dummy data
+    allBooks = List.generate(
       10,
       (i) => Book(
         "name$i",
@@ -29,25 +32,60 @@ class LibraryState extends State<Library> {
         "link",
         "C:\\path",
         "coverPath",
-        false, // favorite?
-        false, // readLater?
+        false,
+        false,
       ),
+    );
+    // show all
+    filteredBooks = List.of(allBooks);
+
+    // whenever the text changes, refilter
+    _searchController.addListener(
+      () {
+        final q = _searchController.text.toLowerCase();
+        setState(() {
+          filteredBooks =
+              allBooks.where((b) => b.title.toLowerCase().contains(q)).toList();
+        });
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // delegate grid layout + tap handling to BookGrid
-    return BookGrid(
-      books: temporaryBooks,
-      onBookTap: (index) async {
-        await Navigator.pushNamed(
-          context,
-          Routes.details, // path to details
-          arguments: temporaryBooks[index], // object passed it
-        );
-        setState(() {/* rebuild to pick up any changes */});
-      },
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: SearchBar(
+            controller: _searchController,
+            hintText: 'Search books...',
+            onChanged: (value) {
+              final q = value.toLowerCase();
+              setState(() {
+                filteredBooks = allBooks
+                    .where((b) => b.title.toLowerCase().contains(q))
+                    .toList();
+              });
+            },
+          ),
+        ),
+
+        // grid uses filteredBooks
+        Expanded(
+          child: BookGrid(
+            books: filteredBooks,
+            onBookTap: (index) async {
+              await Navigator.pushNamed(
+                context,
+                Routes.details,
+                arguments: filteredBooks[index],
+              );
+              setState(() {}); // pick up any changes on return
+            },
+          ),
+        ),
+      ],
     );
   }
 }

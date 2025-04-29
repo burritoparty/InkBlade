@@ -38,7 +38,6 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     Library(),
     Authors(),
     Tags(),
-    Search(),
     Favorites(),
     Filter(),
   ];
@@ -106,7 +105,7 @@ class MainBottomNav extends StatelessWidget {
       currentIndex: currentIndex,
       onTap: onTap,
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.library_books), label: 'Library'),
         BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Authors'),
         BottomNavigationBarItem(icon: Icon(Icons.tag), label: 'Tags'),
       ],
@@ -132,10 +131,9 @@ class NavDrawer extends StatelessWidget {
               child: Text('Library Searching', style: TextStyle(fontSize: 30)),
             ),
           ),
-          // each item switches pages 3,4,5
-          _buildItem(context, Icons.search, 'Search', 3),
-          _buildItem(context, Icons.favorite, 'Favorites', 4),
-          _buildItem(context, Icons.filter_alt, 'Filter Library', 5),
+          // each item switches pages 4,5
+          _buildItem(context, Icons.favorite, 'Favorites', 3),
+          _buildItem(context, Icons.filter_alt, 'Filter Library', 4),
         ],
       ),
     );
