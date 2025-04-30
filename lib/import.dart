@@ -9,23 +9,30 @@ class Import extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Import a book...'),
       ),
-      body: const Row(
-        children: [
-          // add button
-          Expanded(child: CoverImage()),
-          // details column
-          Expanded(
-            child: Column(
-              children: [
-                TitleEntry(),
-                AuthorEntry(),
-                LinkEntry(),
-              ],
+      body: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // add button
+            Expanded(child: CoverImage()),
+            // details column
+            Expanded(
+              child: Column(
+                // adjust expanding with screen here
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TitleEntry(),
+                  AuthorEntry(),
+                  LinkEntry(),
+                ],
+              ),
             ),
-          ),
-          // tags here
-          Expanded(child: Text("temp"))
-        ],
+            // tags here
+            Expanded(child: Text("temp"))
+          ],
+        ),
       ),
     );
   }
@@ -95,32 +102,24 @@ class _CoverImageState extends State<CoverImage> {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minWidth: 80,
-        maxWidth: 200,
-        minHeight: 120,
-        maxHeight: 300,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          // switch to the bookreader page
-          onTap: () {
-            setState(() {});
-            // TODO: i want to select a folder here
-            _folderSelected = true;
-          },
-          child: _folderSelected
-              ? const Placeholder()
-              : Center(
-                  child: Icon(
-                    Icons.add,
-                    size: 48,
-                    color: Colors.grey[600],
-                  ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        // switch to the bookreader page
+        onTap: () {
+          setState(() {});
+          // TODO: i want to select a folder here
+          _folderSelected = true;
+        },
+        child: _folderSelected
+            ? const Placeholder()
+            : Center(
+                child: Icon(
+                  Icons.add,
+                  size: 48,
+                  color: Colors.grey[600],
                 ),
-        ),
+              ),
       ),
     );
   }
