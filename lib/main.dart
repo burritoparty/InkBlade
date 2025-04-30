@@ -48,9 +48,9 @@ class _HomeScaffoldState extends State<HomeScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // AppBar with conditional back button
+      // appbar: conditional back button on search
       appBar: AppBar(
-        // show back arrow on pages 3+ (Search, Favorites, Filter)
+        // show back arrow on pages 3+ (Favorites, Filter)
         leading: _selectedIndex >= 3
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -60,15 +60,18 @@ class _HomeScaffoldState extends State<HomeScaffold> {
         title: const Text('Manga Reader'), // app title
       ),
 
-      // main content = the currently selected page
+      // main content
+      // page shown is the selected index, see in _pages
       body: _pages[_selectedIndex],
 
-      // only show fab on
-      // the first 3 tabs library, authors, tabs
+      // only show fab on the first 3 tabs:
+      // library, authors, tabs
       floatingActionButton: _selectedIndex < 3
           ? FloatingActionButton(
               child: const Icon(Icons.add),
-              onPressed: () {}, // TODO: add new item
+              onPressed: () {
+                Navigator.pushNamed(context, Routes.import);
+              }, // TODO: add new item
             )
           : null,
 
@@ -87,7 +90,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
   }
 }
 
-// reusable BottomNavigationBar wrapper
+// bottom nav
 class MainBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -117,7 +120,6 @@ class MainBottomNav extends StatelessWidget {
 // side drawer with extra navigation options
 class NavDrawer extends StatelessWidget {
   final ValueChanged<int> onTap;
-
   const NavDrawer({Key? key, required this.onTap}) : super(key: key);
 
   @override
@@ -132,7 +134,7 @@ class NavDrawer extends StatelessWidget {
               child: Text('Library Searching', style: TextStyle(fontSize: 30)),
             ),
           ),
-          // each item switches pages 4,5
+          // each item switches pages 4, 5
           _buildItem(context, Icons.favorite, 'Favorites', 3),
           _buildItem(context, Icons.filter_alt, 'Filter Library', 4),
         ],

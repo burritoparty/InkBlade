@@ -1,6 +1,7 @@
 // lib/router/routes.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_manga_reader/import.dart';
 import 'package:flutter_manga_reader/models/book.dart';
 import 'package:flutter_manga_reader/screen/library.dart';
 import 'package:flutter_manga_reader/screen/book/book_details.dart';
@@ -13,6 +14,7 @@ class Routes {
   static const details = '/book/details';
   static const reader = '/book/reader';
   static const author = '/authors/details';
+  static const import = '../import.dart';
 }
 
 class AppRouter {
@@ -31,7 +33,7 @@ class AppRouter {
           builder: (_) => BookReader(book: book),
         );
       case Routes.author:
-      // unpack the given map
+        // unpack the given map
         final args = settings.arguments as Map<String, dynamic>;
         final author = args['author'] as String;
         final allAuthors = List<String>.from(args['allAuthors'] as List);
@@ -41,6 +43,9 @@ class AppRouter {
             allAuthors: allAuthors,
           ),
         );
+      // route for FAB (import)
+      case Routes.import:
+        return MaterialPageRoute(builder: (_) => const Import());
 
       default:
         return null; // or a “NotFound” page
