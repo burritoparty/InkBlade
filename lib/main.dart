@@ -69,7 +69,9 @@ class _HomeScaffoldState extends State<HomeScaffold> {
       floatingActionButton: _selectedIndex < 3
           ? FloatingActionButton(
               child: const Icon(Icons.add),
-              onPressed: () {}, // TODO: add new item
+              onPressed: () {
+                Navigator.pushNamed(context, Routes.import);
+              }, // TODO: add new item
             )
           : null,
 
@@ -118,7 +120,6 @@ class MainBottomNav extends StatelessWidget {
 // side drawer with extra navigation options
 class NavDrawer extends StatelessWidget {
   final ValueChanged<int> onTap;
-
   const NavDrawer({Key? key, required this.onTap}) : super(key: key);
 
   @override
@@ -133,7 +134,7 @@ class NavDrawer extends StatelessWidget {
               child: Text('Library Searching', style: TextStyle(fontSize: 30)),
             ),
           ),
-          // each item switches pages 4,5
+          // each item switches pages 4, 5
           _buildItem(context, Icons.favorite, 'Favorites', 3),
           _buildItem(context, Icons.filter_alt, 'Filter Library', 4),
         ],
