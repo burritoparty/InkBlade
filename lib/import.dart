@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_manga_reader/models/book.dart';
 
-class Import extends StatelessWidget {
+class Import extends StatefulWidget {
   const Import({super.key});
 
   @override
+  State<Import> createState() => _ImportState();
+}
+
+class _ImportState extends State<Import> {
+  @override
   Widget build(BuildContext context) {
+    // set up the book to modify
+    Book book = Book("", "", [], "", "", "", false, false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Import a book...'),
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(8.0),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // add button
-            Expanded(child: CoverImage()),
+            const Expanded(child: CoverImage()),
             // details column
             Expanded(
               child: Column(
@@ -23,14 +31,26 @@ class Import extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TitleEntry(),
-                  AuthorEntry(),
-                  LinkEntry(),
+                  FavoriteReadLaterButtons(
+                    isFavorite: book.favorite,
+                    isReadLater: book.readLater,
+                    onFavoriteToggle: (newVal) => setState(() {
+                      book.favorite = newVal;
+                    }),
+                    onReadLaterToggle: (newVal) => setState(() {
+                      book.readLater = newVal;
+                    }),
+                  ),
+                  const TitleEntry(),
+                  const AuthorEntry(),
+                  const LinkEntry(),
                 ],
               ),
             ),
             // tags here
-            Expanded(child: Text("temp"))
+            const Expanded(
+              child: Text("temp"),
+            ),
           ],
         ),
       ),
@@ -120,6 +140,72 @@ class _CoverImageState extends State<CoverImage> {
                   color: Colors.grey[600],
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class FavoriteReadLaterButtons extends StatelessWidget {
+  final bool isFavorite;
+  final bool isReadLater;
+  final ValueChanged<bool> onFavoriteToggle;
+  final ValueChanged<bool> onReadLaterToggle;
+
+  const FavoriteReadLaterButtons({
+    Key? key,
+    required this.isFavorite,
+    required this.isReadLater,
+    required this.onFavoriteToggle,
+    required this.onReadLaterToggle,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Row(
+        children: [
+          // Favorite button
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => onFavoriteToggle(!isFavorite),
+              icon: Icon(
+                isFavorite ? Icons.favorite : Icons.heart_broken_outlined,
+              ),
+              label: const Text('Favorite'),
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                elevation: 5,
+              ),
+            ),
+          ),
+
+          // Read Later button
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton.icon(
+                onPressed: () => onReadLaterToggle(!isReadLater),
+                icon: Icon(
+                  isReadLater
+                      ? Icons.bookmark_added
+                      : Icons.bookmark_add_outlined,
+                ),
+                label: const Text('Read Later'),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  elevation: 5,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
