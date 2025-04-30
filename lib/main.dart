@@ -105,7 +105,8 @@ class MainBottomNav extends StatelessWidget {
       currentIndex: currentIndex,
       onTap: onTap,
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.library_books), label: 'Library'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.library_books), label: 'Library'),
         BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Authors'),
         BottomNavigationBarItem(icon: Icon(Icons.tag), label: 'Tags'),
       ],
