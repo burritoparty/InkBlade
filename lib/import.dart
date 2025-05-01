@@ -29,6 +29,9 @@ class _ImportState extends State<Import> {
 
   @override
   Widget build(BuildContext context) {
+    // controller for text editing field
+    final TextEditingController titleController =
+        TextEditingController(text: book.title);
     // set up the book to modify
     return Scaffold(
       appBar: AppBar(
@@ -73,7 +76,11 @@ class _ImportState extends State<Import> {
                     ),
                   ]),
                   // title handling
-                  const TitleEntry(),
+                  TitleEditor(
+                      controller: titleController,
+                      onSubmitted: (newTitle) => setState(() {
+                            book.title = newTitle;
+                          })),
                   // author handling
                   AuthorEditor(
                     initialAuthor: book.author,
@@ -98,23 +105,6 @@ class _ImportState extends State<Import> {
               child: Text("temp"),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class TitleEntry extends StatelessWidget {
-  const TitleEntry({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(8.0),
-      child: TextField(
-        decoration: InputDecoration(
-          labelText: "Title",
-          border: OutlineInputBorder(),
         ),
       ),
     );
