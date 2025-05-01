@@ -5,7 +5,7 @@ class TagEditor extends StatelessWidget {
   final List<String> allTags;
   final ValueChanged<String> onTagAdded;
   final ValueChanged<String> onTagRemoved;
-  final int flex;
+  final int flex; // this modifies how much room tags are taking
 
   const TagEditor({
     Key? key,
@@ -25,6 +25,10 @@ class TagEditor extends StatelessWidget {
         children: [
           Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
+              // don't show options until something is typed
+              if (textEditingValue.text.isEmpty) {
+                return const Iterable<String>.empty();
+              }
               final input = textEditingValue.text.toLowerCase();
               return allTags.where((a) => a.toLowerCase().contains(input));
             },
@@ -43,7 +47,12 @@ class TagEditor extends StatelessWidget {
                   border: OutlineInputBorder(),
                 ),
                 onSubmitted: (_) {
+                  // autocomplete logic
                   onFieldSubmitted();
+                  // clear what user typed
+                  textEditingController.clear();
+                  // keep focus
+                  focusNode.requestFocus();
                 },
               );
             },

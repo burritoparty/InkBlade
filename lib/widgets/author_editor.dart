@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class AuthorEditor extends StatelessWidget {
   final String initialAuthor;
   final List<String> allAuthors;
@@ -18,6 +19,10 @@ class AuthorEditor extends StatelessWidget {
       child: Autocomplete<String>(
         initialValue: TextEditingValue(text: initialAuthor),
         optionsBuilder: (TextEditingValue textEditingValue) {
+          // don't show options until something is typed
+          if (textEditingValue.text.isEmpty) {
+            return const Iterable<String>.empty();
+          }
           final input = textEditingValue.text.toLowerCase();
           return allAuthors.where((a) => a.toLowerCase().contains(input));
         },
