@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'tag_details.dart';
 
-class Tags extends StatefulWidget {
-  const Tags({super.key});
+class TagPage extends StatefulWidget {
+  const TagPage({super.key});
 
   @override
-  State<Tags> createState() => _TagsState();
+  State<TagPage> createState() => _TagPageState();
 }
 
-class _TagsState extends State<Tags> {
+class _TagPageState extends State<TagPage> {
   // controller for search input field
   final TextEditingController _searchController = TextEditingController();
 
@@ -42,77 +43,6 @@ class _TagsState extends State<Tags> {
     });
   }
 
-  // pop up for options to rename or delete the tag
-  void _showTagOptions(BuildContext context, String tag) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Tag Options'),
-        content: Text('What would you like to do with "$tag"?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showRenameDialog(context, tag);
-            },
-            child: const Text('Rename'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                allTags.remove(tag);
-                filterTags(_searchController.text);
-              });
-            },
-            child: const Text('Delete'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // display popup with options to rename or delete a tag
-  void _showRenameDialog(BuildContext context, String oldTag) {
-    final TextEditingController _renameController = TextEditingController(text: oldTag);
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Rename Tag'),
-        content: TextField(
-          controller: _renameController,
-          decoration: const InputDecoration(labelText: 'New name'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              final newName = _renameController.text.trim();
-              if (newName.isNotEmpty) {
-                setState(() {
-                  final index = allTags.indexOf(oldTag);
-                  if (index >= 0) {
-                    allTags[index] = newName;
-                    filterTags(_searchController.text);
-                  }
-                });
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -134,7 +64,7 @@ class _TagsState extends State<Tags> {
         TagButtons(
           filteredTags: filteredTags,
           allTags: allTags,
-          onTagPressed: _showTagOptions,
+          // onTagPressed: _showTagOptions,
         ),
       ],
     );
@@ -145,13 +75,13 @@ class _TagsState extends State<Tags> {
 class TagButtons extends StatelessWidget {
   final List<String> filteredTags;
   final List<String> allTags;
-  final void Function(BuildContext, String) onTagPressed;
+  // final void Function(BuildContext, String) onTagPressed;
 
   const TagButtons({
     super.key,
     required this.filteredTags,
     required this.allTags,
-    required this.onTagPressed,
+    // required this.onTagPressed,
   });
 
   @override
@@ -175,11 +105,13 @@ class TagButtons extends StatelessWidget {
             itemBuilder: (context, index) {
               final tag = filteredTags[index];
               return TextButton(
-                onPressed: () => onTagPressed(context, tag),
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => TagDetails(tag: tag))),
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),

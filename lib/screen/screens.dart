@@ -1,5 +1,5 @@
 export '../authors/authors.dart';
-export '../tags/tags.dart';
+export '../tags/tag_page.dart';
 export 'favorites.dart';
 export 'filter.dart';
 export 'library.dart'; //

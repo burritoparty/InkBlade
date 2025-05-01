@@ -37,7 +37,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
   static const _pages = <Widget>[
     Library(),
     Authors(),
-    Tags(),
+    TagPage(),
     Favorites(),
     Filter(),
   ];
