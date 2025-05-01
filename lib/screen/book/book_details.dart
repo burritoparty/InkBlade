@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
 import '../../router/routes.dart';
+import '../../widgets/widgets.dart';
 import 'dart:io';
 
 class BookDetails extends StatefulWidget {
@@ -52,13 +53,13 @@ class _BookDetailsState extends State<BookDetails> {
                       // name of the book
                       children: [
                         // title
-                        BookTitleField(
+                        TitleEditor(
                           controller: titleController,
                           onSubmitted: (newTitle) => setState(() {
                             widget.book.title = newTitle;
                           }),
                         ),
-                        AuthorAutocompleteField(
+                        AuthorEditor(
                           initialAuthor: widget.book.author,
                           allAuthors: allAuthors,
                           onSelected: (sel) => setState(() {
@@ -67,23 +68,50 @@ class _BookDetailsState extends State<BookDetails> {
                           }),
                         ),
                         // link handling
-                        LinkInputField(
+                        LinkEditor(
                           initialLink: widget.book.link,
                           onSubmitted: (newLink) => setState(() {
                             widget.book.link = newLink;
                           }),
                         ),
                         // favorite and read later button
-                        FavoriteReadLaterButtons(
-                          isFavorite: widget.book.favorite,
-                          isReadLater: widget.book.readLater,
-                          onFavoriteToggle: (newVal) => setState(() {
-                            widget.book.favorite = newVal;
-                          }),
-                          onReadLaterToggle: (newVal) => setState(() {
-                            widget.book.readLater = newVal;
-                          }),
+                        // FavoriteReadLaterButtons(
+                        //   isFavorite: widget.book.favorite,
+                        //   isReadLater: widget.book.readLater,
+                        //   onFavoriteToggle: (newVal) => setState(() {
+                        //     widget.book.favorite = newVal;
+                        //   }),
+                        //   onReadLaterToggle: (newVal) => setState(() {
+                        //     widget.book.readLater = newVal;
+                        //   }),
+                        // ),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: FavoriteButton(
+                                  isFavorite: widget.book.favorite,
+                                  onFavoriteToggle: (newVal) => setState(() {
+                                    widget.book.favorite = newVal;
+                                  }),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                                child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: LaterButton(
+                                isReadLater: widget.book.readLater,
+                                onReadLaterToggle: (newVal) => setState(() {
+                                  widget.book.readLater = newVal;
+                                }),
+                              ),
+                            ))
+                          ],
                         ),
+
                         // explorer and delete book
                         ExplorerDeleteButtons(
                           onExplorer: () {
@@ -155,172 +183,6 @@ class CoverImage extends StatelessWidget {
   }
 }
 
-class BookTitleField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onSubmitted;
-
-  const BookTitleField({
-    Key? key,
-    required this.controller,
-    required this.onSubmitted,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-      child: TextField(
-        controller: controller,
-        decoration: const InputDecoration(
-          labelText: "Title",
-          border: OutlineInputBorder(),
-        ),
-        onSubmitted: onSubmitted,
-      ),
-    );
-  }
-}
-
-class AuthorAutocompleteField extends StatelessWidget {
-  final String initialAuthor;
-  final List<String> allAuthors;
-  final ValueChanged<String> onSelected;
-
-  const AuthorAutocompleteField({
-    Key? key,
-    required this.initialAuthor,
-    required this.allAuthors,
-    required this.onSelected,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Autocomplete<String>(
-        initialValue: TextEditingValue(text: initialAuthor),
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          final input = textEditingValue.text.toLowerCase();
-          return allAuthors.where((a) => a.toLowerCase().contains(input));
-        },
-        onSelected: onSelected,
-        fieldViewBuilder: (
-          BuildContext context,
-          TextEditingController textEditingController,
-          FocusNode focusNode,
-          VoidCallback onFieldSubmitted,
-        ) {
-          return TextField(
-            controller: textEditingController,
-            focusNode: focusNode,
-            decoration: const InputDecoration(
-              labelText: 'Author',
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (_) => onFieldSubmitted(),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class LinkInputField extends StatelessWidget {
-  final String initialLink;
-  final ValueChanged<String> onSubmitted;
-
-  const LinkInputField({
-    Key? key,
-    required this.initialLink,
-    required this.onSubmitted,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = TextEditingController(text: initialLink);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-      child: TextField(
-        controller: controller,
-        decoration: const InputDecoration(
-          labelText: 'Link',
-          border: OutlineInputBorder(),
-        ),
-        onSubmitted: onSubmitted,
-      ),
-    );
-  }
-}
-
-class FavoriteReadLaterButtons extends StatelessWidget {
-  final bool isFavorite;
-  final bool isReadLater;
-  final ValueChanged<bool> onFavoriteToggle;
-  final ValueChanged<bool> onReadLaterToggle;
-
-  const FavoriteReadLaterButtons({
-    Key? key,
-    required this.isFavorite,
-    required this.isReadLater,
-    required this.onFavoriteToggle,
-    required this.onReadLaterToggle,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: Row(
-        children: [
-          // Favorite button
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
-                onPressed: () => onFavoriteToggle(!isFavorite),
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.heart_broken_outlined,
-                ),
-                label: const Text('Favorite'),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  elevation: 5,
-                ),
-              ),
-            ),
-          ),
-
-          // Read Later button
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
-                onPressed: () => onReadLaterToggle(!isReadLater),
-                icon: Icon(
-                  isReadLater
-                      ? Icons.bookmark_added
-                      : Icons.bookmark_add_outlined,
-                ),
-                label: const Text('Read Later'),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  elevation: 5,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class ExplorerDeleteButtons extends StatelessWidget {
   final VoidCallback onExplorer;
   final VoidCallback onDelete;
@@ -374,73 +236,6 @@ class ExplorerDeleteButtons extends StatelessWidget {
                   elevation: 5,
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class TagEditor extends StatelessWidget {
-  final List<String> tags;
-  final List<String> allTags;
-  final ValueChanged<String> onTagAdded;
-  final ValueChanged<String> onTagRemoved;
-  final int flex;
-
-  const TagEditor({
-    Key? key,
-    required this.tags,
-    required this.allTags,
-    required this.onTagAdded,
-    required this.onTagRemoved,
-    this.flex = 2,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Autocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              final input = textEditingValue.text.toLowerCase();
-              return allTags.where((a) => a.toLowerCase().contains(input));
-            },
-            onSelected: onTagAdded,
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController textEditingController,
-              FocusNode focusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              return TextField(
-                controller: textEditingController,
-                focusNode: focusNode,
-                decoration: const InputDecoration(
-                  labelText: 'Add tag',
-                  border: OutlineInputBorder(),
-                ),
-                onSubmitted: (_) {
-                  onFieldSubmitted();
-                },
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Wrap(
-              spacing: 8.0,
-              runSpacing: 4.0,
-              children: tags.map((tag) {
-                return InputChip(
-                  label: Text(tag),
-                  onDeleted: () => onTagRemoved(tag),
-                );
-              }).toList(),
             ),
           ),
         ],
