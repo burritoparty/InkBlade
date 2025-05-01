@@ -26,8 +26,8 @@ class _AuthorEditorState extends State<AuthorEditor> {
   Widget build(BuildContext context) {
     // pick border/label color: gray on pristine, red when dirty, green after save
     final Color activeColor = _isDirty
-        ? Colors.red
-        : (_hasSaved ? Colors.green : Colors.grey);
+        ? Colors.redAccent
+        : (_hasSaved ? Colors.greenAccent : Colors.grey);
 
     return Padding(
       padding: const EdgeInsets.all(8.0),

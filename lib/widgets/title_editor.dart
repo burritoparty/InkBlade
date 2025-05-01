@@ -63,11 +63,11 @@ class _TitleEditorsState extends State<TitleEditor> {
     final bool isFocused = _focusNode.hasFocus;
     // choose border color
     final Color borderColor =
-        _dirty ? Colors.red : (_submitted ? Colors.green : Colors.grey);
+        _dirty ? Colors.redAccent : (_submitted ? Colors.greenAccent : Colors.grey);
     // choose focus color
     final Color focusColor = _dirty
-        ? Colors.red
-        : (_submitted ? Colors.green : Theme.of(context).colorScheme.primary);
+        ? Colors.redAccent
+        : (_submitted ? Colors.greenAccent : Theme.of(context).colorScheme.primary);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),

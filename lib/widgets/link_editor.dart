@@ -68,12 +68,12 @@ class _LinkEditorState extends State<LinkEditor> {
 
     // pick border color: red if dirty, green if just submitted, grey otherwise
     final Color borderColor =
-        _dirty ? Colors.red : (_submitted ? Colors.green : Colors.grey);
+        _dirty ? Colors.redAccent : (_submitted ? Colors.greenAccent : Colors.grey);
 
     // pick focus color similarly
     final Color focusColor = _dirty
-        ? Colors.red
-        : (_submitted ? Colors.green : Theme.of(context).colorScheme.primary);
+        ? Colors.redAccent
+        : (_submitted ? Colors.greenAccent : Theme.of(context).colorScheme.primary);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
