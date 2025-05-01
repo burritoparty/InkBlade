@@ -101,8 +101,19 @@ class _ImportState extends State<Import> {
               ),
             ),
             // tags here
-            const Expanded(
-              child: Text("temp"),
+            Expanded(
+              child: TagEditor(
+                tags: book.tags,
+                allTags: allTags,
+                onTagAdded: (sel) => setState(() {
+                  book.tags.add(sel);
+                  debugPrint('Selected tag: $sel');
+                }),
+                onTagRemoved: (tag) => setState(() {
+                  book.tags.remove(tag);
+                }),
+                flex: 1, // this modifies how much room tags are taking
+              ),
             ),
           ],
         ),
