@@ -1,11 +1,10 @@
-// Comments added based on the original TitleEditor implementation citeturn0file0
 import 'package:flutter/material.dart';
 
-// A StatefulWidget that wraps a TextField for editing titles
+// widget for editing titles
 class TitleEditor extends StatefulWidget {
-  // controller to manage text input
+  // text controller
   final TextEditingController controller;
-  // callback when user submits text
+  // submit callback
   final ValueChanged<String> onSubmitted;
 
   const TitleEditor({
@@ -14,77 +13,89 @@ class TitleEditor extends StatefulWidget {
     required this.onSubmitted,
   }) : super(key: key);
 
-  // create state instance
   @override
-  State<TitleEditor> createState() => _TitleEditorState();
+  State<TitleEditor> createState() => _TitleEditorsState();
 }
 
-// State class for TitleEditor
-class _TitleEditorState extends State<TitleEditor> {
-  // tracks if text has been submitted
+class _TitleEditorsState extends State<TitleEditor> {
+  // was last action a submit
   bool _submitted = false;
-  // listens to focus changes on the TextField
+  // is text changed
+  bool _dirty = false;
+  // last saved text
+  late String _lastSubmittedText;
+  // focus node for field
   late FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
-    // initialize focus node
+    _lastSubmittedText = widget.controller.text;
+    // watch text changes
+    widget.controller.addListener(_onTextChanged);
     _focusNode = FocusNode();
-    // redraw when focus changes
+    // update on focus change
     _focusNode.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    // clean up focus node
+    // stop watching text
+    widget.controller.removeListener(_onTextChanged);
     _focusNode.dispose();
     super.dispose();
   }
 
+  // handle text update
+  void _onTextChanged() {
+    final current = widget.controller.text;
+    final bool isDirty = current != _lastSubmittedText;
+    if (isDirty != _dirty || _submitted) {
+      setState(() {
+        _dirty = isDirty;
+        _submitted = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // whether the field is focused
     final bool isFocused = _focusNode.hasFocus;
-    // border color based on submission
-    final Color borderColor = _submitted ? Colors.green : Colors.grey;
-    // focus color for label and border
-    final Color focusColor = _submitted
-        ? Colors.greenAccent
-        : Theme.of(context).colorScheme.primary;
+    // choose border color
+    final Color borderColor =
+        _dirty ? Colors.red : (_submitted ? Colors.green : Colors.grey);
+    // choose focus color
+    final Color focusColor = _dirty
+        ? Colors.red
+        : (_submitted ? Colors.green : Theme.of(context).colorScheme.primary);
 
     return Padding(
-      // horizontal padding around field
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: TextField(
-        // attach focus node to field
         focusNode: _focusNode,
-        // attach text controller
         controller: widget.controller,
         decoration: InputDecoration(
-          // hint for the field
           labelText: 'Title',
           labelStyle: TextStyle(
-            // change label color on focus
             color: isFocused ? focusColor : Colors.grey,
           ),
           enabledBorder: OutlineInputBorder(
-            // border when not focused
             borderSide: BorderSide(color: borderColor),
           ),
           focusedBorder: OutlineInputBorder(
-            // border when focused
             borderSide: BorderSide(color: focusColor),
           ),
         ),
+        // update dirty state on change
+        onChanged: (value) => _onTextChanged(),
         onSubmitted: (value) {
-          // flag as submitted
+          // mark as submitted
           setState(() {
             _submitted = true;
+            _lastSubmittedText = value;
+            _dirty = false;
           });
-          // call parent callback with submitted text
           widget.onSubmitted(value);
-          // remove focus to show enabledBorder
           _focusNode.unfocus();
         },
       ),
