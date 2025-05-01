@@ -74,18 +74,7 @@ class _BookDetailsState extends State<BookDetails> {
                             widget.book.link = newLink;
                           }),
                         ),
-                        // favorite and read later button
-                        // FavoriteReadLaterButtons(
-                        //   isFavorite: widget.book.favorite,
-                        //   isReadLater: widget.book.readLater,
-                        //   onFavoriteToggle: (newVal) => setState(() {
-                        //     widget.book.favorite = newVal;
-                        //   }),
-                        //   onReadLaterToggle: (newVal) => setState(() {
-                        //     widget.book.readLater = newVal;
-                        //   }),
-                        // ),
-
+                        // favorite and read later 
                         Row(
                           children: [
                             Expanded(
@@ -111,17 +100,19 @@ class _BookDetailsState extends State<BookDetails> {
                             ))
                           ],
                         ),
-
-                        // explorer and delete book
-                        ExplorerDeleteButtons(
-                          onExplorer: () {
-                            Process.run("explorer", [widget.book.path]);
-                          },
-                          onDelete: () {
-                            setState(() {
-                              // perform deletion logic here
-                            });
-                          },
+                        // explorer and delete
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              ExplorerButton(onExplorer: () {
+                                Process.run("explorer", [widget.book.path]);
+                              }),
+                              DeleteButton(onDelete: () {
+                                // delete logic here
+                              }),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -142,7 +133,7 @@ class _BookDetailsState extends State<BookDetails> {
                 ],
               ),
             ),
-            PagesPlaceholderGrid(
+            PagesGrid(
               totalPages: totalPages,
               imagesPerRow: imagesPerRow,
             ),
@@ -183,68 +174,7 @@ class CoverImage extends StatelessWidget {
   }
 }
 
-class ExplorerDeleteButtons extends StatelessWidget {
-  final VoidCallback onExplorer;
-  final VoidCallback onDelete;
-
-  const ExplorerDeleteButtons({
-    Key? key,
-    required this.onExplorer,
-    required this.onDelete,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: Row(
-        children: [
-          // Open file location
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
-                onPressed: onExplorer,
-                icon: const Icon(Icons.folder),
-                label: const Text('Explorer'),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 5,
-                ),
-              ),
-            ),
-          ),
-
-          // Delete book
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
-                onPressed: onDelete,
-                icon: const Icon(Icons.delete),
-                label: const Text('Delete Book'),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 5,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class PagesPlaceholderGrid extends StatelessWidget {
+class PagesGrid extends StatelessWidget {
   /// How many “pages” (placeholders) to show
   final int totalPages;
 
@@ -254,7 +184,7 @@ class PagesPlaceholderGrid extends StatelessWidget {
   /// Width / height ratio of each cell
   final double childAspectRatio;
 
-  const PagesPlaceholderGrid({
+  const PagesGrid({
     Key? key,
     required this.totalPages,
     this.imagesPerRow = 3,
