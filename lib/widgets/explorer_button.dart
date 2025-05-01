@@ -11,22 +11,20 @@ class ExplorerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
-                onPressed: onExplorer,
-                icon: const Icon(Icons.folder),
-                label: const Text('Explorer'),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 5,
-                ),
-              ),
-            ),
-          );
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ElevatedButton.icon(
+          onPressed: onExplorer,
+          icon: const Icon(Icons.folder),
+          label: const Text('Explorer'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[800],
+            foregroundColor: Colors.white,
+            shape: const StadiumBorder(),
+            minimumSize: const Size.fromHeight(48),
+          ),
+        ),
+      ),
+    );
   }
 }

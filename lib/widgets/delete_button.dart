@@ -11,22 +11,20 @@ class DeleteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
-                onPressed: onDelete,
-                icon: const Icon(Icons.delete),
-                label: const Text('Delete Book'),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 5,
-                ),
-              ),
-            ),
-          );
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ElevatedButton.icon(
+          onPressed: onDelete,
+          icon: const Icon(Icons.delete),
+          label: const Text('Delete Book'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[800],
+            foregroundColor: Colors.white,
+            shape: const StadiumBorder(),
+            minimumSize: const Size.fromHeight(48),
+          ),
+        ),
+      ),
+    );
   }
 }
