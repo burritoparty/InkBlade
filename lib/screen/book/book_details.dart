@@ -107,18 +107,15 @@ class _BookDetailsState extends State<BookDetails> {
                           ],
                         ),
                         // explorer and delete
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              ExplorerButton(onExplorer: () {
-                                Process.run("explorer", [widget.book.path]);
-                              }),
-                              DeleteButton(onDelete: () {
-                                // delete logic here
-                              }),
-                            ],
-                          ),
+                        Row(
+                          children: [
+                            ExplorerButton(onExplorer: () {
+                              Process.run("explorer", [widget.book.path]);
+                            }),
+                            DeleteButton(onDelete: () {
+                              // delete logic here
+                            }),
+                          ],
                         ),
                       ],
                     ),
