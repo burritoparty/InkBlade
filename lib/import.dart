@@ -35,7 +35,24 @@ class _ImportState extends State<Import> {
     // set up the book to modify
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Import a book...'),
+        centerTitle: true, // ← makes the whole title widget centered
+        title: Row(
+          mainAxisSize:
+              MainAxisSize.min, // ← shrink‐wrap so Row itself is centered
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.check),
+              onPressed: () {},
+              label: const Text("Import book"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[800],
+                foregroundColor: Colors.white,
+                shape: const StadiumBorder(),
+                // minimumSize: const Size.fromHeight(48),
+              ),
+            )
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
