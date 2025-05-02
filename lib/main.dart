@@ -41,6 +41,13 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     Favorites(),
     Filter(),
   ];
+  static const _pageTitles = [
+    'Library',
+    'Authors',
+    'Tags',
+    'Favorites',
+    'Filter Library',
+  ];
 
   // update selected index and rebuild
   void _onItemTapped(int idx) => setState(() => _selectedIndex = idx);
@@ -57,7 +64,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
                 onPressed: () => setState(() => _selectedIndex = 0),
               )
             : null,
-        title: const Text('Manga Reader'), // app title
+        title: Text(_pageTitles[_selectedIndex]), // app title
       ),
 
       // main content
