@@ -13,18 +13,21 @@ class AuthorEditor extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _AuthorEditorState createState() => _AuthorEditorState();
+  State<AuthorEditor> createState() => _AuthorEditorState();
 }
 
 class _AuthorEditorState extends State<AuthorEditor> {
-  // tracks unsaved edits
+  // track unsaved edits
   bool _isDirty = false;
-  // tracks whether we've ever saved
+  // track whether we've ever saved
   bool _hasSaved = false;
 
   @override
   Widget build(BuildContext context) {
-    // pick border/label color: gray on pristine, red when dirty, green after save
+    // pick border/label color: 
+    // gray on pristine
+    // red when dirty 
+    // green after save
     final Color activeColor = _isDirty
         ? Colors.redAccent
         : (_hasSaved ? Colors.greenAccent : Colors.grey);
@@ -33,22 +36,38 @@ class _AuthorEditorState extends State<AuthorEditor> {
       padding: const EdgeInsets.all(8.0),
       child: Autocomplete<String>(
         initialValue: TextEditingValue(text: widget.initialAuthor),
+
+        // iterate through each tag
         optionsBuilder: (TextEditingValue textEditingValue) {
           if (textEditingValue.text.isEmpty) {
             return const Iterable<String>.empty();
           }
-          final input = textEditingValue.text.toLowerCase();
-          return widget.allAuthors
-              .where((a) => a.toLowerCase().contains(input));
+
+          final input = textEditingValue.text;
+          final lowerInput = input.toLowerCase();
+
+          // find all existing authors matching the input
+          final matches = widget.allAuthors
+              .where((a) => a.toLowerCase().contains(lowerInput))
+              .toList();
+
+          // if the exact author isn't in your list yet, offer it first
+          if (!widget.allAuthors.any((a) => a.toLowerCase() == lowerInput)) {
+            matches.insert(0, input);
+          }
+
+          return matches;
         },
+
+        // if they tap a suggestion (whether new or existing)
         onSelected: (value) {
-          // mark saved on dropdown select
           setState(() {
             _isDirty = false;
             _hasSaved = true;
           });
           widget.onSelected(value);
         },
+
         fieldViewBuilder: (
           BuildContext context,
           TextEditingController textEditingController,
@@ -60,7 +79,6 @@ class _AuthorEditorState extends State<AuthorEditor> {
             focusNode: focusNode,
             decoration: InputDecoration(
               labelText: 'Author',
-              // label color matches border
               labelStyle: TextStyle(color: activeColor),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: activeColor),
@@ -70,15 +88,13 @@ class _AuthorEditorState extends State<AuthorEditor> {
               ),
             ),
             onChanged: (_) {
-              // turn dirty on any change
               if (!_isDirty) {
-                setState(() {
-                  _isDirty = true;
-                });
+                setState(() => _isDirty = true);
               }
             },
             onSubmitted: (_) {
-              // save on enter
+              // save on enter 
+              // (will pick the first option)
               onFieldSubmitted();
               setState(() {
                 _isDirty = false;
