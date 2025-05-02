@@ -65,8 +65,12 @@ class _BookDetailsState extends State<BookDetails> {
                           initialAuthor: widget.book.author,
                           allAuthors: allAuthors,
                           onSelected: (sel) => setState(() {
-                            widget.book.author = sel;
-                            debugPrint('Selected author: $sel');
+                            // add sel to book.tags if it’s not already there
+                            if (widget.book.author != sel) {
+                              widget.book.author = sel;
+                            }
+                            // TODO: this prob needs changed when implementing database
+                            if (!allAuthors.contains(sel)) allAuthors.add(sel);
                           }),
                         ),
                         // link handling
