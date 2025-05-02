@@ -86,8 +86,9 @@ class _ImportState extends State<Import> {
                     initialAuthor: book.author,
                     allAuthors: allAuthors,
                     onSelected: (sel) => setState(() {
+                      // TODO: may need to update all authors here?
+                      // only add don't remove?
                       book.author = sel;
-                      debugPrint('Selected author: $sel');
                     }),
                   ),
                   // link handling
@@ -105,8 +106,12 @@ class _ImportState extends State<Import> {
               tags: book.tags,
               allTags: allTags,
               onTagAdded: (sel) => setState(() {
-                book.tags.add(sel);
-                debugPrint('Selected tag: $sel');
+                // add sel to book.tags if it’s not already there
+                if (!book.tags.contains(sel)) {
+                  book.tags.add(sel);
+                }
+                // TODO: this prob needs changed when implementing database
+                if (!allTags.contains(sel)) allTags.add(sel);
               }),
               onTagRemoved: (tag) => setState(() {
                 book.tags.remove(tag);

@@ -1,3 +1,5 @@
+// tag_editor.dart
+
 import 'package:flutter/material.dart';
 
 class TagEditor extends StatelessWidget {
@@ -25,14 +27,28 @@ class TagEditor extends StatelessWidget {
         children: [
           Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
-              // don't show options until something is typed
-              if (textEditingValue.text.isEmpty) {
-                return const Iterable<String>.empty();
+              final input = textEditingValue.text;
+              if (input.isEmpty) return const Iterable<String>.empty();
+
+              final lowerInput = input.toLowerCase();
+
+              // find all existing tags matching the input
+              final matches = allTags
+                  .where((t) => t.toLowerCase().contains(lowerInput))
+                  .toList();
+
+              // if the exact tag isn't already in your list, offer it first
+              if (!allTags.any((t) => t.toLowerCase() == lowerInput)) {
+                matches.insert(0, input);
               }
-              final input = textEditingValue.text.toLowerCase();
-              return allTags.where((a) => a.toLowerCase().contains(input));
+
+              return matches;
             },
-            onSelected: onTagAdded,
+
+            onSelected: (tag) {
+              onTagAdded(tag);
+            },
+
             fieldViewBuilder: (
               BuildContext context,
               TextEditingController textEditingController,
@@ -47,28 +63,26 @@ class TagEditor extends StatelessWidget {
                   border: OutlineInputBorder(),
                 ),
                 onSubmitted: (_) {
-                  // autocomplete logic
+                  // pick the top option (which is your raw input if new)
                   onFieldSubmitted();
-                  // clear what user typed
+                  // clear the text field and keep focus
                   textEditingController.clear();
-                  // keep focus
                   focusNode.requestFocus();
                 },
               );
             },
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Wrap(
-              spacing: 8.0,
-              runSpacing: 4.0,
-              children: tags.map((tag) {
-                return InputChip(
-                  label: Text(tag),
-                  onDeleted: () => onTagRemoved(tag),
-                );
-              }).toList(),
-            ),
+
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 4.0,
+            children: tags.map((tag) {
+              return InputChip(
+                label: Text(tag),
+                onDeleted: () => onTagRemoved(tag),
+              );
+            }).toList(),
           ),
         ],
       ),

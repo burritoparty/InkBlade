@@ -13,24 +13,26 @@ class BookDetails extends StatefulWidget {
 }
 
 class _BookDetailsState extends State<BookDetails> {
+  // mock data
+  // grab the authors
+  List<String> allAuthors = [];
+  List<String> allTags = [];
+  int imagesPerRow = 10;
+  int totalPages = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    // mock data: only runs once
+    allAuthors = List.generate(1000, (i) => 'authorname$i');
+    allTags = List.generate(15, (i) => 'tagname$i');
+  }
+
   @override
   Widget build(BuildContext context) {
     // controller for text editing field
     final TextEditingController titleController =
         TextEditingController(text: widget.book.title);
-
-    // mock data
-    // grab the authors
-    List<String> allAuthors = [];
-    for (int i = 0; i < 1000; i++) {
-      allAuthors.add("authorname$i");
-    }
-    List<String> allTags = [];
-    for (int i = 0; i < 15; i++) {
-      allTags.add("tagname$i");
-    }
-    int imagesPerRow = 10;
-    int totalPages = 30;
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.book.title)),
@@ -74,7 +76,7 @@ class _BookDetailsState extends State<BookDetails> {
                             widget.book.link = newLink;
                           }),
                         ),
-                        // favorite and read later 
+                        // favorite and read later
                         Row(
                           children: [
                             Expanded(
@@ -122,8 +124,12 @@ class _BookDetailsState extends State<BookDetails> {
                     tags: widget.book.tags,
                     allTags: allTags,
                     onTagAdded: (sel) => setState(() {
-                      widget.book.tags.add(sel);
-                      debugPrint('Selected tag: $sel');
+                      // add sel to book.tags if it’s not already there
+                      if (!widget.book.tags.contains(sel)) {
+                        widget.book.tags.add(sel);
+                      }
+                      // TODO: this prob needs changed when implementing database
+                      if (!allTags.contains(sel)) allTags.add(sel);
                     }),
                     onTagRemoved: (tag) => setState(() {
                       widget.book.tags.remove(tag);
