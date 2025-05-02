@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/book_repository.dart';
 import '../models/book.dart';
+import '../router/routes.dart';
 
 class AuthorDetails extends StatefulWidget {
   final String author;
@@ -59,8 +60,7 @@ class AuthorDetailsState extends State<AuthorDetails> {
         false,
       ),
     ];
-    
-    
+
     // look through the books and only load up the ones with author
     // for (int i = 0; i < allBooks.length; i++) {
     //   if () {
@@ -73,7 +73,6 @@ class AuthorDetailsState extends State<AuthorDetails> {
       }
     }
     // filteredBooks = List.of(allBooks);
-
   }
 
   @override
@@ -98,11 +97,11 @@ class AuthorDetailsState extends State<AuthorDetails> {
             child: BookGrid(
               books: filteredBooks,
               onBookTap: (index) async {
-                // await Navigator.pushNamed(
-                //   context,
-                //   Routes.details,
-                //   arguments: filteredBooks[index],
-                // );
+                await Navigator.pushNamed(
+                  context,
+                  Routes.details,
+                  arguments: filteredBooks[index],
+                );
                 setState(() {}); // pick up any changes on return
               },
             ),
