@@ -15,6 +15,7 @@ class TagDetails extends StatefulWidget {
 class _TagDetailsState extends State<TagDetails> {
   late TextEditingController _controller;
   late String _currentTag;
+  late String _originalTag;
   final List<String> allTags = List.generate(15, (i) => 'tagname$i');
   late final List<Book> allBooks;
   late final List<Book> filteredBooks = [];
@@ -22,6 +23,7 @@ class _TagDetailsState extends State<TagDetails> {
   @override
   void initState() {
     super.initState();
+    _originalTag = widget.tag;
     _currentTag = widget.tag;
     _controller = TextEditingController(text: _currentTag);
 
@@ -43,7 +45,7 @@ class _TagDetailsState extends State<TagDetails> {
     // make a book with an author
     allBooks.add(Book("Romance book", "author", ["Romance"], "link", "path",
         "coverPath", false, false));
-        
+
     // iterate through all books
     for (final Book book in allBooks) {
       // iterate through each tag
@@ -64,16 +66,33 @@ class _TagDetailsState extends State<TagDetails> {
   }
 
   void _onSubmitted(String newTag) {
+    final oldTag = _originalTag;
+
+    // replace tag on every book
+    for (final Book book in allBooks) {
+      for (int i = 0; i < book.tags.length; i++) {
+        // if it finds the old tag, swap it out
+        if (book.tags[i] == oldTag) {
+          book.tags[i] = newTag;
+        }
+      }
+    }
+
+    // update master tag list
+    final int idx = allTags.indexOf(oldTag);
+    if (idx != -1) {
+      allTags[idx] = newTag;
+    }
+
+    // update state and re-filter
     setState(() {
+      _originalTag = newTag; // next rename uses this as oldTag
       _currentTag = newTag;
       _controller.text = newTag;
+      filteredBooks
+        ..clear()
+        ..addAll(allBooks.where((b) => b.tags.contains(newTag)));
     });
-    // rebuild the filtered list
-    filteredBooks
-      ..clear()
-      ..addAll(
-        allBooks.where((book) => book.tags.contains(newTag)),
-      );
   }
 
   @override
