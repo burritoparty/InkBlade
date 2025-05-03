@@ -166,7 +166,7 @@ class _BookDetailsState extends State<BookDetails> {
                           characters: widget.book.characters,
                           allCharacters: allCharacters,
                           onCharacterAdded: (sel) => setState(() {
-                            // add sel to book.tags if it’s not already there
+                            // add sel to book.chars if it’s not already there
                             if (!widget.book.characters.contains(sel)) {
                               widget.book.characters.add(sel);
                             }

@@ -183,7 +183,7 @@ class _ImportState extends State<Import> {
                     characters: book.characters,
                     allCharacters: allCharacters,
                     onCharacterAdded: (sel) => setState(() {
-                      // add sel to book.tags if it’s not already there
+                      // add sel to book.chars if it’s not already there
                       if (!book.characters.contains(sel)) {
                         book.characters.add(sel);
                       }
@@ -193,7 +193,7 @@ class _ImportState extends State<Import> {
                     onCharacterRemoved: (character) => setState(() {
                       book.characters.remove(character);
                     }),
-                    flex: 1, // this modifies how much room tags are taking
+                    flex: 1, // this modifies how much room chars are taking
                   ),
                 ],
               ),
