@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
-import 'package:flutter_manga_reader/widgets/character_editor.dart';
-import 'package:flutter_manga_reader/widgets/series_editor.dart';
 import '../../router/routes.dart';
 import '../../widgets/widgets.dart';
 import 'dart:io';
@@ -231,10 +229,12 @@ class _BookDetailsState extends State<BookDetails> {
                   Expanded(
                     child: Column(
                       children: [
-                        TagEditor(
-                          tags: widget.book.tags,
-                          allTags: allTags,
-                          onTagAdded: (sel) => setState(() {
+                        // tags
+                        ListEditor(
+                          name: "tag",
+                          item: widget.book.tags,
+                          allItems: allTags,
+                          onAdded: (sel) => setState(() {
                             // add sel to book.tags if it’s not already there
                             if (!widget.book.tags.contains(sel)) {
                               widget.book.tags.add(sel);
@@ -242,15 +242,17 @@ class _BookDetailsState extends State<BookDetails> {
                             // TODO: this prob needs changed when implementing database
                             if (!allTags.contains(sel)) allTags.add(sel);
                           }),
-                          onTagRemoved: (tag) => setState(() {
+                          onRemoved: (tag) => setState(() {
                             widget.book.tags.remove(tag);
                           }),
                           flex: 2,
                         ),
-                        CharacterEditor(
-                          characters: widget.book.characters,
-                          allCharacters: allCharacters,
-                          onCharacterAdded: (sel) => setState(() {
+                        // characters
+                        ListEditor(
+                          name: "character",
+                          item: widget.book.characters,
+                          allItems: allCharacters,
+                          onAdded: (sel) => setState(() {
                             // add sel to book.chars if it’s not already there
                             if (!widget.book.characters.contains(sel)) {
                               widget.book.characters.add(sel);
@@ -259,7 +261,7 @@ class _BookDetailsState extends State<BookDetails> {
                             if (!allCharacters.contains(sel))
                               allCharacters.add(sel);
                           }),
-                          onCharacterRemoved: (character) => setState(() {
+                          onRemoved: (character) => setState(() {
                             widget.book.characters.remove(character);
                           }),
                           flex: 2,

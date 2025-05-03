@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
-import 'package:flutter_manga_reader/widgets/character_editor.dart';
-import 'package:flutter_manga_reader/widgets/series_editor.dart';
 import '/widgets/widgets.dart';
 
 class Import extends StatefulWidget {
@@ -239,10 +237,12 @@ class _ImportState extends State<Import> {
             Expanded(
               child: Column(
                 children: [
-                  TagEditor(
-                    tags: book.tags,
-                    allTags: allTags,
-                    onTagAdded: (sel) => setState(() {
+                  // tags
+                  ListEditor(
+                    name: "tag",
+                    item: book.tags,
+                    allItems: allTags,
+                    onAdded: (sel) => setState(() {
                       // add sel to book.tags if it’s not already there
                       if (!book.tags.contains(sel)) {
                         book.tags.add(sel);
@@ -250,15 +250,17 @@ class _ImportState extends State<Import> {
                       // TODO: this prob needs changed when implementing database
                       if (!allTags.contains(sel)) allTags.add(sel);
                     }),
-                    onTagRemoved: (tag) => setState(() {
+                    onRemoved: (tag) => setState(() {
                       book.tags.remove(tag);
                     }),
-                    flex: 1, // this modifies how much room tags are taking
+                    flex: 1,
                   ),
-                  CharacterEditor(
-                    characters: book.characters,
-                    allCharacters: allCharacters,
-                    onCharacterAdded: (sel) => setState(() {
+                  // characters
+                  ListEditor(
+                    name: "character",
+                    item: book.characters,
+                    allItems: allCharacters,
+                    onAdded: (sel) => setState(() {
                       // add sel to book.chars if it’s not already there
                       if (!book.characters.contains(sel)) {
                         book.characters.add(sel);
@@ -266,10 +268,10 @@ class _ImportState extends State<Import> {
                       // TODO: this prob needs changed when implementing database
                       if (!allCharacters.contains(sel)) allCharacters.add(sel);
                     }),
-                    onCharacterRemoved: (character) => setState(() {
+                    onRemoved: (character) => setState(() {
                       book.characters.remove(character);
                     }),
-                    flex: 1, // this modifies how much room chars are taking
+                    flex: 1,
                   ),
                 ],
               ),
