@@ -106,6 +106,10 @@ class _ImportState extends State<Import> {
                       // TODO: may need to update all authors here?
                       // only add don't remove?
                       book.author = sel;
+                      // add if it doesnt exist
+                      if (!allAuthors.contains(sel)) {
+                        allAuthors.add(sel);
+                      }
                     }),
                   ),
                   // link handling

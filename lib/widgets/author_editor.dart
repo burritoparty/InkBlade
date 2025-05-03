@@ -100,7 +100,6 @@ class _AuthorEditorState extends State<AuthorEditor> {
                 _isDirty = false;
                 _hasSaved = true;
               });
-              widget.onSelected(textEditingController.text);
             },
           );
         },
