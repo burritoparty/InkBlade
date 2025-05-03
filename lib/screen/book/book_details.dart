@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
+import 'package:flutter_manga_reader/widgets/series_editor.dart';
 import '../../router/routes.dart';
 import '../../widgets/widgets.dart';
 import 'dart:io';
@@ -16,7 +17,10 @@ class _BookDetailsState extends State<BookDetails> {
   // mock data
   // grab the authors
   List<String> allAuthors = [];
+  // grab the tags
   List<String> allTags = [];
+  // grab the series
+  List<String> allSeries = [];
   int imagesPerRow = 10;
   int totalPages = 30;
 
@@ -26,6 +30,7 @@ class _BookDetailsState extends State<BookDetails> {
     // mock data: only runs once
     allAuthors = List.generate(1000, (i) => 'authorname$i');
     allTags = List.generate(15, (i) => 'tagname$i');
+    allSeries = List.generate(15, (i) => 'seriesname$i');
   }
 
   @override
@@ -60,6 +65,18 @@ class _BookDetailsState extends State<BookDetails> {
                           controller: titleController,
                           onSubmitted: (newTitle) => setState(() {
                             widget.book.title = newTitle;
+                          }),
+                        ),
+                        SeriesEditor(
+                          initialSeries: widget.book.series,
+                          allSeries: allSeries,
+                          onSelected: (sel) => setState(() {
+                            // add sel to book.tags if it’s not already there
+                            if (widget.book.series != sel) {
+                              widget.book.series = sel;
+                            }
+                            // TODO: this prob needs changed when implementing database
+                            if (!allSeries.contains(sel)) allSeries.add(sel);
                           }),
                         ),
                         AuthorEditor(

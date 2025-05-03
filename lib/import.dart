@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
+import 'package:flutter_manga_reader/widgets/series_editor.dart';
 import '/widgets/widgets.dart';
 
 class Import extends StatefulWidget {
@@ -11,8 +12,12 @@ class Import extends StatefulWidget {
 
 class _ImportState extends State<Import> {
   Book book = Book("", "", "", "", "", [], [], false, false);
+  // grab the authors
   List<String> allAuthors = [];
+  // grab the tags
   List<String> allTags = [];
+  // grab the series
+  List<String> allSeries = [];
 
   @override
   void initState() {
@@ -24,6 +29,9 @@ class _ImportState extends State<Import> {
     }
     for (int i = 0; i < 15; i++) {
       allTags.add("tagname$i");
+    }
+    for (int i = 0; i < 15; i++) {
+      allSeries.add("seriesname$i");
     }
   }
 
@@ -94,30 +102,53 @@ class _ImportState extends State<Import> {
                   ]),
                   // title handling
                   TitleEditor(
-                      controller: titleController,
-                      onSubmitted: (newTitle) => setState(() {
-                            book.title = newTitle;
-                          })),
+                    controller: titleController,
+                    onSubmitted: (newTitle) => setState(
+                      () {
+                        book.title = newTitle;
+                      },
+                    ),
+                  ),
+                  // series handling
+                  SeriesEditor(
+                    initialSeries: book.series,
+                    allSeries: allSeries,
+                    onSelected: (sel) => setState(
+                      () {
+                        // TODO: may need to update all series here?
+                        // only add don't remove?
+                        book.series = sel;
+                        // add if it doesnt exist
+                        if (!allSeries.contains(sel)) {
+                          allSeries.add(sel);
+                        }
+                      },
+                    ),
+                  ),
                   // author handling
                   AuthorEditor(
                     initialAuthor: book.author,
                     allAuthors: allAuthors,
-                    onSelected: (sel) => setState(() {
-                      // TODO: may need to update all authors here?
-                      // only add don't remove?
-                      book.author = sel;
-                      // add if it doesnt exist
-                      if (!allAuthors.contains(sel)) {
-                        allAuthors.add(sel);
-                      }
-                    }),
+                    onSelected: (sel) => setState(
+                      () {
+                        // TODO: may need to update all authors here?
+                        // only add don't remove?
+                        book.author = sel;
+                        // add if it doesnt exist
+                        if (!allAuthors.contains(sel)) {
+                          allAuthors.add(sel);
+                        }
+                      },
+                    ),
                   ),
                   // link handling
                   LinkEditor(
                     initialLink: book.link,
-                    onSubmitted: (newLink) => setState(() {
-                      book.link = newLink;
-                    }),
+                    onSubmitted: (newLink) => setState(
+                      () {
+                        book.link = newLink;
+                      },
+                    ),
                   ),
                 ],
               ),
