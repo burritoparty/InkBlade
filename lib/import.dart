@@ -10,7 +10,7 @@ class Import extends StatefulWidget {
 }
 
 class _ImportState extends State<Import> {
-  Book book = Book("", "", "", "", "", [], [], false, false);
+  Book book = Book("", "", "", "", [], [], [], false, false);
   // grab the books
   List<Book> allBooks = [];
   // grab the authors
@@ -31,9 +31,9 @@ class _ImportState extends State<Import> {
       Book(
         "C:\\", // path
         "Full Metal Alchemist Brotherhood", // title
-        "Hiromu Arakawa", // author
         "link", // link
         "Full Metal Alchemist", // series
+        ["Hiromu Arakawa"], // author
         ["Adventure", "Fantasy"], // tags
         ["Edward", "Alphonse", "Winry"], // characters
         true, // favorite
@@ -42,9 +42,9 @@ class _ImportState extends State<Import> {
       Book(
         "C:\\", // path
         "My Dress Up Darling: Volume 1", // title
-        "Shinichi Fukuda", // author
         "link", // link
         "My Dress Up Darling", // series
+        ["Shinichi Fukuda"], // author
         ["Romance", "Comedy", "Cosplay"], // tags
         ["Marin Kitagawa", "Gojo"], // characters
         true, // favorite
@@ -53,9 +53,9 @@ class _ImportState extends State<Import> {
       Book(
         "C:\\", // path
         "My Dress Up Darling: Volume 2", // title
-        "Shinichi Fukuda", // author
         "link", // link
         "My Dress Up Darling", // series
+        ["Shinichi Fukuda"], // author
         ["Romance", "Comedy", "Cosplay"], // tags
         ["Marin Kitagawa", "Wakana Gojo"], // characters
         true, // favorite
@@ -64,9 +64,9 @@ class _ImportState extends State<Import> {
       Book(
         "C:\\", // path
         "Komi Can't Communicate: Volume 1", // title
-        "Tomohito Oda", // author
         "link", // link
         "Komi Can't Communicate", // series
+        ["Tomohito Oda"], // author
         ["Romance", "Comedy", "Slice of Life"], // tags
         ["Komi Shoko", "Tadano Hitohito"], // characters
         false, // favorite
@@ -75,9 +75,9 @@ class _ImportState extends State<Import> {
       Book(
         "C:\\", // path
         "Hokkaido Gals Are Super Adorable: Volume 1", // title
-        "Ikada Kai", // author
         "link", // link
         "Hokkaido Gals Are Super Adorable", // series
+        ["Ikada Kai"], // author
         ["Romance", "Comedy"], // tags
         ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
         false, // favorite
@@ -104,8 +104,11 @@ class _ImportState extends State<Import> {
       }
 
       // add author if not already in
-      if (!allAuthors.contains(book.author)) {
-        allAuthors.add(book.author);
+      for (String author in book.authors) {
+        // add them if not already in
+        if (!allAuthors.contains(author)) {
+          allAuthors.add(author);
+        }
       }
 
       // add series if not already in
@@ -206,21 +209,21 @@ class _ImportState extends State<Import> {
                     ),
                   ),
                   // author handling
-                  AuthorEditor(
-                    initialAuthor: book.author,
-                    allAuthors: allAuthors,
-                    onSelected: (sel) => setState(
-                      () {
-                        // TODO: may need to update all authors here?
-                        // only add don't remove?
-                        book.author = sel;
-                        // add if it doesnt exist
-                        if (!allAuthors.contains(sel)) {
-                          allAuthors.add(sel);
-                        }
-                      },
-                    ),
-                  ),
+                  // AuthorEditor(
+                  //   initialAuthor: book.authors,
+                  //   allAuthors: allAuthors,
+                  //   onSelected: (sel) => setState(
+                  //     () {
+                  //       // TODO: may need to update all authors here?
+                  //       // only add don't remove?
+                  //       book.authors = sel;
+                  //       // add if it doesnt exist
+                  //       if (!allAuthors.contains(sel)) {
+                  //         allAuthors.add(sel);
+                  //       }
+                  //     },
+                  //   ),
+                  // ),
                   // link handling
                   LinkEditor(
                     initialLink: book.link,
@@ -233,10 +236,27 @@ class _ImportState extends State<Import> {
                 ],
               ),
             ),
-            // tags here
             Expanded(
               child: Column(
                 children: [
+                  // authors
+                  ListEditor(
+                    name: "author",
+                    item: book.authors,
+                    allItems: allAuthors,
+                    onAdded: (sel) => setState(() {
+                      // add sel to book.authors if it’s not already there
+                      if (!book.authors.contains(sel)) {
+                        book.authors.add(sel);
+                      }
+                      // TODO: this prob needs changed when implementing database
+                      if (!allAuthors.contains(sel)) allAuthors.add(sel);
+                    }),
+                    onRemoved: (author) => setState(() {
+                      book.authors.remove(author);
+                    }),
+                    flex: 1,
+                  ),
                   // tags
                   ListEditor(
                     name: "tag",

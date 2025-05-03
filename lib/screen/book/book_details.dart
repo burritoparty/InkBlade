@@ -36,9 +36,9 @@ class _BookDetailsState extends State<BookDetails> {
       Book(
         "C:\\", // path
         "Full Metal Alchemist Brotherhood", // title
-        "Hiromu Arakawa", // author
         "link", // link
         "Full Metal Alchemist", // series
+        ["Hiromu Arakawa"], // author
         ["Adventure", "Fantasy"], // tags
         ["Edward", "Alphonse", "Winry"], // characters
         true, // favorite
@@ -47,9 +47,9 @@ class _BookDetailsState extends State<BookDetails> {
       Book(
         "C:\\", // path
         "My Dress Up Darling: Volume 1", // title
-        "Shinichi Fukuda", // author
         "link", // link
         "My Dress Up Darling", // series
+        ["Shinichi Fukuda"], // author
         ["Romance", "Comedy", "Cosplay"], // tags
         ["Marin Kitagawa", "Gojo"], // characters
         true, // favorite
@@ -58,9 +58,9 @@ class _BookDetailsState extends State<BookDetails> {
       Book(
         "C:\\", // path
         "My Dress Up Darling: Volume 2", // title
-        "Shinichi Fukuda", // author
         "link", // link
         "My Dress Up Darling", // series
+        ["Shinichi Fukuda"], // author
         ["Romance", "Comedy", "Cosplay"], // tags
         ["Marin Kitagawa", "Wakana Gojo"], // characters
         true, // favorite
@@ -69,9 +69,9 @@ class _BookDetailsState extends State<BookDetails> {
       Book(
         "C:\\", // path
         "Komi Can't Communicate: Volume 1", // title
-        "Tomohito Oda", // author
         "link", // link
         "Komi Can't Communicate", // series
+        ["Tomohito Oda"], // author
         ["Romance", "Comedy", "Slice of Life"], // tags
         ["Komi Shoko", "Tadano Hitohito"], // characters
         false, // favorite
@@ -80,9 +80,9 @@ class _BookDetailsState extends State<BookDetails> {
       Book(
         "C:\\", // path
         "Hokkaido Gals Are Super Adorable: Volume 1", // title
-        "Ikada Kai", // author
         "link", // link
         "Hokkaido Gals Are Super Adorable", // series
+        ["Ikada Kai"], // author
         ["Romance", "Comedy"], // tags
         ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
         false, // favorite
@@ -108,9 +108,12 @@ class _BookDetailsState extends State<BookDetails> {
         }
       }
 
-      // add author if not already in
-      if (!allAuthors.contains(book.author)) {
-        allAuthors.add(book.author);
+      // iterate trhough the books characters
+      for (String author in book.authors) {
+        // add them if not already in
+        if (!allAuthors.contains(author)) {
+          allAuthors.add(author);
+        }
       }
 
       // add series if not already in
@@ -166,18 +169,6 @@ class _BookDetailsState extends State<BookDetails> {
                             if (!allSeries.contains(sel)) allSeries.add(sel);
                           }),
                         ),
-                        AuthorEditor(
-                          initialAuthor: widget.book.author,
-                          allAuthors: allAuthors,
-                          onSelected: (sel) => setState(() {
-                            // add sel to book.tags if it’s not already there
-                            if (widget.book.author != sel) {
-                              widget.book.author = sel;
-                            }
-                            // TODO: this prob needs changed when implementing database
-                            if (!allAuthors.contains(sel)) allAuthors.add(sel);
-                          }),
-                        ),
                         // link handling
                         LinkEditor(
                           initialLink: widget.book.link,
@@ -211,24 +202,34 @@ class _BookDetailsState extends State<BookDetails> {
                             ))
                           ],
                         ),
-                        // explorer and delete
-                        Row(
-                          children: [
-                            ExplorerButton(onExplorer: () {
-                              Process.run("explorer", [widget.book.path]);
-                            }),
-                            DeleteButton(onDelete: () {
-                              // delete logic here
-                            }),
-                          ],
-                        ),
+                        
                       ],
                     ),
                   ),
                   // tag handling
                   Expanded(
+                    flex: 2,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // authors
+                        ListEditor(
+                          name: "author",
+                          item: widget.book.authors,
+                          allItems: allAuthors,
+                          onAdded: (sel) => setState(() {
+                            // add sel to book.authors if it’s not already there
+                            if (!widget.book.authors.contains(sel)) {
+                              widget.book.authors.add(sel);
+                            }
+                            // TODO: this prob needs changed when implementing database
+                            if (!allAuthors.contains(sel)) allAuthors.add(sel);
+                          }),
+                          onRemoved: (author) => setState(() {
+                            widget.book.authors.remove(author);
+                          }),
+                        ),
                         // tags
                         ListEditor(
                           name: "tag",
@@ -245,7 +246,6 @@ class _BookDetailsState extends State<BookDetails> {
                           onRemoved: (tag) => setState(() {
                             widget.book.tags.remove(tag);
                           }),
-                          flex: 2,
                         ),
                         // characters
                         ListEditor(
@@ -264,7 +264,17 @@ class _BookDetailsState extends State<BookDetails> {
                           onRemoved: (character) => setState(() {
                             widget.book.characters.remove(character);
                           }),
-                          flex: 2,
+                        ),
+                        // explorer and delete
+                        Row(
+                          children: [
+                            ExplorerButton(onExplorer: () {
+                              Process.run("explorer", [widget.book.path]);
+                            }),
+                            DeleteButton(onDelete: () {
+                              // delete logic here
+                            }),
+                          ],
                         ),
                       ],
                     ),
