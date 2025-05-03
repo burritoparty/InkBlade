@@ -123,13 +123,14 @@ class _ImportState extends State<Import> {
     // controller for text editing field
     final TextEditingController titleController =
         TextEditingController(text: book.title);
-    // set up the book to modify
+    final TextEditingController linkController =
+        TextEditingController(text: book.link);
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true, // ← makes the whole title widget centered
+        centerTitle: true,
         title: Row(
           mainAxisSize:
-              MainAxisSize.min, // ← shrink‐wrap so Row itself is centered
+              MainAxisSize.min,
           children: [
             ElevatedButton.icon(
               icon: const Icon(Icons.check),
@@ -159,32 +160,35 @@ class _ImportState extends State<Import> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: FavoriteButton(
-                          isFavorite: book.favorite,
-                          onFavoriteToggle: (newVal) => setState(() {
-                            book.favorite = newVal;
-                          }),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FavoriteButton(
+                            isFavorite: book.favorite,
+                            onFavoriteToggle: (newVal) => setState(() {
+                              book.favorite = newVal;
+                            }),
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: LaterButton(
-                          isReadLater: book.readLater,
-                          onReadLaterToggle: (newVal) => setState(() {
-                            book.readLater = newVal;
-                          }),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: LaterButton(
+                            isReadLater: book.readLater,
+                            onReadLaterToggle: (newVal) => setState(() {
+                              book.readLater = newVal;
+                            }),
+                          ),
                         ),
                       ),
-                    ),
-                  ]),
+                    ],
+                  ),
                   // title handling
-                  TitleEditor(
+                  StringEditor(
+                    name: "Title",
                     controller: titleController,
                     onSubmitted: (newTitle) => setState(
                       () {
@@ -193,9 +197,10 @@ class _ImportState extends State<Import> {
                     ),
                   ),
                   // series handling
-                  SeriesEditor(
-                    initialSeries: book.series,
-                    allSeries: allSeries,
+                  DropdownEditor(
+                    name: "Series",
+                    initial: book.series,
+                    all: allSeries,
                     onSelected: (sel) => setState(
                       () {
                         // TODO: may need to update all series here?
@@ -208,25 +213,10 @@ class _ImportState extends State<Import> {
                       },
                     ),
                   ),
-                  // author handling
-                  // AuthorEditor(
-                  //   initialAuthor: book.authors,
-                  //   allAuthors: allAuthors,
-                  //   onSelected: (sel) => setState(
-                  //     () {
-                  //       // TODO: may need to update all authors here?
-                  //       // only add don't remove?
-                  //       book.authors = sel;
-                  //       // add if it doesnt exist
-                  //       if (!allAuthors.contains(sel)) {
-                  //         allAuthors.add(sel);
-                  //       }
-                  //     },
-                  //   ),
-                  // ),
                   // link handling
-                  LinkEditor(
-                    initialLink: book.link,
+                  StringEditor(
+                    name: "Link",
+                    controller: linkController,
                     onSubmitted: (newLink) => setState(
                       () {
                         book.link = newLink;

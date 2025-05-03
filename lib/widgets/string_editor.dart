@@ -1,58 +1,56 @@
 import 'package:flutter/material.dart';
 
-// widget for editing links
-class LinkEditor extends StatefulWidget {
-  // initial link text
-  final String initialLink;
-  // callback when link is submitted
+// widget for editing entries for given
+class StringEditor extends StatefulWidget {
+  final String name;
+  // text controller
+  final TextEditingController controller;
+  // submit callback
   final ValueChanged<String> onSubmitted;
 
-  const LinkEditor({
+  const StringEditor({
     Key? key,
-    required this.initialLink,
+    required this.name,
+    required this.controller,
     required this.onSubmitted,
   }) : super(key: key);
 
   @override
-  State<LinkEditor> createState() => _LinkEditorState();
+  State<StringEditor> createState() => _StringEditorsState();
 }
 
-class _LinkEditorState extends State<LinkEditor> {
-  // controller for text field
-  late TextEditingController _controller;
-  // focus node to watch focus changes
-  late FocusNode _focusNode;
-  // whether last action was a submit
+class _StringEditorsState extends State<StringEditor> {
+  // was last action a submit
   bool _submitted = false;
-  // whether text has changed since last submit
+  // is text changed
   bool _dirty = false;
-  // text that was last submitted
+  // last saved text
   late String _lastSubmittedText;
+  // focus node for field
+  late FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
-    // initialize controller and track its changes
-    _controller = TextEditingController(text: widget.initialLink);
-    _lastSubmittedText = widget.initialLink;
-    _controller.addListener(_onTextChanged);
-
-    // initialize focus node to trigger rebuild on focus change
+    _lastSubmittedText = widget.controller.text;
+    // watch text changes
+    widget.controller.addListener(_onTextChanged);
     _focusNode = FocusNode();
+    // update on focus change
     _focusNode.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    // clean up listeners
-    _controller.removeListener(_onTextChanged);
+    // stop watching text
+    widget.controller.removeListener(_onTextChanged);
     _focusNode.dispose();
     super.dispose();
   }
 
-  // update dirty flag when text changes
+  // handle text update
   void _onTextChanged() {
-    final current = _controller.text;
+    final current = widget.controller.text;
     final bool isDirty = current != _lastSubmittedText;
     if (isDirty != _dirty || _submitted) {
       setState(() {
@@ -65,23 +63,21 @@ class _LinkEditorState extends State<LinkEditor> {
   @override
   Widget build(BuildContext context) {
     final bool isFocused = _focusNode.hasFocus;
-
-    // pick border color: red if dirty, green if just submitted, grey otherwise
+    // choose border color
     final Color borderColor =
         _dirty ? Colors.redAccent : (_submitted ? Colors.greenAccent : Colors.grey);
-
-    // pick focus color similarly
+    // choose focus color
     final Color focusColor = _dirty
         ? Colors.redAccent
         : (_submitted ? Colors.greenAccent : Theme.of(context).colorScheme.primary);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: TextField(
         focusNode: _focusNode,
-        controller: _controller,
+        controller: widget.controller,
         decoration: InputDecoration(
-          labelText: 'Link',
+          labelText: widget.name,
           labelStyle: TextStyle(
             color: isFocused ? focusColor : Colors.grey,
           ),
@@ -92,10 +88,10 @@ class _LinkEditorState extends State<LinkEditor> {
             borderSide: BorderSide(color: focusColor),
           ),
         ),
-        // trigger dirty logic on every change
-        onChanged: (_) => _onTextChanged(),
+        // update dirty state on change
+        onChanged: (value) => _onTextChanged(),
         onSubmitted: (value) {
-          // mark as submitted: clear dirty and update last text
+          // mark as submitted
           setState(() {
             _submitted = true;
             _lastSubmittedText = value;

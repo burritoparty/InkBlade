@@ -6,12 +6,10 @@ import '../widgets/widgets.dart';
 
 class AuthorDetails extends StatefulWidget {
   final String author;
-  final List<String> allAuthors;
 
   const AuthorDetails({
     super.key,
     required this.author,
-    required this.allAuthors,
   });
 
   @override
@@ -103,7 +101,6 @@ class AuthorDetailsState extends State<AuthorDetails> {
         }
       }
     }
-    
   }
 
   @override
@@ -114,20 +111,10 @@ class AuthorDetailsState extends State<AuthorDetails> {
       ),
       body: Column(
         children: [
-          // AuthorAutocompleteField(
-          //   initialAuthor: _author,
-          //   allAuthors: widget.allAuthors,
-          //   onSelected: (sel) {
-          //     setState(() {
-          //       _author = sel;
-          //       debugPrint('Selected author: $sel');
-          //     });
-          //   },
-          // ),
-
-          AuthorEditor(
-            initialAuthor: _author,
-            allAuthors: [],
+          DropdownEditor(
+            name: "Rename Author",
+            initial: _author,
+            all: allAuthors,
             onSelected: (sel) => setState(() {
               // add sel to book.tags if it’s not already there
               if (_author != sel) {
@@ -137,7 +124,6 @@ class AuthorDetailsState extends State<AuthorDetails> {
               if (!allAuthors.contains(sel)) allAuthors.add(sel);
             }),
           ),
-
           Expanded(
             child: BookGrid(
               books: filteredBooks,

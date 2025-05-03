@@ -128,6 +128,8 @@ class _BookDetailsState extends State<BookDetails> {
     // controller for text editing field
     final TextEditingController titleController =
         TextEditingController(text: widget.book.title);
+    final TextEditingController linkController =
+        TextEditingController(text: widget.book.link);
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.book.title)),
@@ -150,16 +152,20 @@ class _BookDetailsState extends State<BookDetails> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       // name of the book
                       children: [
-                        // title
-                        TitleEditor(
+                        // title handling
+                        StringEditor(
+                          name: "Title",
                           controller: titleController,
-                          onSubmitted: (newTitle) => setState(() {
-                            widget.book.title = newTitle;
-                          }),
+                          onSubmitted: (newTitle) => setState(
+                            () {
+                              widget.book.title = newTitle;
+                            },
+                          ),
                         ),
-                        SeriesEditor(
-                          initialSeries: widget.book.series,
-                          allSeries: allSeries,
+                        DropdownEditor(
+                          name: "Series",
+                          initial: widget.book.series,
+                          all: allSeries,
                           onSelected: (sel) => setState(() {
                             // add sel to book.tags if it’s not already there
                             if (widget.book.series != sel) {
@@ -170,11 +176,14 @@ class _BookDetailsState extends State<BookDetails> {
                           }),
                         ),
                         // link handling
-                        LinkEditor(
-                          initialLink: widget.book.link,
-                          onSubmitted: (newLink) => setState(() {
-                            widget.book.link = newLink;
-                          }),
+                        StringEditor(
+                          name: "Link",
+                          controller: linkController,
+                          onSubmitted: (newLink) => setState(
+                            () {
+                              widget.book.link = newLink;
+                            },
+                          ),
                         ),
                         // favorite and read later
                         Row(
@@ -202,7 +211,6 @@ class _BookDetailsState extends State<BookDetails> {
                             ))
                           ],
                         ),
-                        
                       ],
                     ),
                   ),

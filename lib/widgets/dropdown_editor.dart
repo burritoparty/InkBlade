@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 
-class AuthorEditor extends StatefulWidget {
-  final String initialAuthor;
-  final List<String> allAuthors;
+class DropdownEditor extends StatefulWidget {
+  final String name;
+  final String initial;
+  final List<String> all;
   final ValueChanged<String> onSelected;
 
-  const AuthorEditor({
+  const DropdownEditor({
     Key? key,
-    required this.initialAuthor,
-    required this.allAuthors,
+    required this.name,
+    required this.initial,
+    required this.all,
     required this.onSelected,
   }) : super(key: key);
 
   @override
-  State<AuthorEditor> createState() => _AuthorEditorState();
+  State<DropdownEditor> createState() => _DropdownEditorState();
 }
 
-class _AuthorEditorState extends State<AuthorEditor> {
+class _DropdownEditorState extends State<DropdownEditor> {
   // track unsaved edits
   bool _isDirty = false;
   // track whether we've ever saved
@@ -24,9 +26,9 @@ class _AuthorEditorState extends State<AuthorEditor> {
 
   @override
   Widget build(BuildContext context) {
-    // pick border/label color: 
+    // pick border/label color:
     // gray on pristine
-    // red when dirty 
+    // red when dirty
     // green after save
     final Color activeColor = _isDirty
         ? Colors.redAccent
@@ -35,7 +37,7 @@ class _AuthorEditorState extends State<AuthorEditor> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Autocomplete<String>(
-        initialValue: TextEditingValue(text: widget.initialAuthor),
+        initialValue: TextEditingValue(text: widget.initial),
 
         // iterate through each tag
         optionsBuilder: (TextEditingValue textEditingValue) {
@@ -46,13 +48,13 @@ class _AuthorEditorState extends State<AuthorEditor> {
           final input = textEditingValue.text;
           final lowerInput = input.toLowerCase();
 
-          // find all existing authors matching the input
-          final matches = widget.allAuthors
+          // find all existing series matching the input
+          final matches = widget.all
               .where((a) => a.toLowerCase().contains(lowerInput))
               .toList();
 
-          // if the exact author isn't in your list yet, offer it first
-          if (!widget.allAuthors.any((a) => a.toLowerCase() == lowerInput)) {
+          // if the exact series isn't in your list yet, offer it first
+          if (!widget.all.any((a) => a.toLowerCase() == lowerInput)) {
             matches.insert(0, input);
           }
 
@@ -78,7 +80,7 @@ class _AuthorEditorState extends State<AuthorEditor> {
             controller: textEditingController,
             focusNode: focusNode,
             decoration: InputDecoration(
-              labelText: 'Author',
+              labelText: widget.name,
               labelStyle: TextStyle(color: activeColor),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: activeColor),
@@ -93,7 +95,7 @@ class _AuthorEditorState extends State<AuthorEditor> {
               }
             },
             onSubmitted: (_) {
-              // save on enter 
+              // save on enter
               // (will pick the first option)
               onFieldSubmitted();
               setState(() {

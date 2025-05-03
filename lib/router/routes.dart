@@ -40,7 +40,6 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => AuthorDetails(
             author: author,
-            allAuthors: allAuthors,
           ),
         );
       // route for FAB (import)

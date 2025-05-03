@@ -6,7 +6,11 @@ import '../models/book.dart';
 
 class TagDetails extends StatefulWidget {
   final String tag;
-  const TagDetails({Key? key, required this.tag}) : super(key: key);
+  // const TagDetails({Key? key, required this.tag}) : super(key: key);
+  const TagDetails({
+    super.key,
+    required this.tag,
+  });
 
   @override
   State<TagDetails> createState() => _TagDetailsState();
@@ -148,7 +152,8 @@ class _TagDetailsState extends State<TagDetails> {
             Row(
               children: [
                 Expanded(
-                  child: TitleEditor(
+                  child: StringEditor(
+                    name: "Rename tag",
                     controller: _controller,
                     onSubmitted: _onSubmitted,
                   ),
