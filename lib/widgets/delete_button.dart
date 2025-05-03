@@ -16,7 +16,7 @@ class DeleteButton extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: onDelete,
           icon: const Icon(Icons.delete),
-          label: const Text('Delete Book'),
+          label: const Text('Delete'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey[800],
             foregroundColor: Colors.white,
