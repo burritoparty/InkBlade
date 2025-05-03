@@ -37,14 +37,21 @@ class _TagDetailsState extends State<TagDetails> {
         ["tag1", "tag2", "tag3"],
         "link",
         "C:\\path",
-        "coverPath",
+        // "coverPath",
         false,
         false,
       ),
     );
     // make a book with an author
-    allBooks.add(Book("Romance book", "author", ["Romance"], "link", "path",
-        "coverPath", false, false));
+    allBooks.add(Book(
+        "Romance book",
+        "author",
+        ["Romance"],
+        "link",
+        "path",
+        // "coverPath",
+        false,
+        false));
 
     // iterate through all books
     for (final Book book in allBooks) {

@@ -5,19 +5,17 @@ class Book {
   List<String> tags;
   String link;
   String path;
-  String coverPath;
+  // String coverPath;
   bool readLater;
-  bool favorite; 
+  bool favorite;
 
   Book(
-    this.title,
-    this.author,
-    this.tags,
-    this.link,
-    this.path,
-    this.coverPath,
-    this.readLater,
-    this.favorite
-  );
-
+      this.title,
+      this.author,
+      this.tags,
+      this.link,
+      this.path,
+      // this.coverPath,
+      this.readLater,
+      this.favorite);
 }
