@@ -10,7 +10,7 @@ class Import extends StatefulWidget {
 }
 
 class _ImportState extends State<Import> {
-  Book book = Book("", "", [], "", "", false, false);
+  Book book = Book("", "", "", "", "", [], [], false, false);
   List<String> allAuthors = [];
   List<String> allTags = [];
 

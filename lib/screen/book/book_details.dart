@@ -41,6 +41,7 @@ class _BookDetailsState extends State<BookDetails> {
         child: Column(
           children: [
             Expanded(
+              flex: 2,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

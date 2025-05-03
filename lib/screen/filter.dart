@@ -27,34 +27,59 @@ class _FilterState extends State<Filter> {
     // set up all books
     allBooks = [
       Book(
-        "Full Metal Alchemist",
-        "Hiromu Arakawa",
-        ["Adventure", "Fantasy"],
-        "link",
-        "C:\\path",
-        "coverPath",
-        false,
-        false,
+        "C:\\", // path
+        "Full Metal Alchemist Brotherhood", // title
+        "Hiromu Arakawa", // author
+        "link", // link
+        "Full Metal Alchemist", // series
+        ["Adventure", "Fantasy"], // tags
+        ["Edward", "Alphonse", "Winry"], // characters
+        true, // favorite
+        false, // read later
       ),
       Book(
-        "My Dress Up Darling",
-        "Shinichi Fukuda",
-        ["Romance", "Comedy", "Cosplay"],
-        "link",
-        "C:\\path",
-        "coverPath",
-        true,
-        true,
+        "C:\\", // path
+        "My Dress Up Darling: Volume 1", // title
+        "Shinichi Fukuda", // author
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Gojo"], // characters
+        true, // favorite
+        false, // read later
       ),
       Book(
-        "Komi Can't Communicate",
-        "Tomohito Oda",
-        ["Romance", "Comedy"],
-        "link",
-        "C:\\path",
-        "coverPath",
-        false,
-        false,
+        "C:\\", // path
+        "My Dress Up Darling: Volume 2", // title
+        "Shinichi Fukuda", // author
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Wakana Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Komi Can't Communicate: Volume 1", // title
+        "Tomohito Oda", // author
+        "link", // link
+        "Komi Can't Communicate", // series
+        ["Romance", "Comedy", "Slice of Life"], // tags
+        ["Komi Shoko", "Tadano Hitohito"], // characters
+        false, // favorite
+        true, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Hokkaido Gals Are Super Adorable: Volume 1", // title
+        "Ikada Kai", // author
+        "link", // link
+        "Hokkaido Gals Are Super Adorable", // series
+        ["Romance", "Comedy"], // tags
+        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
+        false, // favorite
+        true, // read later
       ),
     ];
 
@@ -191,7 +216,7 @@ class AuthorSearch extends StatelessWidget {
           // <-- add this
           onChanged: (value) {
             if (value.isEmpty) {
-              onSelected('');      // reset your author state
+              onSelected(''); // reset your author state
             }
           },
           onSubmitted: (_) => onFieldSubmitted(),
@@ -200,7 +225,6 @@ class AuthorSearch extends StatelessWidget {
     );
   }
 }
-
 
 // tag search
 class TagSearch extends StatefulWidget {
