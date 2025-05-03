@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/book.dart';
+// import '../services/book_repository.dart';
 
 class Filter extends StatefulWidget {
   const Filter({super.key});
@@ -71,92 +72,74 @@ class _FilterState extends State<Filter> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TitleSearch(initialValue: title,
-          onChanged: (value) {
-            title = value;
-          },),
-          Row(
-            // align both inputs at the top
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // author field
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: AuthorSearch(
-                    allAuthors: allAuthors,
-                    onSelected: (value) {
-                      author = value;
-                    },
-                  ),
-                ),
-              ),
-              // tag field + chips
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TagSearch(
-                    allTags: allTags,
-                    onTagAdded: (value) => setState(() {
-                      tags.add(value);
-                    }),
-                    onTagRemoved: (value) => setState(() {
-                      tags.remove(value);
-                    }),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+  // call any time author, or tags change
+  void _applyFilters() {
+    setState(
+      () {
+        filteredBooks = allBooks.where(
+          (book) {
+            // final matchesTitle = title.isEmpty ||
+            //     book.title.toLowerCase().contains(title.toLowerCase());
+            final matchesAuthor = author.isEmpty ||
+                book.author.toLowerCase() == author.toLowerCase();
+            final matchesTags =
+                tags.isEmpty || tags.every((tag) => book.tags.contains(tag));
+            // return matchesTitle && matchesAuthor && matchesTags;
+            return matchesAuthor && matchesTags;
+          },
+        ).toList();
+      },
     );
   }
-}
-
-// Make TitleSearch a *stateless* widget that just reflects
-// the value you hand in, and tells you whenever it changes:
-
-class TitleSearch extends StatelessWidget {
-  final String initialValue;
-  final ValueChanged<String> onChanged;
-
-  const TitleSearch({
-    Key? key,
-    this.initialValue = '',
-    required this.onChanged,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // create a controller so the textfield shows the current title
-    final controller = TextEditingController(text: initialValue);
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        controller: controller,
-        decoration: const InputDecoration(
-          labelText: 'Title',
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
+    return Row(
+      // align both inputs at the top
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // author field
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: AuthorSearch(
+              allAuthors: allAuthors,
+              onSelected: (value) {
+                // update the value
+                author = value;
+                // call the function to update filtered
+                _applyFilters();
+              },
+            ),
           ),
         ),
-        onChanged: onChanged,
-      ),
+        // tag field + chips
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TagSearch(
+              allTags: allTags,
+              onTagAdded: (value) => setState(() {
+                // update the value
+                tags.add(value);
+                // call the function to update filtered
+                _applyFilters();
+              }),
+              onTagRemoved: (value) => setState(
+                () {
+                  // update the value
+                  tags.remove(value);
+                  // call the function to update filtered
+                  _applyFilters();
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
-
 
 // author search field
 class AuthorSearch extends StatelessWidget {
@@ -239,8 +222,7 @@ class TagSearchState extends State<TagSearch> {
               return const Iterable<String>.empty();
             }
             final input = textEditingValue.text.toLowerCase();
-            return widget.allTags
-                .where((a) => a.toLowerCase().contains(input));
+            return widget.allTags.where((a) => a.toLowerCase().contains(input));
           },
           onSelected: (tag) {
             // add tag to internal list
@@ -300,3 +282,62 @@ class TagSearchState extends State<TagSearch> {
     );
   }
 }
+
+// To add later maybe
+// class TitleSearch extends StatefulWidget {
+//   final String initialValue;
+//   final ValueChanged<String> onChanged;
+
+//   const TitleSearch({
+//     Key? key,
+//     this.initialValue = '',
+//     required this.onChanged,
+//   }) : super(key: key);
+
+//   @override
+//   TitleSearchState createState() => TitleSearchState();
+// }
+
+// class TitleSearchState extends State<TitleSearch> {
+//   late final TextEditingController _controller;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _controller = TextEditingController(text: widget.initialValue);
+//   }
+
+//   @override
+//   void didUpdateWidget(covariant TitleSearch old) {
+//     super.didUpdateWidget(old);
+//     if (old.initialValue != widget.initialValue) {
+//       // only update if the parent really changed it:
+//       _controller.text = widget.initialValue;
+//       // place cursor at end
+//       _controller.selection = TextSelection.fromPosition(
+//         TextPosition(offset: _controller.text.length),
+//       );
+//     }
+//   }
+
+//   @override
+//   void dispose() {
+//     _controller.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8),
+//       child: TextField(
+//         controller: _controller,
+//         decoration: const InputDecoration(
+//           labelText: 'Title',
+//           border: OutlineInputBorder(),
+//         ),
+//         onChanged: widget.onChanged,
+//       ),
+//     );
+//   }
+// }
