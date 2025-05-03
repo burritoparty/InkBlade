@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/router/routes.dart';
+import '../models/book.dart';
 
 class Authors extends StatefulWidget {
   const Authors({super.key});
@@ -10,20 +11,78 @@ class Authors extends StatefulWidget {
 
 class _AuthorsState extends State<Authors> {
   final TextEditingController _searchController = TextEditingController();
+  List<Book> allBooks = [];
   List<String> allAuthors = [];
   List<String> filteredAuthors = [];
   @override
   void initState() {
     super.initState();
 
-    // load up the authors from json
-    allAuthors = [
-      "Shinichi Fukuda",
-      "Hiromu Arakawa",
-      "Kana Akatsuki",
-      "Kenya Suzuki",
-      "Nisio Isin",
+    // load up the authors
+    allBooks = [
+      Book(
+        "C:\\", // path
+        "Full Metal Alchemist Brotherhood", // title
+        "Hiromu Arakawa", // author
+        "link", // link
+        "Full Metal Alchemist", // series
+        ["Adventure", "Fantasy"], // tags
+        ["Edward", "Alphonse", "Winry"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "My Dress Up Darling: Volume 1", // title
+        "Shinichi Fukuda", // author
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "My Dress Up Darling: Volume 2", // title
+        "Shinichi Fukuda", // author
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Wakana Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Komi Can't Communicate: Volume 1", // title
+        "Tomohito Oda", // author
+        "link", // link
+        "Komi Can't Communicate", // series
+        ["Romance", "Comedy", "Slice of Life"], // tags
+        ["Komi Shoko", "Tadano Hitohito"], // characters
+        false, // favorite
+        true, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Hokkaido Gals Are Super Adorable: Volume 1", // title
+        "Ikada Kai", // author
+        "link", // link
+        "Hokkaido Gals Are Super Adorable", // series
+        ["Romance", "Comedy"], // tags
+        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
+        false, // favorite
+        true, // read later
+      ),
     ];
+    // loop thru all authors
+    for (Book book in allBooks) {
+      if (!allBooks.contains(book.author)) {
+        allAuthors.add(book.author);
+      }
+    }
+
     filteredAuthors = allAuthors;
   }
 
