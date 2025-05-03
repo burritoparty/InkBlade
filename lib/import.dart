@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
+import 'package:flutter_manga_reader/widgets/character_editor.dart';
 import 'package:flutter_manga_reader/widgets/series_editor.dart';
 import '/widgets/widgets.dart';
 
@@ -18,6 +19,8 @@ class _ImportState extends State<Import> {
   List<String> allTags = [];
   // grab the series
   List<String> allSeries = [];
+  // grab the characters
+  List<String> allCharacters = [];
 
   @override
   void initState() {
@@ -32,6 +35,9 @@ class _ImportState extends State<Import> {
     }
     for (int i = 0; i < 15; i++) {
       allSeries.add("seriesname$i");
+    }
+    for (int i = 0; i < 15; i++) {
+      allCharacters.add("charactername$i");
     }
   }
 
@@ -154,21 +160,43 @@ class _ImportState extends State<Import> {
               ),
             ),
             // tags here
-            TagEditor(
-              tags: book.tags,
-              allTags: allTags,
-              onTagAdded: (sel) => setState(() {
-                // add sel to book.tags if it’s not already there
-                if (!book.tags.contains(sel)) {
-                  book.tags.add(sel);
-                }
-                // TODO: this prob needs changed when implementing database
-                if (!allTags.contains(sel)) allTags.add(sel);
-              }),
-              onTagRemoved: (tag) => setState(() {
-                book.tags.remove(tag);
-              }),
-              flex: 1, // this modifies how much room tags are taking
+            Expanded(
+              child: Column(
+                children: [
+                  TagEditor(
+                    tags: book.tags,
+                    allTags: allTags,
+                    onTagAdded: (sel) => setState(() {
+                      // add sel to book.tags if it’s not already there
+                      if (!book.tags.contains(sel)) {
+                        book.tags.add(sel);
+                      }
+                      // TODO: this prob needs changed when implementing database
+                      if (!allTags.contains(sel)) allTags.add(sel);
+                    }),
+                    onTagRemoved: (tag) => setState(() {
+                      book.tags.remove(tag);
+                    }),
+                    flex: 1, // this modifies how much room tags are taking
+                  ),
+                  CharacterEditor(
+                    characters: book.characters,
+                    allCharacters: allCharacters,
+                    onCharacterAdded: (sel) => setState(() {
+                      // add sel to book.tags if it’s not already there
+                      if (!book.characters.contains(sel)) {
+                        book.characters.add(sel);
+                      }
+                      // TODO: this prob needs changed when implementing database
+                      if (!allCharacters.contains(sel)) allCharacters.add(sel);
+                    }),
+                    onCharacterRemoved: (character) => setState(() {
+                      book.characters.remove(character);
+                    }),
+                    flex: 1, // this modifies how much room tags are taking
+                  ),
+                ],
+              ),
             ),
           ],
         ),

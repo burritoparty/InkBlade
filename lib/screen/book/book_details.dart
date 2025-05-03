@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
+import 'package:flutter_manga_reader/widgets/character_editor.dart';
 import 'package:flutter_manga_reader/widgets/series_editor.dart';
 import '../../router/routes.dart';
 import '../../widgets/widgets.dart';
@@ -21,6 +22,8 @@ class _BookDetailsState extends State<BookDetails> {
   List<String> allTags = [];
   // grab the series
   List<String> allSeries = [];
+  // grab the characters
+  List<String> allCharacters = [];
   int imagesPerRow = 10;
   int totalPages = 30;
 
@@ -31,6 +34,7 @@ class _BookDetailsState extends State<BookDetails> {
     allAuthors = List.generate(1000, (i) => 'authorname$i');
     allTags = List.generate(15, (i) => 'tagname$i');
     allSeries = List.generate(15, (i) => 'seriesname$i');
+    allCharacters = List.generate(15, (i) => 'charactername$i');
   }
 
   @override
@@ -139,21 +143,44 @@ class _BookDetailsState extends State<BookDetails> {
                     ),
                   ),
                   // tag handling
-                  TagEditor(
-                    tags: widget.book.tags,
-                    allTags: allTags,
-                    onTagAdded: (sel) => setState(() {
-                      // add sel to book.tags if it’s not already there
-                      if (!widget.book.tags.contains(sel)) {
-                        widget.book.tags.add(sel);
-                      }
-                      // TODO: this prob needs changed when implementing database
-                      if (!allTags.contains(sel)) allTags.add(sel);
-                    }),
-                    onTagRemoved: (tag) => setState(() {
-                      widget.book.tags.remove(tag);
-                    }),
-                    flex: 2,
+                  Expanded(
+                    child: Column(
+                      children: [
+                        TagEditor(
+                          tags: widget.book.tags,
+                          allTags: allTags,
+                          onTagAdded: (sel) => setState(() {
+                            // add sel to book.tags if it’s not already there
+                            if (!widget.book.tags.contains(sel)) {
+                              widget.book.tags.add(sel);
+                            }
+                            // TODO: this prob needs changed when implementing database
+                            if (!allTags.contains(sel)) allTags.add(sel);
+                          }),
+                          onTagRemoved: (tag) => setState(() {
+                            widget.book.tags.remove(tag);
+                          }),
+                          flex: 2,
+                        ),
+                        CharacterEditor(
+                          characters: widget.book.characters,
+                          allCharacters: allCharacters,
+                          onCharacterAdded: (sel) => setState(() {
+                            // add sel to book.tags if it’s not already there
+                            if (!widget.book.characters.contains(sel)) {
+                              widget.book.characters.add(sel);
+                            }
+                            // TODO: this prob needs changed when implementing database
+                            if (!allCharacters.contains(sel))
+                              allCharacters.add(sel);
+                          }),
+                          onCharacterRemoved: (character) => setState(() {
+                            widget.book.characters.remove(character);
+                          }),
+                          flex: 2,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
