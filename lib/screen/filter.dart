@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/book.dart';
-// import '../services/book_repository.dart';
+import '../services/book_repository.dart';
+import '../router/routes.dart';
 
 class Filter extends StatefulWidget {
   const Filter({super.key});
@@ -94,46 +95,64 @@ class _FilterState extends State<Filter> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      // align both inputs at the top
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        // author field
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: AuthorSearch(
-              allAuthors: allAuthors,
-              onSelected: (value) {
-                // update the value
-                author = value;
-                // call the function to update filtered
-                _applyFilters();
-              },
-            ),
-          ),
-        ),
-        // tag field + chips
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TagSearch(
-              allTags: allTags,
-              onTagAdded: (value) => setState(() {
-                // update the value
-                tags.add(value);
-                // call the function to update filtered
-                _applyFilters();
-              }),
-              onTagRemoved: (value) => setState(
-                () {
-                  // update the value
-                  tags.remove(value);
-                  // call the function to update filtered
-                  _applyFilters();
-                },
+        Row(
+          // align both inputs at the top
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // author field
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: AuthorSearch(
+                  allAuthors: allAuthors,
+                  onSelected: (value) {
+                    // update the value
+                    author = value;
+                    // call the function to update filtered
+                    _applyFilters();
+                  },
+                ),
               ),
             ),
+            // tag field + chips
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TagSearch(
+                  allTags: allTags,
+                  onTagAdded: (value) => setState(() {
+                    // update the value
+                    tags.add(value);
+                    // call the function to update filtered
+                    _applyFilters();
+                  }),
+                  onTagRemoved: (value) => setState(
+                    () {
+                      // update the value
+                      tags.remove(value);
+                      // call the function to update filtered
+                      _applyFilters();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        // grid uses filteredBooks
+        Expanded(
+          child: BookGrid(
+            books: filteredBooks,
+            onBookTap: (index) async {
+              await Navigator.pushNamed(
+                context,
+                Routes.details,
+                arguments: filteredBooks[index],
+              );
+              setState(() {}); // pick up any changes on return
+            },
           ),
         ),
       ],
@@ -143,13 +162,11 @@ class _FilterState extends State<Filter> {
 
 // author search field
 class AuthorSearch extends StatelessWidget {
-  // final String initialAuthor;
   final List<String> allAuthors;
   final ValueChanged<String> onSelected;
 
   const AuthorSearch({
     Key? key,
-    // required this.initialAuthor,
     required this.allAuthors,
     required this.onSelected,
   }) : super(key: key);
@@ -157,35 +174,33 @@ class AuthorSearch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Autocomplete<String>(
-      // initialValue: TextEditingValue(text: initialAuthor),
-      optionsBuilder: (TextEditingValue textEditingValue) {
-        // don't show options until something is typed
-        if (textEditingValue.text.isEmpty) {
-          return const Iterable<String>.empty();
-        }
-        final input = textEditingValue.text.toLowerCase();
+      optionsBuilder: (TextEditingValue txt) {
+        if (txt.text.isEmpty) return const Iterable<String>.empty();
+        final input = txt.text.toLowerCase();
         return allAuthors.where((a) => a.toLowerCase().contains(input));
       },
       onSelected: onSelected,
-      fieldViewBuilder: (
-        BuildContext context,
-        TextEditingController textEditingController,
-        FocusNode focusNode,
-        VoidCallback onFieldSubmitted,
-      ) {
+      fieldViewBuilder: (ctx, controller, focusNode, onFieldSubmitted) {
         return TextField(
-          controller: textEditingController,
+          controller: controller,
           focusNode: focusNode,
           decoration: const InputDecoration(
             labelText: 'Author',
             border: OutlineInputBorder(),
           ),
+          // <-- add this
+          onChanged: (value) {
+            if (value.isEmpty) {
+              onSelected('');      // reset your author state
+            }
+          },
           onSubmitted: (_) => onFieldSubmitted(),
         );
       },
     );
   }
 }
+
 
 // tag search
 class TagSearch extends StatefulWidget {
