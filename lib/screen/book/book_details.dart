@@ -16,6 +16,8 @@ class BookDetails extends StatefulWidget {
 
 class _BookDetailsState extends State<BookDetails> {
   // mock data
+  // grab the books
+  List<Book> allBooks = [];
   // grab the authors
   List<String> allAuthors = [];
   // grab the tags
@@ -30,11 +32,94 @@ class _BookDetailsState extends State<BookDetails> {
   @override
   void initState() {
     super.initState();
-    // mock data: only runs once
-    allAuthors = List.generate(1000, (i) => 'authorname$i');
-    allTags = List.generate(15, (i) => 'tagname$i');
-    allSeries = List.generate(15, (i) => 'seriesname$i');
-    allCharacters = List.generate(15, (i) => 'charactername$i');
+
+    // set up all books, make one a fave
+    allBooks = [
+      Book(
+        "C:\\", // path
+        "Full Metal Alchemist Brotherhood", // title
+        "Hiromu Arakawa", // author
+        "link", // link
+        "Full Metal Alchemist", // series
+        ["Adventure", "Fantasy"], // tags
+        ["Edward", "Alphonse", "Winry"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "My Dress Up Darling: Volume 1", // title
+        "Shinichi Fukuda", // author
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "My Dress Up Darling: Volume 2", // title
+        "Shinichi Fukuda", // author
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Wakana Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Komi Can't Communicate: Volume 1", // title
+        "Tomohito Oda", // author
+        "link", // link
+        "Komi Can't Communicate", // series
+        ["Romance", "Comedy", "Slice of Life"], // tags
+        ["Komi Shoko", "Tadano Hitohito"], // characters
+        false, // favorite
+        true, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Hokkaido Gals Are Super Adorable: Volume 1", // title
+        "Ikada Kai", // author
+        "link", // link
+        "Hokkaido Gals Are Super Adorable", // series
+        ["Romance", "Comedy"], // tags
+        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
+        false, // favorite
+        true, // read later
+      ),
+    ];
+
+    // iterate each book
+    for (Book book in allBooks) {
+      // iterate through the books tags
+      for (String tag in book.tags) {
+        // add them if not already in
+        if (!allTags.contains(tag)) {
+          allTags.add(tag);
+        }
+      }
+
+      // iterate trhough the books characters
+      for (String character in book.characters) {
+        // add them if not already in
+        if (!allCharacters.contains(character)) {
+          allCharacters.add(character);
+        }
+      }
+
+      // add author if not already in
+      if (!allAuthors.contains(book.author)) {
+        allAuthors.add(book.author);
+      }
+
+      // add series if not already in
+      if (!allSeries.contains(book.series)) {
+        allSeries.add(book.series);
+      }
+    }
   }
 
   @override
