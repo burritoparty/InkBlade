@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/book_repository.dart';
 import '../models/book.dart';
 import '../router/routes.dart';
+import '../widgets/widgets.dart';
 
 class AuthorDetails extends StatefulWidget {
   final String author;
@@ -19,6 +20,7 @@ class AuthorDetails extends StatefulWidget {
 
 class AuthorDetailsState extends State<AuthorDetails> {
   late String _author;
+  late List<String> allAuthors = [];
   late final List<Book> allBooks;
   late List<Book> filteredBooks = [];
 
@@ -62,12 +64,13 @@ class AuthorDetailsState extends State<AuthorDetails> {
     ];
 
     // look through the books and only load up the ones with author
-    // for (int i = 0; i < allBooks.length; i++) {
-    //   if () {
-
-    //   }
-    // }
     for (Book book in allBooks) {
+      // add every author to the dropdown
+      if (!allAuthors.contains(book.author)) {
+        allAuthors.add(book.author);
+      }
+      // if author matches author add to list
+      // TODO this may cause an error when changing the author name
       if (book.author == _author) {
         filteredBooks.add(book);
       }
@@ -83,16 +86,30 @@ class AuthorDetailsState extends State<AuthorDetails> {
       ),
       body: Column(
         children: [
-          AuthorAutocompleteField(
+          // AuthorAutocompleteField(
+          //   initialAuthor: _author,
+          //   allAuthors: widget.allAuthors,
+          //   onSelected: (sel) {
+          //     setState(() {
+          //       _author = sel;
+          //       debugPrint('Selected author: $sel');
+          //     });
+          //   },
+          // ),
+
+          AuthorEditor(
             initialAuthor: _author,
-            allAuthors: widget.allAuthors,
-            onSelected: (sel) {
-              setState(() {
+            allAuthors: [],
+            onSelected: (sel) => setState(() {
+              // add sel to book.tags if it’s not already there
+              if (_author != sel) {
                 _author = sel;
-                debugPrint('Selected author: $sel');
-              });
-            },
+              }
+              // TODO: this prob needs changed when implementing database
+              if (!allAuthors.contains(sel)) allAuthors.add(sel);
+            }),
           ),
+
           Expanded(
             child: BookGrid(
               books: filteredBooks,
@@ -112,48 +129,48 @@ class AuthorDetailsState extends State<AuthorDetails> {
   }
 }
 
-class AuthorAutocompleteField extends StatelessWidget {
-  final String initialAuthor;
-  final List<String> allAuthors;
-  final ValueChanged<String> onSelected;
+// class AuthorAutocompleteField extends StatelessWidget {
+//   final String initialAuthor;
+//   final List<String> allAuthors;
+//   final ValueChanged<String> onSelected;
 
-  const AuthorAutocompleteField({
-    Key? key,
-    required this.initialAuthor,
-    required this.allAuthors,
-    required this.onSelected,
-  }) : super(key: key);
+//   const AuthorAutocompleteField({
+//     Key? key,
+//     required this.initialAuthor,
+//     required this.allAuthors,
+//     required this.onSelected,
+//   }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Autocomplete<String>(
-        initialValue: TextEditingValue(text: initialAuthor),
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          final input = textEditingValue.text.toLowerCase();
-          return allAuthors.where(
-            (a) => a.toLowerCase().contains(input),
-          );
-        },
-        onSelected: onSelected,
-        fieldViewBuilder: (
-          BuildContext context,
-          TextEditingController textEditingController,
-          FocusNode focusNode,
-          VoidCallback onFieldSubmitted,
-        ) {
-          return TextField(
-            controller: textEditingController,
-            focusNode: focusNode,
-            decoration: const InputDecoration(
-              labelText: 'Author',
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (_) => onFieldSubmitted(),
-          );
-        },
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Autocomplete<String>(
+//         initialValue: TextEditingValue(text: initialAuthor),
+//         optionsBuilder: (TextEditingValue textEditingValue) {
+//           final input = textEditingValue.text.toLowerCase();
+//           return allAuthors.where(
+//             (a) => a.toLowerCase().contains(input),
+//           );
+//         },
+//         onSelected: onSelected,
+//         fieldViewBuilder: (
+//           BuildContext context,
+//           TextEditingController textEditingController,
+//           FocusNode focusNode,
+//           VoidCallback onFieldSubmitted,
+//         ) {
+//           return TextField(
+//             controller: textEditingController,
+//             focusNode: focusNode,
+//             decoration: const InputDecoration(
+//               labelText: 'Author',
+//               border: OutlineInputBorder(),
+//             ),
+//             onSubmitted: (_) => onFieldSubmitted(),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
