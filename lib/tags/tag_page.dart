@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'tag_details.dart';
+import '../models/book.dart';
 
 class TagPage extends StatefulWidget {
   const TagPage({super.key});
@@ -11,7 +12,7 @@ class TagPage extends StatefulWidget {
 class _TagPageState extends State<TagPage> {
   // controller for search input field
   final TextEditingController _searchController = TextEditingController();
-
+  List<Book> allBooks = [];
   List<String> allTags = [];
   List<String> filteredTags = [];
 
@@ -19,14 +20,72 @@ class _TagPageState extends State<TagPage> {
   void initState() {
     super.initState();
 
-    // load up the tags from json
-    allTags = [
-      "Romance",
-      "Comedy",
-      "Horror",
-      "Slice of Life",
-      "Isekai",
+    allBooks = [
+      Book(
+        "C:\\", // path
+        "Full Metal Alchemist Brotherhood", // title
+        "Hiromu Arakawa", // author
+        "link", // link
+        "Full Metal Alchemist", // series
+        ["Adventure", "Fantasy"], // tags
+        ["Edward", "Alphonse", "Winry"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "My Dress Up Darling: Volume 1", // title
+        "Shinichi Fukuda", // author
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "My Dress Up Darling: Volume 2", // title
+        "Shinichi Fukuda", // author
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Wakana Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Komi Can't Communicate: Volume 1", // title
+        "Tomohito Oda", // author
+        "link", // link
+        "Komi Can't Communicate", // series
+        ["Romance", "Comedy", "Slice of Life"], // tags
+        ["Komi Shoko", "Tadano Hitohito"], // characters
+        false, // favorite
+        true, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Hokkaido Gals Are Super Adorable: Volume 1", // title
+        "Ikada Kai", // author
+        "link", // link
+        "Hokkaido Gals Are Super Adorable", // series
+        ["Romance", "Comedy"], // tags
+        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
+        false, // favorite
+        true, // read later
+      ),
     ];
+
+    // load up the tags
+    for (Book book in allBooks) {
+      for (String tag in book.tags) {
+        if (!allTags.contains(tag)) {
+          allTags.add(tag);
+        }
+      }
+    }
     filteredTags = List.from(allTags);
   }
 
