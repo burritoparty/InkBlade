@@ -145,148 +145,122 @@ class _ImportState extends State<Import> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // add button
-            const Expanded(child: CoverImage()),
-            // details column
-            Expanded(
-              child: Column(
-                // adjust expanding with screen here
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: FavoriteButton(
-                            isFavorite: book.favorite,
-                            onFavoriteToggle: (newVal) => setState(() {
-                              book.favorite = newVal;
-                            }),
-                          ),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // add button
+          const Expanded(child: CoverImage()),
+          // details column
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: FavoriteButton(
+                          isFavorite: book.favorite,
+                          onFavoriteToggle: (newVal) => setState(() {
+                            book.favorite = newVal;
+                          }),
                         ),
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: LaterButton(
-                            isReadLater: book.readLater,
-                            onReadLaterToggle: (newVal) => setState(() {
-                              book.readLater = newVal;
-                            }),
-                          ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: LaterButton(
+                          isReadLater: book.readLater,
+                          onReadLaterToggle: (newVal) => setState(() {
+                            book.readLater = newVal;
+                          }),
                         ),
+                      ),
+                    ),
+                  ],
+                ),
+                Flexible(
+                  child: ListView(
+                    children: [
+                      StringEditor(
+                        name: "Title",
+                        controller: titleController,
+                        onSubmitted: (newTitle) => setState(() {
+                          book.title = newTitle;
+                        }),
+                      ),
+                      DropdownEditor(
+                        name: "Series",
+                        initial: book.series,
+                        all: allSeries,
+                        onSelected: (sel) => setState(() {
+                          book.series = sel;
+                          if (!allSeries.contains(sel)) {
+                            allSeries.add(sel);
+                          }
+                        }),
+                      ),
+                      StringEditor(
+                        name: "Link",
+                        controller: linkController,
+                        onSubmitted: (newLink) => setState(() {
+                          book.link = newLink;
+                        }),
+                      ),
+                      ListEditor(
+                        name: "author",
+                        item: book.authors,
+                        allItems: allAuthors,
+                        onAdded: (sel) => setState(() {
+                          if (!book.authors.contains(sel)) {
+                            book.authors.add(sel);
+                          }
+                          if (!allAuthors.contains(sel)) allAuthors.add(sel);
+                        }),
+                        onRemoved: (author) => setState(() {
+                          book.authors.remove(author);
+                        }),
+                      ),
+                      ListEditor(
+                        name: "tag",
+                        item: book.tags,
+                        allItems: allTags,
+                        onAdded: (sel) => setState(() {
+                          if (!book.tags.contains(sel)) {
+                            book.tags.add(sel);
+                          }
+                          if (!allTags.contains(sel)) allTags.add(sel);
+                        }),
+                        onRemoved: (tag) => setState(() {
+                          book.tags.remove(tag);
+                        }),
+                      ),
+                      ListEditor(
+                        name: "character",
+                        item: book.characters,
+                        allItems: allCharacters,
+                        onAdded: (sel) => setState(() {
+                          if (!book.characters.contains(sel)) {
+                            book.characters.add(sel);
+                          }
+                          if (!allCharacters.contains(sel)) {
+                            allCharacters.add(sel);
+                          }
+                        }),
+                        onRemoved: (character) => setState(() {
+                          book.characters.remove(character);
+                        }),
                       ),
                     ],
                   ),
-                  // title handling
-                  StringEditor(
-                    name: "Title",
-                    controller: titleController,
-                    onSubmitted: (newTitle) => setState(
-                      () {
-                        book.title = newTitle;
-                      },
-                    ),
-                  ),
-                  // series handling
-                  DropdownEditor(
-                    name: "Series",
-                    initial: book.series,
-                    all: allSeries,
-                    onSelected: (sel) => setState(
-                      () {
-                        // TODO: may need to update all series here?
-                        // only add don't remove?
-                        book.series = sel;
-                        // add if it doesnt exist
-                        if (!allSeries.contains(sel)) {
-                          allSeries.add(sel);
-                        }
-                      },
-                    ),
-                  ),
-                  // link handling
-                  StringEditor(
-                    name: "Link",
-                    controller: linkController,
-                    onSubmitted: (newLink) => setState(
-                      () {
-                        book.link = newLink;
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Expanded(
-              child: Column(
-                children: [
-                  // authors
-                  ListEditor(
-                    name: "author",
-                    item: book.authors,
-                    allItems: allAuthors,
-                    onAdded: (sel) => setState(() {
-                      // add sel to book.authors if it’s not already there
-                      if (!book.authors.contains(sel)) {
-                        book.authors.add(sel);
-                      }
-                      // TODO: this prob needs changed when implementing database
-                      if (!allAuthors.contains(sel)) allAuthors.add(sel);
-                    }),
-                    onRemoved: (author) => setState(() {
-                      book.authors.remove(author);
-                    }),
-                    flex: 1,
-                  ),
-                  // tags
-                  ListEditor(
-                    name: "tag",
-                    item: book.tags,
-                    allItems: allTags,
-                    onAdded: (sel) => setState(() {
-                      // add sel to book.tags if it’s not already there
-                      if (!book.tags.contains(sel)) {
-                        book.tags.add(sel);
-                      }
-                      // TODO: this prob needs changed when implementing database
-                      if (!allTags.contains(sel)) allTags.add(sel);
-                    }),
-                    onRemoved: (tag) => setState(() {
-                      book.tags.remove(tag);
-                    }),
-                    flex: 1,
-                  ),
-                  // characters
-                  ListEditor(
-                    name: "character",
-                    item: book.characters,
-                    allItems: allCharacters,
-                    onAdded: (sel) => setState(() {
-                      // add sel to book.chars if it’s not already there
-                      if (!book.characters.contains(sel)) {
-                        book.characters.add(sel);
-                      }
-                      // TODO: this prob needs changed when implementing database
-                      if (!allCharacters.contains(sel)) allCharacters.add(sel);
-                    }),
-                    onRemoved: (character) => setState(() {
-                      book.characters.remove(character);
-                    }),
-                    flex: 1,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
