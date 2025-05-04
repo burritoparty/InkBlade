@@ -34,78 +34,75 @@ class _DropdownEditorState extends State<DropdownEditor> {
         ? Colors.redAccent
         : (_hasSaved ? Colors.greenAccent : Colors.grey);
 
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Autocomplete<String>(
-        initialValue: TextEditingValue(text: widget.initial),
+    return Autocomplete<String>(
+      initialValue: TextEditingValue(text: widget.initial),
 
-        // iterate through each tag
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          if (textEditingValue.text.isEmpty) {
-            return const Iterable<String>.empty();
-          }
+      // iterate through each tag
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text.isEmpty) {
+          return const Iterable<String>.empty();
+        }
 
-          final input = textEditingValue.text;
-          final lowerInput = input.toLowerCase();
+        final input = textEditingValue.text;
+        final lowerInput = input.toLowerCase();
 
-          // find all existing series matching the input
-          final matches = widget.all
-              .where((a) => a.toLowerCase().contains(lowerInput))
-              .toList();
+        // find all existing series matching the input
+        final matches = widget.all
+            .where((a) => a.toLowerCase().contains(lowerInput))
+            .toList();
 
-          // if the exact series isn't in your list yet, offer it first
-          if (!widget.all.any((a) => a.toLowerCase() == lowerInput)) {
-            matches.insert(0, input);
-          }
+        // if the exact series isn't in your list yet, offer it first
+        if (!widget.all.any((a) => a.toLowerCase() == lowerInput)) {
+          matches.insert(0, input);
+        }
 
-          return matches;
-        },
+        return matches;
+      },
 
-        // if they tap a suggestion (whether new or existing)
-        onSelected: (value) {
-          setState(() {
-            _isDirty = false;
-            _hasSaved = true;
-          });
-          widget.onSelected(value);
-        },
+      // if they tap a suggestion (whether new or existing)
+      onSelected: (value) {
+        setState(() {
+          _isDirty = false;
+          _hasSaved = true;
+        });
+        widget.onSelected(value);
+      },
 
-        fieldViewBuilder: (
-          BuildContext context,
-          TextEditingController textEditingController,
-          FocusNode focusNode,
-          VoidCallback onFieldSubmitted,
-        ) {
-          return TextField(
-            controller: textEditingController,
-            focusNode: focusNode,
-            decoration: InputDecoration(
-              labelText: widget.name,
-              labelStyle: TextStyle(color: activeColor),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: activeColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: activeColor),
-              ),
+      fieldViewBuilder: (
+        BuildContext context,
+        TextEditingController textEditingController,
+        FocusNode focusNode,
+        VoidCallback onFieldSubmitted,
+      ) {
+        return TextField(
+          controller: textEditingController,
+          focusNode: focusNode,
+          decoration: InputDecoration(
+            labelText: widget.name,
+            labelStyle: TextStyle(color: activeColor),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: activeColor),
             ),
-            onChanged: (_) {
-              if (!_isDirty) {
-                setState(() => _isDirty = true);
-              }
-            },
-            onSubmitted: (_) {
-              // save on enter
-              // (will pick the first option)
-              onFieldSubmitted();
-              setState(() {
-                _isDirty = false;
-                _hasSaved = true;
-              });
-            },
-          );
-        },
-      ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: activeColor),
+            ),
+          ),
+          onChanged: (_) {
+            if (!_isDirty) {
+              setState(() => _isDirty = true);
+            }
+          },
+          onSubmitted: (_) {
+            // save on enter
+            // (will pick the first option)
+            onFieldSubmitted();
+            setState(() {
+              _isDirty = false;
+              _hasSaved = true;
+            });
+          },
+        );
+      },
     );
   }
 }

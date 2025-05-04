@@ -153,36 +153,45 @@ class _BookDetailsState extends State<BookDetails> {
                       // name of the book
                       children: [
                         // title handling
-                        StringEditor(
-                          name: "Title",
-                          controller: titleController,
-                          onSubmitted: (newTitle) => setState(
-                            () {
-                              widget.book.title = newTitle;
-                            },
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: StringEditor(
+                            name: "Title",
+                            controller: titleController,
+                            onSubmitted: (newTitle) => setState(
+                              () {
+                                widget.book.title = newTitle;
+                              },
+                            ),
                           ),
                         ),
-                        DropdownEditor(
-                          name: "Series",
-                          initial: widget.book.series,
-                          all: allSeries,
-                          onSelected: (sel) => setState(() {
-                            // add sel to book.tags if it’s not already there
-                            if (widget.book.series != sel) {
-                              widget.book.series = sel;
-                            }
-                            // TODO: this prob needs changed when implementing database
-                            if (!allSeries.contains(sel)) allSeries.add(sel);
-                          }),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownEditor(
+                            name: "Series",
+                            initial: widget.book.series,
+                            all: allSeries,
+                            onSelected: (sel) => setState(() {
+                              // add sel to book.tags if it’s not already there
+                              if (widget.book.series != sel) {
+                                widget.book.series = sel;
+                              }
+                              // TODO: this prob needs changed when implementing database
+                              if (!allSeries.contains(sel)) allSeries.add(sel);
+                            }),
+                          ),
                         ),
                         // link handling
-                        StringEditor(
-                          name: "Link",
-                          controller: linkController,
-                          onSubmitted: (newLink) => setState(
-                            () {
-                              widget.book.link = newLink;
-                            },
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: StringEditor(
+                            name: "Link",
+                            controller: linkController,
+                            onSubmitted: (newLink) => setState(
+                              () {
+                                widget.book.link = newLink;
+                              },
+                            ),
                           ),
                         ),
                         // favorite and read later
@@ -222,56 +231,66 @@ class _BookDetailsState extends State<BookDetails> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // authors
-                        ListEditor(
-                          name: "author",
-                          item: widget.book.authors,
-                          allItems: allAuthors,
-                          onAdded: (sel) => setState(() {
-                            // add sel to book.authors if it’s not already there
-                            if (!widget.book.authors.contains(sel)) {
-                              widget.book.authors.add(sel);
-                            }
-                            // TODO: this prob needs changed when implementing database
-                            if (!allAuthors.contains(sel)) allAuthors.add(sel);
-                          }),
-                          onRemoved: (author) => setState(() {
-                            widget.book.authors.remove(author);
-                          }),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListEditor(
+                            name: "author",
+                            item: widget.book.authors,
+                            allItems: allAuthors,
+                            onAdded: (sel) => setState(() {
+                              // add sel to book.authors if it’s not already there
+                              if (!widget.book.authors.contains(sel)) {
+                                widget.book.authors.add(sel);
+                              }
+                              // TODO: this prob needs changed when implementing database
+                              if (!allAuthors.contains(sel))
+                                allAuthors.add(sel);
+                            }),
+                            onRemoved: (author) => setState(() {
+                              widget.book.authors.remove(author);
+                            }),
+                          ),
                         ),
                         // tags
-                        ListEditor(
-                          name: "tag",
-                          item: widget.book.tags,
-                          allItems: allTags,
-                          onAdded: (sel) => setState(() {
-                            // add sel to book.tags if it’s not already there
-                            if (!widget.book.tags.contains(sel)) {
-                              widget.book.tags.add(sel);
-                            }
-                            // TODO: this prob needs changed when implementing database
-                            if (!allTags.contains(sel)) allTags.add(sel);
-                          }),
-                          onRemoved: (tag) => setState(() {
-                            widget.book.tags.remove(tag);
-                          }),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListEditor(
+                            name: "tag",
+                            item: widget.book.tags,
+                            allItems: allTags,
+                            onAdded: (sel) => setState(() {
+                              // add sel to book.tags if it’s not already there
+                              if (!widget.book.tags.contains(sel)) {
+                                widget.book.tags.add(sel);
+                              }
+                              // TODO: this prob needs changed when implementing database
+                              if (!allTags.contains(sel)) allTags.add(sel);
+                            }),
+                            onRemoved: (tag) => setState(() {
+                              widget.book.tags.remove(tag);
+                            }),
+                          ),
                         ),
                         // characters
-                        ListEditor(
-                          name: "character",
-                          item: widget.book.characters,
-                          allItems: allCharacters,
-                          onAdded: (sel) => setState(() {
-                            // add sel to book.chars if it’s not already there
-                            if (!widget.book.characters.contains(sel)) {
-                              widget.book.characters.add(sel);
-                            }
-                            // TODO: this prob needs changed when implementing database
-                            if (!allCharacters.contains(sel))
-                              allCharacters.add(sel);
-                          }),
-                          onRemoved: (character) => setState(() {
-                            widget.book.characters.remove(character);
-                          }),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListEditor(
+                            name: "character",
+                            item: widget.book.characters,
+                            allItems: allCharacters,
+                            onAdded: (sel) => setState(() {
+                              // add sel to book.chars if it’s not already there
+                              if (!widget.book.characters.contains(sel)) {
+                                widget.book.characters.add(sel);
+                              }
+                              // TODO: this prob needs changed when implementing database
+                              if (!allCharacters.contains(sel))
+                                allCharacters.add(sel);
+                            }),
+                            onRemoved: (character) => setState(() {
+                              widget.book.characters.remove(character);
+                            }),
+                          ),
                         ),
                         // explorer and delete
                         Row(

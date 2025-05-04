@@ -64,43 +64,43 @@ class _StringEditorsState extends State<StringEditor> {
   Widget build(BuildContext context) {
     final bool isFocused = _focusNode.hasFocus;
     // choose border color
-    final Color borderColor =
-        _dirty ? Colors.redAccent : (_submitted ? Colors.greenAccent : Colors.grey);
+    final Color borderColor = _dirty
+        ? Colors.redAccent
+        : (_submitted ? Colors.greenAccent : Colors.grey);
     // choose focus color
     final Color focusColor = _dirty
         ? Colors.redAccent
-        : (_submitted ? Colors.greenAccent : Theme.of(context).colorScheme.primary);
+        : (_submitted
+            ? Colors.greenAccent
+            : Theme.of(context).colorScheme.primary);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: TextField(
-        focusNode: _focusNode,
-        controller: widget.controller,
-        decoration: InputDecoration(
-          labelText: widget.name,
-          labelStyle: TextStyle(
-            color: isFocused ? focusColor : Colors.grey,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: borderColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: focusColor),
-          ),
+    return TextField(
+      focusNode: _focusNode,
+      controller: widget.controller,
+      decoration: InputDecoration(
+        labelText: widget.name,
+        labelStyle: TextStyle(
+          color: isFocused ? focusColor : Colors.grey,
         ),
-        // update dirty state on change
-        onChanged: (value) => _onTextChanged(),
-        onSubmitted: (value) {
-          // mark as submitted
-          setState(() {
-            _submitted = true;
-            _lastSubmittedText = value;
-            _dirty = false;
-          });
-          widget.onSubmitted(value);
-          _focusNode.unfocus();
-        },
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: focusColor),
+        ),
       ),
+      // update dirty state on change
+      onChanged: (value) => _onTextChanged(),
+      onSubmitted: (value) {
+        // mark as submitted
+        setState(() {
+          _submitted = true;
+          _lastSubmittedText = value;
+          _dirty = false;
+        });
+        widget.onSubmitted(value);
+        _focusNode.unfocus();
+      },
     );
   }
 }

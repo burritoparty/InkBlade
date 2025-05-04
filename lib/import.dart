@@ -129,8 +129,7 @@ class _ImportState extends State<Import> {
       appBar: AppBar(
         centerTitle: true,
         title: Row(
-          mainAxisSize:
-              MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton.icon(
               icon: const Icon(Icons.check),
