@@ -51,20 +51,23 @@ class ListEditor extends StatelessWidget {
             FocusNode focusNode,
             VoidCallback onFieldSubmitted,
           ) {
-            return TextField(
-              controller: textEditingController,
-              focusNode: focusNode,
-              decoration: InputDecoration(
-                labelText: 'Add $name',
-                border: const OutlineInputBorder(),
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+              child: TextField(
+                controller: textEditingController,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  labelText: 'Add $name',
+                  border: const OutlineInputBorder(),
+                ),
+                onSubmitted: (_) {
+                  // pick the top option (which is your raw input if new)
+                  onFieldSubmitted();
+                  // clear the text field and keep focus
+                  textEditingController.clear();
+                  focusNode.requestFocus();
+                },
               ),
-              onSubmitted: (_) {
-                // pick the top option (which is your raw input if new)
-                onFieldSubmitted();
-                // clear the text field and keep focus
-                textEditingController.clear();
-                focusNode.requestFocus();
-              },
             );
           },
         ),
