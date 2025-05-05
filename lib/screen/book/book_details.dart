@@ -132,7 +132,26 @@ class _BookDetailsState extends State<BookDetails> {
         TextEditingController(text: widget.book.link);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.book.title)),
+      appBar: AppBar(
+        centerTitle: true, // ← makes the whole title widget centered
+        title: Row(
+          mainAxisSize:
+              MainAxisSize.min, // ← shrink‐wrap so Row itself is centered
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.check),
+              onPressed: () {},
+              label: const Text("Import book"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[800],
+                foregroundColor: Colors.white,
+                shape: const StadiumBorder(),
+                // minimumSize: const Size.fromHeight(48),
+              ),
+            )
+          ],
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

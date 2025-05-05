@@ -127,7 +127,33 @@ class _ImportState extends State<Import> {
         TextEditingController(text: book.link);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Import Book"),
+        centerTitle: true,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(
+                Icons.check,
+                size: 24, // Slightly larger icon
+              ),
+              onPressed: () {},
+              label: const Text(
+                "Import book",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                backgroundColor: Colors.grey[800],
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                elevation: 5,
+              ),
+            )
+          ],
+        ),
       ),
       body: Row(
         // crossAxisAlignment: CrossAxisAlignment.stretch,
