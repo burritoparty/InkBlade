@@ -194,7 +194,10 @@ class _ImportState extends State<Import> {
                     )
                   ],
                 ),
-                const Expanded(child: CoverImage()),
+                const Expanded(child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CoverImage(),
+                )),
               ],
             ),
           ),
