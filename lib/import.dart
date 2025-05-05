@@ -194,7 +194,8 @@ class _ImportState extends State<Import> {
                     )
                   ],
                 ),
-                const Expanded(child: Padding(
+                const Expanded(
+                    child: Padding(
                   padding: EdgeInsets.all(8.0),
                   child: CoverImage(),
                 )),
@@ -211,6 +212,7 @@ class _ImportState extends State<Import> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Padding(
@@ -219,7 +221,7 @@ class _ImportState extends State<Import> {
                             name: "Title",
                             controller: titleController,
                             onSubmitted: (newTitle) => setState(() {
-                              // widget.book.title = newTitle;
+                              book.title = newTitle;
                             }),
                           ),
                         ),
@@ -231,14 +233,23 @@ class _ImportState extends State<Import> {
                             name: "author",
                             item: book.authors,
                             allItems: allAuthors,
-                            onAdded: (sel) => setState(() {}),
-                            onRemoved: (author) => setState(() {}),
+                            onAdded: (sel) => setState(() {
+                              // add them if not already in
+                              if (!book.authors.contains(sel)) {
+                                book.authors.add(sel);
+                              }
+                            }),
+                            onRemoved: (author) => setState(() {
+                              // remove them if already in
+                              book.authors.remove(author);
+                            }),
                           ),
                         ),
                       ),
                     ],
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Padding(
@@ -255,17 +266,26 @@ class _ImportState extends State<Import> {
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ListEditor(
-                            name: "author",
-                            item: book.authors,
-                            allItems: allAuthors,
-                            onAdded: (sel) => setState(() {}),
-                            onRemoved: (author) => setState(() {}),
+                            name: "tag",
+                            item: book.tags,
+                            allItems: allTags,
+                            onAdded: (sel) => setState(() {
+                              // if new tag add to list
+                              if (!book.tags.contains(sel)) {
+                                book.tags.add(sel);
+                              }
+                            }),
+                            onRemoved: (tag) => setState(() {
+                              // remove them if already in
+                              book.tags.remove(tag);
+                            }),
                           ),
                         ),
                       ),
                     ],
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Padding(
@@ -283,11 +303,19 @@ class _ImportState extends State<Import> {
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ListEditor(
-                            name: "author",
-                            item: book.authors,
-                            allItems: allAuthors,
-                            onAdded: (sel) => setState(() {}),
-                            onRemoved: (author) => setState(() {}),
+                            name: "character",
+                            item: book.characters,
+                            allItems: allCharacters,
+                            onAdded: (sel) => setState(() {
+                              // if new character add to list
+                              if (!book.characters.contains(sel)) {
+                                book.characters.add(sel);
+                              }
+                            }),
+                            onRemoved: (character) => setState(() {
+                              // remove them if already in
+                              book.characters.remove(character);
+                            }),
                           ),
                         ),
                       ),
