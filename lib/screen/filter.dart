@@ -12,15 +12,26 @@ class Filter extends StatefulWidget {
 
 class _FilterState extends State<Filter> {
   // TODO need to pass in object with all books
+
   // filtering tools
   late List<Book> allBooks = [];
   late List<Book> filteredBooks = [];
-  late List<String> allAuthors = [];
-  late List<String> allTags = [];
+  // grab the authors
+  List<String> allAuthors = [];
+  // grab the tags
+  List<String> allTags = [];
+  // grab the series
+  List<String> allSeries = [];
+  // grab the characters
+  List<String> allCharacters = [];
+
   // results
   String title = '';
   late List<String> authors = [];
   late List<String> tags = [];
+  late List<String> characters = [];
+  late List<String> series = [];
+
   @override
   void initState() {
     super.initState();
@@ -82,21 +93,38 @@ class _FilterState extends State<Filter> {
         true, // read later
       ),
     ];
+    // set up filtered books
+    filteredBooks = List.from(allBooks);
 
-    // loop thru the books get all stuff
+    // iterate each book
     for (Book book in allBooks) {
+      // iterate through the books tags
+      for (String tag in book.tags) {
+        // add them if not already in
+        if (!allTags.contains(tag)) {
+          allTags.add(tag);
+        }
+      }
+
+      // iterate trhough the books characters
+      for (String character in book.characters) {
+        // add them if not already in
+        if (!allCharacters.contains(character)) {
+          allCharacters.add(character);
+        }
+      }
+
+      // add author if not already in
       for (String author in book.authors) {
-        // if new author add to list
+        // add them if not already in
         if (!allAuthors.contains(author)) {
           allAuthors.add(author);
         }
       }
-    }
-    for (Book book in allBooks) {
-      for (String tag in book.tags) {
-        if (!allTags.contains(tag)) {
-          allTags.add(tag);
-        }
+
+      // add series if not already in
+      if (!allSeries.contains(book.series)) {
+        allSeries.add(book.series);
       }
     }
   }
@@ -111,12 +139,20 @@ class _FilterState extends State<Filter> {
             //     book.title.toLowerCase().contains(title.toLowerCase());
             // final matchesAuthor = author.isEmpty ||
             //     book.authors.toLowerCase() == author.toLowerCase();
-            final matchesAuthor =
-                book.authors.isEmpty || authors.every((author) => book.authors.contains(author));
+            final matchesSeries = book.series.isEmpty ||
+                series.every((series) => book.series.contains(series));
             final matchesTags =
                 tags.isEmpty || tags.every((tag) => book.tags.contains(tag));
+            final matchesAuthors = authors.isEmpty ||
+                authors.every((author) => book.authors.contains(author));
+            final matchesCharacters = characters.isEmpty ||
+                characters
+                    .every((character) => book.characters.contains(character));
             // return matchesTitle && matchesAuthor && matchesTags;
-            return matchesAuthor && matchesTags;
+            return matchesAuthors &&
+                matchesSeries &&
+                matchesTags &&
+                matchesCharacters;
           },
         ).toList();
       },
@@ -131,15 +167,16 @@ class _FilterState extends State<Filter> {
           // align both inputs at the top
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // author field
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: AuthorSearch(
-                  allAuthors: allAuthors,
+                child: StringSearch(
+                  name: "Series",
+                  all: allSeries,
                   onSelected: (value) {
                     // update the value
-                    authors.add(value);
+                    series.clear();
+                    series.add(value);
                     // call the function to update filtered
                     _applyFilters();
                   },
@@ -150,18 +187,65 @@ class _FilterState extends State<Filter> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: TagSearch(
-                  allTags: allTags,
-                  onTagAdded: (value) => setState(() {
+                child: ListSearch(
+                  name: "Tags",
+                  all: allTags,
+                  onAdded: (value) => setState(() {
                     // update the value
                     tags.add(value);
                     // call the function to update filtered
                     _applyFilters();
                   }),
-                  onTagRemoved: (value) => setState(
+                  onRemoved: (value) => setState(
                     () {
                       // update the value
                       tags.remove(value);
+                      // call the function to update filtered
+                      _applyFilters();
+                    },
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListSearch(
+                  name: "Authors",
+                  all: allAuthors,
+                  onAdded: (value) => setState(() {
+                    // update the value
+                    authors.add(value);
+                    // call the function to update filtered
+                    _applyFilters();
+                  }),
+                  onRemoved: (value) => setState(
+                    () {
+                      // update the value
+                      authors.remove(value);
+                      // call the function to update filtered
+                      _applyFilters();
+                    },
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListSearch(
+                  name: "Characters",
+                  all: allCharacters,
+                  onAdded: (value) => setState(() {
+                    // update the value
+                    characters.add(value);
+                    // call the function to update filtered
+                    _applyFilters();
+                  }),
+                  onRemoved: (value) => setState(
+                    () {
+                      // update the value
+                      characters.remove(value);
                       // call the function to update filtered
                       _applyFilters();
                     },
@@ -190,14 +274,16 @@ class _FilterState extends State<Filter> {
   }
 }
 
-// author search field
-class AuthorSearch extends StatelessWidget {
-  final List<String> allAuthors;
+// search field
+class StringSearch extends StatelessWidget {
+  final String name;
+  final List<String> all;
   final ValueChanged<String> onSelected;
 
-  const AuthorSearch({
+  const StringSearch({
     Key? key,
-    required this.allAuthors,
+    required this.name,
+    required this.all,
     required this.onSelected,
   }) : super(key: key);
 
@@ -207,21 +293,21 @@ class AuthorSearch extends StatelessWidget {
       optionsBuilder: (TextEditingValue txt) {
         if (txt.text.isEmpty) return const Iterable<String>.empty();
         final input = txt.text.toLowerCase();
-        return allAuthors.where((a) => a.toLowerCase().contains(input));
+        return all.where((a) => a.toLowerCase().contains(input));
       },
       onSelected: onSelected,
       fieldViewBuilder: (ctx, controller, focusNode, onFieldSubmitted) {
         return TextField(
           controller: controller,
           focusNode: focusNode,
-          decoration: const InputDecoration(
-            labelText: 'Author',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: name,
+            border: const OutlineInputBorder(),
           ),
           // <-- add this
           onChanged: (value) {
             if (value.isEmpty) {
-              onSelected(''); // reset your author state
+              onSelected(''); // reset state
             }
           },
           onSubmitted: (_) => onFieldSubmitted(),
@@ -231,28 +317,30 @@ class AuthorSearch extends StatelessWidget {
   }
 }
 
-// tag search
-class TagSearch extends StatefulWidget {
-  final List<String> allTags;
-  final ValueChanged<String> onTagAdded;
-  final ValueChanged<String> onTagRemoved;
+// list search
+class ListSearch extends StatefulWidget {
+  final String name;
+  final List<String> all;
+  final ValueChanged<String> onAdded;
+  final ValueChanged<String> onRemoved;
   final int flex;
 
-  const TagSearch({
+  const ListSearch({
     Key? key,
-    required this.allTags,
-    required this.onTagAdded,
-    required this.onTagRemoved,
+    required this.name,
+    required this.all,
+    required this.onAdded,
+    required this.onRemoved,
     this.flex = 2,
   }) : super(key: key);
 
   @override
-  TagSearchState createState() => TagSearchState();
+  ListSearchState createState() => ListSearchState();
 }
 
-class TagSearchState extends State<TagSearch> {
-  // internal list of tags
-  final List<String> _tags = [];
+class ListSearchState extends State<ListSearch> {
+  // internal list
+  final List<String> _all = [];
 
   @override
   Widget build(BuildContext context) {
@@ -266,15 +354,15 @@ class TagSearchState extends State<TagSearch> {
               return const Iterable<String>.empty();
             }
             final input = textEditingValue.text.toLowerCase();
-            return widget.allTags.where((a) => a.toLowerCase().contains(input));
+            return widget.all.where((a) => a.toLowerCase().contains(input));
           },
-          onSelected: (tag) {
-            // add tag to internal list
-            if (!_tags.contains(tag)) {
+          onSelected: (item) {
+            // add to internal list
+            if (!_all.contains(item)) {
               setState(() {
-                _tags.add(tag);
+                _all.add(item);
               });
-              widget.onTagAdded(tag);
+              widget.onAdded(item);
             }
           },
           fieldViewBuilder: (
@@ -286,9 +374,9 @@ class TagSearchState extends State<TagSearch> {
             return TextField(
               controller: textEditingController,
               focusNode: focusNode,
-              decoration: const InputDecoration(
-                labelText: 'Add tag',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: widget.name,
+                border: const OutlineInputBorder(),
               ),
               onSubmitted: (_) {
                 // autocomplete logic
@@ -306,16 +394,16 @@ class TagSearchState extends State<TagSearch> {
           child: Wrap(
             spacing: 8.0,
             runSpacing: 4.0,
-            children: _tags.map(
-              (tag) {
+            children: _all.map(
+              (item) {
                 return InputChip(
-                  label: Text(tag),
+                  label: Text(item),
                   onDeleted: () {
-                    // remove tag from internal list
+                    // remove from internal list
                     setState(() {
-                      _tags.remove(tag);
+                      _all.remove(item);
                     });
-                    widget.onTagRemoved(tag);
+                    widget.onRemoved(item);
                   },
                 );
               },
