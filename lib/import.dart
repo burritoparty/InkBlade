@@ -127,149 +127,95 @@ class _ImportState extends State<Import> {
         TextEditingController(text: book.link);
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton.icon(
-              icon: const Icon(Icons.check),
-              onPressed: () {},
-              label: const Text("Import book"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
-                foregroundColor: Colors.white,
-                shape: const StadiumBorder(),
-                // minimumSize: const Size.fromHeight(48),
-              ),
-            )
-          ],
-        ),
+        title: const Text("Import Book"),
       ),
+      // creates a row with two children: two columns
       body: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // add button
-          const Expanded(child: CoverImage()),
-          // details column
           Expanded(
-            flex: 2,
-            child: Column( 
+            // pad out from the image
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // name of the book
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: FavoriteButton(
-                          isFavorite: book.favorite,
-                          onFavoriteToggle: (newVal) => setState(() {
-                            book.favorite = newVal;
-                          }),
-                        ),
-                      ),
+                // title handling
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: StringEditor(
+                    name: "Title",
+                    controller: titleController,
+                    onSubmitted: (newTitle) => setState(
+                      () {
+                        // widget.book.title = newTitle;
+                      },
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: LaterButton(
-                          isReadLater: book.readLater,
-                          onReadLaterToggle: (newVal) => setState(() {
-                            book.readLater = newVal;
-                          }),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: StringEditor(
-                            name: "Title",
-                            controller: titleController,
-                            onSubmitted: (newTitle) => setState(() {
-                              book.title = newTitle;
-                            }),
-                          ),
-                        ),
-                        Expanded(
-                          child: DropdownEditor(
-                            name: "Series",
-                            initial: book.series,
-                            all: allSeries,
-                            onSelected: (sel) => setState(() {
-                              book.series = sel;
-                              if (!allSeries.contains(sel)) {
-                                allSeries.add(sel);
-                              }
-                            }),
-                          ),
-                        ),
-                        Expanded(
-                          child: StringEditor(
-                            name: "Link",
-                            controller: linkController,
-                            onSubmitted: (newLink) => setState(() {
-                              book.link = newLink;
-                            }),
-                          ),
-                        ),
-                        Expanded(
-                          child: ListEditor(
-                            name: "author",
-                            item: book.authors,
-                            allItems: allAuthors,
-                            onAdded: (sel) => setState(() {
-                              if (!book.authors.contains(sel)) {
-                                book.authors.add(sel);
-                              }
-                              if (!allAuthors.contains(sel)) allAuthors.add(sel);
-                            }),
-                            onRemoved: (author) => setState(() {
-                              book.authors.remove(author);
-                            }),
-                          ),
-                        ),
-                        Expanded(
-                          child: ListEditor(
-                            name: "tag",
-                            item: book.tags,
-                            allItems: allTags,
-                            onAdded: (sel) => setState(() {
-                              if (!book.tags.contains(sel)) {
-                                book.tags.add(sel);
-                              }
-                              if (!allTags.contains(sel)) allTags.add(sel);
-                            }),
-                            onRemoved: (tag) => setState(() {
-                              book.tags.remove(tag);
-                            }),
-                          ),
-                        ),
-                        Expanded(
-                          child: ListEditor(
-                            name: "character",
-                            item: book.characters,
-                            allItems: allCharacters,
-                            onAdded: (sel) => setState(() {
-                              if (!book.characters.contains(sel)) {
-                                book.characters.add(sel);
-                              }
-                              if (!allCharacters.contains(sel)) {
-                                allCharacters.add(sel);
-                              }
-                            }),
-                            onRemoved: (character) => setState(() {
-                              book.characters.remove(character);
-                            }),
-                          ),
-                        ),
-                      ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DropdownEditor(
+                    name: "Series",
+                    initial: book.series,
+                    all: allSeries,
+                    onSelected: (sel) => setState(() {}),
+                  ),
+                ),
+                // link handling
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: StringEditor(
+                    name: "Link",
+                    controller: linkController,
+                    onSubmitted: (newLink) => setState(
+                      () {
+                        book.link = newLink;
+                      },
                     ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // authors
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListEditor(
+                    name: "author",
+                    item: book.authors,
+                    allItems: allAuthors,
+                    onAdded: (sel) => setState(() {}),
+                    onRemoved: (author) => setState(() {}),
+                  ),
+                ),
+                // tags
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListEditor(
+                    name: "tag",
+                    item: book.tags,
+                    allItems: allTags,
+                    onAdded: (sel) => setState(() {}),
+                    onRemoved: (tag) => setState(() {
+                      book.tags.remove(tag);
+                    }),
+                  ),
+                ),
+                // characters
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListEditor(
+                    name: "character",
+                    item: book.characters,
+                    allItems: allCharacters,
+                    onAdded: (sel) => setState(() {}),
+                    onRemoved: (character) => setState(() {}),
                   ),
                 ),
               ],

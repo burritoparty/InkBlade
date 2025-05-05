@@ -68,7 +68,7 @@ class ListEditor extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 8),
+        // const SizedBox(height: 8),
         Wrap(
           spacing: 8.0,
           runSpacing: 4.0,
