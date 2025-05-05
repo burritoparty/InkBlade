@@ -111,18 +111,30 @@ class AuthorDetailsState extends State<AuthorDetails> {
       ),
       body: Column(
         children: [
-          DropdownEditor(
-            name: "Rename Author",
-            initial: _author,
-            all: allAuthors,
-            onSelected: (sel) => setState(() {
-              // add sel to book.tags if it’s not already there
-              if (_author != sel) {
-                _author = sel;
-              }
-              // TODO: this prob needs changed when implementing database
-              if (!allAuthors.contains(sel)) allAuthors.add(sel);
-            }),
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DropdownEditor(
+                    name: "Rename Author",
+                    initial: _author,
+                    all: allAuthors,
+                    onSelected: (sel) => setState(() {
+                      // add sel to book.tags if it’s not already there
+                      if (_author != sel) {
+                        _author = sel;
+                      }
+                      // TODO: this prob needs changed when implementing database
+                      if (!allAuthors.contains(sel)) allAuthors.add(sel);
+                    }),
+                  ),
+                ),
+              ),
+              DeleteButton(
+                onDelete: () { }
+              ),
+            ],
           ),
           Expanded(
             child: BookGrid(
