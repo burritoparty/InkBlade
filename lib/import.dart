@@ -129,96 +129,104 @@ class _ImportState extends State<Import> {
       appBar: AppBar(
         title: const Text("Import Book"),
       ),
-      // creates a row with two children: two columns
       body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const Expanded(child: CoverImage()),
           Expanded(
-            // pad out from the image
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              // name of the book
-              children: [
-                // title handling
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: StringEditor(
-                    name: "Title",
-                    controller: titleController,
-                    onSubmitted: (newTitle) => setState(
-                      () {
-                        // widget.book.title = newTitle;
-                      },
-                    ),
+            flex: 2,
+            child: Padding(
+              // pad from bottom to allow for the dropdown to be visible
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 200),
+              child: Column(
+                // spaces out each row
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: StringEditor(
+                            name: "Title",
+                            controller: titleController,
+                            onSubmitted: (newTitle) => setState(() {
+                              // widget.book.title = newTitle;
+                            }),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListEditor(
+                            name: "author",
+                            item: book.authors,
+                            allItems: allAuthors,
+                            onAdded: (sel) => setState(() {}),
+                            onRemoved: (author) => setState(() {}),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: DropdownEditor(
-                    name: "Series",
-                    initial: book.series,
-                    all: allSeries,
-                    onSelected: (sel) => setState(() {}),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownEditor(
+                            name: "Series",
+                            initial: book.series,
+                            all: allSeries,
+                            onSelected: (sel) => setState(() {}),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListEditor(
+                            name: "author",
+                            item: book.authors,
+                            allItems: allAuthors,
+                            onAdded: (sel) => setState(() {}),
+                            onRemoved: (author) => setState(() {}),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                // link handling
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: StringEditor(
-                    name: "Link",
-                    controller: linkController,
-                    onSubmitted: (newLink) => setState(
-                      () {
-                        book.link = newLink;
-                      },
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: StringEditor(
+                            name: "Link",
+                            controller: linkController,
+                            onSubmitted: (newLink) => setState(() {
+                              book.link = newLink;
+                            }),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListEditor(
+                            name: "author",
+                            item: book.authors,
+                            allItems: allAuthors,
+                            onAdded: (sel) => setState(() {}),
+                            onRemoved: (author) => setState(() {}),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // authors
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListEditor(
-                    name: "author",
-                    item: book.authors,
-                    allItems: allAuthors,
-                    onAdded: (sel) => setState(() {}),
-                    onRemoved: (author) => setState(() {}),
-                  ),
-                ),
-                // tags
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListEditor(
-                    name: "tag",
-                    item: book.tags,
-                    allItems: allTags,
-                    onAdded: (sel) => setState(() {}),
-                    onRemoved: (tag) => setState(() {
-                      book.tags.remove(tag);
-                    }),
-                  ),
-                ),
-                // characters
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListEditor(
-                    name: "character",
-                    item: book.characters,
-                    allItems: allCharacters,
-                    onAdded: (sel) => setState(() {}),
-                    onRemoved: (character) => setState(() {}),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
