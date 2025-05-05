@@ -202,9 +202,11 @@ class _BookDetailsState extends State<BookDetails> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: FavoriteButton(
                                   isFavorite: widget.book.favorite,
-                                  onFavoriteToggle: (newVal) => setState(() {
-                                    widget.book.favorite = newVal;
-                                  }),
+                                  onFavoriteToggle: (newVal) => setState(
+                                    () {
+                                      widget.book.favorite = newVal;
+                                    },
+                                  ),
                                 ),
                               ),
                             ),

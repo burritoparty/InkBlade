@@ -130,9 +130,48 @@ class _ImportState extends State<Import> {
         title: const Text("Import Book"),
       ),
       body: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        // crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Expanded(child: CoverImage()),
+          Expanded(
+            // column for the left side
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // row for the favorite and read later buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: FavoriteButton(
+                          isFavorite: book.favorite,
+                          onFavoriteToggle: (newVal) => setState(
+                            () {
+                              book.favorite = newVal;
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: LaterButton(
+                          isReadLater: book.readLater,
+                          onReadLaterToggle: (newVal) => setState(
+                            () {
+                              book.readLater = newVal;
+                            },
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                const Expanded(child: CoverImage()),
+              ],
+            ),
+          ),
           Expanded(
             flex: 2,
             child: Padding(
