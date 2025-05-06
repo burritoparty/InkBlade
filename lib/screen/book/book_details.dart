@@ -123,11 +123,19 @@ class _BookDetailsState extends State<BookDetails> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: FavoriteButton(
                                   isFavorite: widget.book.favorite,
-                                  onFavoriteToggle: (newVal) => setState(
-                                    () {
-                                      widget.book.favorite = newVal;
-                                    },
-                                  ),
+                                  onFavoriteToggle: (newVal) async {
+                                    // Update the book's favorite status and save to JSON
+                                    final success = await libraryController
+                                        .updateFavorite(widget.book, newVal);
+                                    if (success) {
+                                      setState(
+                                        () {
+                                          widget.book.favorite =
+                                              newVal; // Update the UI
+                                        },
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -136,9 +144,19 @@ class _BookDetailsState extends State<BookDetails> {
                               padding: const EdgeInsets.all(8.0),
                               child: LaterButton(
                                 isReadLater: widget.book.readLater,
-                                onReadLaterToggle: (newVal) => setState(() {
-                                  widget.book.readLater = newVal;
-                                }),
+                                onReadLaterToggle: (newVal) async {
+                                  // Update the book's readLater status and save to JSON
+                                  final success = await libraryController
+                                      .updateReadLater(widget.book, newVal);
+                                  if (success) {
+                                    setState(
+                                      () {
+                                        widget.book.readLater =
+                                            newVal; // Update the UI
+                                      },
+                                    );
+                                  }
+                                },
                               ),
                             ))
                           ],
