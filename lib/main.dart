@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_manga_reader/screen/later.dart';
 import 'screen/screens.dart';
 import 'router/routes.dart';
 
@@ -39,6 +40,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     Authors(),
     TagPage(),
     Favorites(),
+    Later(),
     Filter(),
   ];
   static const _pageTitles = [
@@ -46,6 +48,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     'Authors',
     'Tags',
     'Favorites',
+    'Read Later',
     'Filter Library',
   ];
 
@@ -143,7 +146,8 @@ class NavDrawer extends StatelessWidget {
           ),
           // each item switches pages 4, 5
           _buildItem(context, Icons.favorite, 'Favorites', 3),
-          _buildItem(context, Icons.filter_alt, 'Filter Library', 4),
+          _buildItem(context, Icons.bookmark, 'Later', 4),
+          _buildItem(context, Icons.filter_alt, 'Filter Library', 5),
         ],
       ),
     );
