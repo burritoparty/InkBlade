@@ -280,8 +280,44 @@ class _BookDetailsState extends State<BookDetails> {
                               },
                             ),
                             DeleteButton(
-                              onDelete: () {
-                                // delete logic here
+                              onDelete: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Delete Book"),
+                                    content: const Text(
+                                        "Are you sure you want to delete this book?"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(
+                                            context, false), // Cancel
+                                        child: const Text("Cancel"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(
+                                            context, true), // Confirm
+                                        child: const Text("Delete"),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                                if (confirm == true) {
+                                  // Remove the book from the library
+                                  await libraryController
+                                      .removeBook(widget.book);
+
+                                  // Delete the book's files from the filesystem
+                                  final bookDir = Directory(widget.book.path);
+                                  if (await bookDir.exists()) {
+                                    await bookDir.delete(recursive: true);
+                                  }
+
+                                  // Navigate back to the previous screen
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                  }
+                                }
                               },
                             ),
                           ],
