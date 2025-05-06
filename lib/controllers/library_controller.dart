@@ -116,7 +116,7 @@ class LibraryController extends ChangeNotifier {
     // find the book in the list
     final index = _books.indexWhere((b) => b.path == book.path);
     // check if the book exists in the list or if the new title is empty
-    if (index == -1 || newTitle.isEmpty) {
+    if (index == -1 || newTitle.trim().isEmpty) {
       return false;
     }
     // update the title of the book

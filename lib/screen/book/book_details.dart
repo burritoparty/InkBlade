@@ -61,11 +61,19 @@ class _BookDetailsState extends State<BookDetails> {
                           child: StringEditor(
                             name: "Title",
                             controller: titleController,
-                            onSubmitted: (newTitle) => setState(
-                              () {
-                                widget.book.title = newTitle;
-                              },
-                            ),
+                            onSubmitted: (newTitle) async {
+                              // wait for the title to be updated
+                              final success = await libraryController
+                                  .updateTitle(widget.book, newTitle);
+                              // then if it was successful, update the book title
+                              if (success) {
+                                setState(
+                                  () {
+                                    widget.book.title = newTitle;
+                                  },
+                                );
+                              }
+                            },
                           ),
                         ),
                         Padding(
@@ -92,11 +100,19 @@ class _BookDetailsState extends State<BookDetails> {
                           child: StringEditor(
                             name: "Link",
                             controller: linkController,
-                            onSubmitted: (newLink) => setState(
-                              () {
-                                widget.book.link = newLink;
-                              },
-                            ),
+                            onSubmitted: (newLink) async {
+                              // wait for the link to be updated
+                              final success = await libraryController
+                                  .updateLink(widget.book, newLink);
+                              // then if it was successful, update the book title
+                              if (success) {
+                                setState(
+                                  () {
+                                    widget.book.link = newLink;
+                                  },
+                                );
+                              }
+                            },
                           ),
                         ),
                         // favorite and read later
