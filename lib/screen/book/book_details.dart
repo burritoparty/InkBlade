@@ -325,7 +325,7 @@ class _BookDetailsState extends State<BookDetails> {
 class CoverImage extends StatelessWidget {
   final Book book;
   // requires the book as a param
-  const CoverImage({Key? key, required this.book}) : super(key: key);
+  const CoverImage({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {
@@ -342,9 +342,9 @@ class CoverImage extends StatelessWidget {
               arguments: book, // object passed it
             );
           },
-          child: const AspectRatio(
+          child: AspectRatio(
             aspectRatio: 2 / 3,
-            child: Placeholder(),
+            child: Image.file(File(book.getCoverPath())),
           ),
         ),
       ),
@@ -363,11 +363,11 @@ class PagesGrid extends StatelessWidget {
   final double childAspectRatio;
 
   const PagesGrid({
-    Key? key,
+    super.key,
     required this.totalPages,
     this.imagesPerRow = 3,
     this.childAspectRatio = 2 / 3,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
