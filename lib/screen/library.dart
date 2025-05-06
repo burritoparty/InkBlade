@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_manga_reader/controllers/library_controller.dart';
 import 'package:flutter_manga_reader/models/book.dart';
+import 'package:provider/provider.dart';
 
 import '../router/routes.dart';
 import '../services/book_repository.dart';
@@ -13,84 +15,28 @@ class Library extends StatefulWidget {
 }
 
 class LibraryState extends State<Library> {
-  // temporary in‐memory list until we load from JSON
-  late List<Book> temporaryBooks;
-  late final List<Book> allBooks;
+  late final LibraryController libraryController;
   late List<Book> filteredBooks;
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // dummy data
-    final allBooks = [
-      Book(
-        path: "C:\\",
-        title: "Full Metal Alchemist Brotherhood",
-        link: "link",
-        series: "Full Metal Alchemist",
-        authors: ["Hiromu Arakawa"],
-        tags: ["Adventure", "Fantasy"],
-        characters: ["Edward", "Alphonse", "Winry"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "My Dress Up Darling: Volume 1",
-        link: "link",
-        series: "My Dress Up Darling",
-        authors: ["Shinichi Fukuda"],
-        tags: ["Romance", "Comedy", "Cosplay"],
-        characters: ["Marin Kitagawa", "Gojo"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "My Dress Up Darling: Volume 2",
-        link: "link",
-        series: "My Dress Up Darling",
-        authors: ["Shinichi Fukuda"],
-        tags: ["Romance", "Comedy", "Cosplay"],
-        characters: ["Marin Kitagawa", "Wakana Gojo"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "Komi Can't Communicate: Volume 1",
-        link: "link",
-        series: "Komi Can't Communicate",
-        authors: ["Tomohito Oda"],
-        tags: ["Romance", "Comedy", "Slice of Life"],
-        characters: ["Komi Shoko", "Tadano Hitohito"],
-        favorite: false,
-        readLater: true,
-      ),
-      Book(
-        path: "C:\\",
-        title: "Hokkaido Gals Are Super Adorable: Volume 1",
-        link: "link",
-        series: "Hokkaido Gals Are Super Adorable",
-        authors: ["Ikada Kai"],
-        tags: ["Romance", "Comedy"],
-        characters: ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"],
-        favorite: false,
-        readLater: true,
-      ),
-    ];
+
+    // get the library controller from the provider
+    libraryController = context.read<LibraryController>();
 
     // show all to start
-    filteredBooks = List.of(allBooks);
+    filteredBooks = List.of(libraryController.books);
 
     // controller to whenever the text changes, refilter
     _searchController.addListener(
       () {
         final q = _searchController.text.toLowerCase();
         setState(() {
-          filteredBooks =
-              allBooks.where((b) => b.title.toLowerCase().contains(q)).toList();
+          filteredBooks = libraryController.books
+              .where((b) => b.title.toLowerCase().contains(q))
+              .toList();
         });
       },
     );
@@ -108,7 +54,7 @@ class LibraryState extends State<Library> {
             onChanged: (value) {
               final q = value.toLowerCase();
               setState(() {
-                filteredBooks = allBooks
+                filteredBooks = libraryController.books
                     .where((b) => b.title.toLowerCase().contains(q))
                     .toList();
               });
