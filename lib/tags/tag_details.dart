@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/widgets/widgets.dart';
 import '../router/routes.dart';
-import '../services/book_repository.dart';
+import '../widgets/book_grid.dart';
 import '../models/book.dart';
 
 class TagDetails extends StatefulWidget {
