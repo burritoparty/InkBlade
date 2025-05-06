@@ -3,6 +3,9 @@ import 'package:flutter_manga_reader/models/book.dart';
 import '/widgets/widgets.dart';
 import '../controllers/library_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:file_selector/file_selector.dart';
+import 'dart:io';
+import 'package:path/path.dart' as p;
 
 class Import extends StatefulWidget {
   const Import({super.key});
@@ -110,11 +113,27 @@ class _ImportState extends State<Import> {
                     )
                   ],
                 ),
-                const Expanded(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CoverImage(),
-                )),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CoverImage(
+                      folderPath: newBook.path,
+                      onFolderSelected: (path) => setState(
+                        () {
+                          // set the path to the selected folder
+                          newBook.path = path;
+                          // clean up the string for the title
+                          String title = p.basename(path);
+                          title = cleanString(title);
+                          // set the title to the cleaned up string
+                          titleController.text = title;
+                          newBook.title = title;
+                          // TODO: find a way to set StringEditor for title to green
+                        },
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -252,28 +271,51 @@ class _ImportState extends State<Import> {
 }
 
 class CoverImage extends StatefulWidget {
-  const CoverImage({super.key});
+  final String? folderPath;
+  final String? bookName;
+  final ValueChanged<String> onFolderSelected;
+
+  const CoverImage({
+    super.key,
+    this.folderPath,
+    this.bookName,
+    required this.onFolderSelected,
+  });
 
   @override
   State<CoverImage> createState() => _CoverImageState();
 }
 
 class _CoverImageState extends State<CoverImage> {
-  // keep track of when folder selected should be a plus
   bool _folderSelected = false;
+
+  @override
+  void didUpdateWidget(CoverImage old) {
+    super.didUpdateWidget(old);
+    if (widget.folderPath == null || widget.folderPath!.isEmpty) {
+      _folderSelected = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.grey[800],
+      color: _folderSelected ? Colors.transparent : Colors.grey[800],
       child: InkWell(
-        onTap: () {
-          setState(() {});
-          // TODO: i want to select a folder here
-          _folderSelected = true;
+        onTap: () async {
+          // uses native picker on all platforms
+          final String? dir = await getDirectoryPath();
+          if (dir != null) {
+            setState(() => _folderSelected = true);
+            widget.onFolderSelected(dir);
+          }
         },
         child: _folderSelected
-            ? const Placeholder()
+            ? Center(
+                child: Image.file(
+                  File(getCoverPath(_folderSelected ? widget.folderPath! : "")),
+                ),
+              )
             : Icon(
                 Icons.add,
                 size: 48,
@@ -282,4 +324,45 @@ class _CoverImageState extends State<CoverImage> {
       ),
     );
   }
+}
+
+// just copy pasted code from the book model
+// to get the cover image from the folder path
+String getCoverPath(String path) {
+  // ensure the directory exists
+  final dir = Directory(path);
+  if (!dir.existsSync()) {
+    return '';
+  }
+
+  // list all entries in the folder
+  final entries = dir.listSync();
+
+  // filter to just files with image extensions
+  final images = entries.whereType<File>().where((file) {
+    final ext = p.extension(file.path).toLowerCase();
+    return ['.jpg', '.jpeg', '.png', '.webp'].contains(ext);
+  }).toList();
+
+  // if no images, bail out
+  if (images.isEmpty) {
+    return '';
+  }
+
+  // sort by filename so it's consistent
+  images.sort((a, b) => a.path.compareTo(b.path));
+
+  // return the very first image's path
+  return images.first.path;
+}
+
+// cleans up the string for the name
+String cleanString(String input) {
+  // remove any [...] or (...) or {...} and their contents
+  // remove any leading digits
+  // trim residual whitespace
+  return input
+      .replaceAll(RegExp(r'\[.*?\]|\(.*?\)|\{.*?\}'), '')
+      .replaceAll(RegExp(r'^\d+'), '')
+      .trim();
 }
