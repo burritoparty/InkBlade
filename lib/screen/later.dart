@@ -2,32 +2,22 @@ import 'package:flutter/material.dart';
 import '../services/book_repository.dart';
 import '../models/book.dart';
 import '../router/routes.dart';
-import '../widgets/widgets.dart';
 
-class AuthorDetails extends StatefulWidget {
-  final String author;
-
-  const AuthorDetails({
-    super.key,
-    required this.author,
-  });
+class Later extends StatefulWidget {
+  const Later({super.key});
 
   @override
-  State<AuthorDetails> createState() => AuthorDetailsState();
+  State<Later> createState() => _LaterState();
 }
 
-class AuthorDetailsState extends State<AuthorDetails> {
-  late String _author;
-  late List<String> allAuthors = [];
-  late final List<Book> allBooks;
+class _LaterState extends State<Later> {
+  // TODO need to pass in object with all books
+  late List<Book> allBooks = [];
   late List<Book> filteredBooks = [];
-
   @override
   void initState() {
     super.initState();
-    _author = widget.author;
-
-    // get all the books
+    // set up all books, make one a later
     allBooks = [
       Book(
         "C:\\", // path
@@ -86,19 +76,11 @@ class AuthorDetailsState extends State<AuthorDetails> {
       ),
     ];
 
-    // look through the books and only load up the ones with author
+    // loop thru the books, if its a later,
+    // add it to the filtered
     for (Book book in allBooks) {
-      // iterate thru every books authors
-      for (String author in book.authors) {
-        // if new author add to list
-        if (!allAuthors.contains(author)) {
-          allAuthors.add(author);
-        }
-        // if author matches author add to list
-        // TODO this may cause an error when changing the author name
-        if (author == _author) {
-          filteredBooks.add(book);
-        }
+      if (book.readLater) {
+        filteredBooks.add(book);
       }
     }
   }
@@ -106,36 +88,8 @@ class AuthorDetailsState extends State<AuthorDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_author),
-      ),
       body: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: DropdownEditor(
-                    name: "Rename Author",
-                    initial: _author,
-                    all: allAuthors,
-                    onSelected: (sel) => setState(() {
-                      // add sel to book.tags if it’s not already there
-                      if (_author != sel) {
-                        _author = sel;
-                      }
-                      // TODO: this prob needs changed when implementing database
-                      if (!allAuthors.contains(sel)) allAuthors.add(sel);
-                    }),
-                  ),
-                ),
-              ),
-              DeleteButton(
-                onDelete: () { }
-              ),
-            ],
-          ),
           Expanded(
             child: BookGrid(
               books: filteredBooks,

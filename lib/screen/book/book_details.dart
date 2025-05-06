@@ -14,18 +14,113 @@ class BookDetails extends StatefulWidget {
 
 class _BookDetailsState extends State<BookDetails> {
   // mock data
+  // grab the books
+  List<Book> allBooks = [];
   // grab the authors
   List<String> allAuthors = [];
+  // grab the tags
   List<String> allTags = [];
+  // grab the series
+  List<String> allSeries = [];
+  // grab the characters
+  List<String> allCharacters = [];
   int imagesPerRow = 10;
   int totalPages = 30;
 
   @override
   void initState() {
     super.initState();
-    // mock data: only runs once
-    allAuthors = List.generate(1000, (i) => 'authorname$i');
-    allTags = List.generate(15, (i) => 'tagname$i');
+
+    // set up all books, make one a fave
+    allBooks = [
+      Book(
+        "C:\\", // path
+        "Full Metal Alchemist Brotherhood", // title
+        "link", // link
+        "Full Metal Alchemist", // series
+        ["Hiromu Arakawa"], // author
+        ["Adventure", "Fantasy"], // tags
+        ["Edward", "Alphonse", "Winry"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "My Dress Up Darling: Volume 1", // title
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Shinichi Fukuda"], // author
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "My Dress Up Darling: Volume 2", // title
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Shinichi Fukuda"], // author
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Wakana Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Komi Can't Communicate: Volume 1", // title
+        "link", // link
+        "Komi Can't Communicate", // series
+        ["Tomohito Oda"], // author
+        ["Romance", "Comedy", "Slice of Life"], // tags
+        ["Komi Shoko", "Tadano Hitohito"], // characters
+        false, // favorite
+        true, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Hokkaido Gals Are Super Adorable: Volume 1", // title
+        "link", // link
+        "Hokkaido Gals Are Super Adorable", // series
+        ["Ikada Kai"], // author
+        ["Romance", "Comedy"], // tags
+        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
+        false, // favorite
+        true, // read later
+      ),
+    ];
+
+    // iterate each book
+    for (Book book in allBooks) {
+      // iterate through the books tags
+      for (String tag in book.tags) {
+        // add them if not already in
+        if (!allTags.contains(tag)) {
+          allTags.add(tag);
+        }
+      }
+
+      // iterate trhough the books characters
+      for (String character in book.characters) {
+        // add them if not already in
+        if (!allCharacters.contains(character)) {
+          allCharacters.add(character);
+        }
+      }
+
+      // iterate trhough the books characters
+      for (String author in book.authors) {
+        // add them if not already in
+        if (!allAuthors.contains(author)) {
+          allAuthors.add(author);
+        }
+      }
+
+      // add series if not already in
+      if (!allSeries.contains(book.series)) {
+        allSeries.add(book.series);
+      }
+    }
   }
 
   @override
@@ -33,6 +128,8 @@ class _BookDetailsState extends State<BookDetails> {
     // controller for text editing field
     final TextEditingController titleController =
         TextEditingController(text: widget.book.title);
+    final TextEditingController linkController =
+        TextEditingController(text: widget.book.link);
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.book.title)),
@@ -41,6 +138,7 @@ class _BookDetailsState extends State<BookDetails> {
         child: Column(
           children: [
             Expanded(
+              flex: 2,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -54,31 +152,47 @@ class _BookDetailsState extends State<BookDetails> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       // name of the book
                       children: [
-                        // title
-                        TitleEditor(
-                          controller: titleController,
-                          onSubmitted: (newTitle) => setState(() {
-                            widget.book.title = newTitle;
-                          }),
+                        // title handling
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: StringEditor(
+                            name: "Title",
+                            controller: titleController,
+                            onSubmitted: (newTitle) => setState(
+                              () {
+                                widget.book.title = newTitle;
+                              },
+                            ),
+                          ),
                         ),
-                        AuthorEditor(
-                          initialAuthor: widget.book.author,
-                          allAuthors: allAuthors,
-                          onSelected: (sel) => setState(() {
-                            // add sel to book.tags if it’s not already there
-                            if (widget.book.author != sel) {
-                              widget.book.author = sel;
-                            }
-                            // TODO: this prob needs changed when implementing database
-                            if (!allAuthors.contains(sel)) allAuthors.add(sel);
-                          }),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownEditor(
+                            name: "Series",
+                            initial: widget.book.series,
+                            all: allSeries,
+                            onSelected: (sel) => setState(() {
+                              // add sel to book.tags if it’s not already there
+                              if (widget.book.series != sel) {
+                                widget.book.series = sel;
+                              }
+                              // TODO: this prob needs changed when implementing database
+                              if (!allSeries.contains(sel)) allSeries.add(sel);
+                            }),
+                          ),
                         ),
                         // link handling
-                        LinkEditor(
-                          initialLink: widget.book.link,
-                          onSubmitted: (newLink) => setState(() {
-                            widget.book.link = newLink;
-                          }),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: StringEditor(
+                            name: "Link",
+                            controller: linkController,
+                            onSubmitted: (newLink) => setState(
+                              () {
+                                widget.book.link = newLink;
+                              },
+                            ),
+                          ),
                         ),
                         // favorite and read later
                         Row(
@@ -88,9 +202,11 @@ class _BookDetailsState extends State<BookDetails> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: FavoriteButton(
                                   isFavorite: widget.book.favorite,
-                                  onFavoriteToggle: (newVal) => setState(() {
-                                    widget.book.favorite = newVal;
-                                  }),
+                                  onFavoriteToggle: (newVal) => setState(
+                                    () {
+                                      widget.book.favorite = newVal;
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
@@ -106,6 +222,78 @@ class _BookDetailsState extends State<BookDetails> {
                             ))
                           ],
                         ),
+                      ],
+                    ),
+                  ),
+                  // tag handling
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // authors
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListEditor(
+                            name: "author",
+                            item: widget.book.authors,
+                            allItems: allAuthors,
+                            onAdded: (sel) => setState(() {
+                              // add sel to book.authors if it’s not already there
+                              if (!widget.book.authors.contains(sel)) {
+                                widget.book.authors.add(sel);
+                              }
+                              // TODO: this prob needs changed when implementing database
+                              if (!allAuthors.contains(sel))
+                                allAuthors.add(sel);
+                            }),
+                            onRemoved: (author) => setState(() {
+                              widget.book.authors.remove(author);
+                            }),
+                          ),
+                        ),
+                        // tags
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListEditor(
+                            name: "tag",
+                            item: widget.book.tags,
+                            allItems: allTags,
+                            onAdded: (sel) => setState(() {
+                              // add sel to book.tags if it’s not already there
+                              if (!widget.book.tags.contains(sel)) {
+                                widget.book.tags.add(sel);
+                              }
+                              // TODO: this prob needs changed when implementing database
+                              if (!allTags.contains(sel)) allTags.add(sel);
+                            }),
+                            onRemoved: (tag) => setState(() {
+                              widget.book.tags.remove(tag);
+                            }),
+                          ),
+                        ),
+                        // characters
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListEditor(
+                            name: "character",
+                            item: widget.book.characters,
+                            allItems: allCharacters,
+                            onAdded: (sel) => setState(() {
+                              // add sel to book.chars if it’s not already there
+                              if (!widget.book.characters.contains(sel)) {
+                                widget.book.characters.add(sel);
+                              }
+                              // TODO: this prob needs changed when implementing database
+                              if (!allCharacters.contains(sel))
+                                allCharacters.add(sel);
+                            }),
+                            onRemoved: (character) => setState(() {
+                              widget.book.characters.remove(character);
+                            }),
+                          ),
+                        ),
                         // explorer and delete
                         Row(
                           children: [
@@ -119,23 +307,6 @@ class _BookDetailsState extends State<BookDetails> {
                         ),
                       ],
                     ),
-                  ),
-                  // tag handling
-                  TagEditor(
-                    tags: widget.book.tags,
-                    allTags: allTags,
-                    onTagAdded: (sel) => setState(() {
-                      // add sel to book.tags if it’s not already there
-                      if (!widget.book.tags.contains(sel)) {
-                        widget.book.tags.add(sel);
-                      }
-                      // TODO: this prob needs changed when implementing database
-                      if (!allTags.contains(sel)) allTags.add(sel);
-                    }),
-                    onTagRemoved: (tag) => setState(() {
-                      widget.book.tags.remove(tag);
-                    }),
-                    flex: 2,
                   ),
                 ],
               ),

@@ -20,34 +20,59 @@ class _FavoritesState extends State<Favorites> {
     // set up all books, make one a fave
     allBooks = [
       Book(
-        "name1",
-        "Shinichi Fukuda",
-        ["tag1", "tag2", "tag3"],
-        "link",
-        "C:\\path",
-        "coverPath",
-        false,
-        false,
+        "C:\\", // path
+        "Full Metal Alchemist Brotherhood", // title
+        "link", // link
+        "Full Metal Alchemist", // series
+        ["Hiromu Arakawa"], // author
+        ["Adventure", "Fantasy"], // tags
+        ["Edward", "Alphonse", "Winry"], // characters
+        true, // favorite
+        false, // read later
       ),
       Book(
-        "name2",
-        "Shinichi Fukuda",
-        ["tag1", "tag2", "tag3"],
-        "link",
-        "C:\\path",
-        "coverPath",
-        true,
-        true,
+        "C:\\", // path
+        "My Dress Up Darling: Volume 1", // title
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Shinichi Fukuda"], // author
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Gojo"], // characters
+        true, // favorite
+        false, // read later
       ),
       Book(
-        "name1",
-        "Hiromu Arakawa",
-        ["tag1", "tag2", "tag3"],
-        "link",
-        "C:\\path",
-        "coverPath",
-        false,
-        false,
+        "C:\\", // path
+        "My Dress Up Darling: Volume 2", // title
+        "link", // link
+        "My Dress Up Darling", // series
+        ["Shinichi Fukuda"], // author
+        ["Romance", "Comedy", "Cosplay"], // tags
+        ["Marin Kitagawa", "Wakana Gojo"], // characters
+        true, // favorite
+        false, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Komi Can't Communicate: Volume 1", // title
+        "link", // link
+        "Komi Can't Communicate", // series
+        ["Tomohito Oda"], // author
+        ["Romance", "Comedy", "Slice of Life"], // tags
+        ["Komi Shoko", "Tadano Hitohito"], // characters
+        false, // favorite
+        true, // read later
+      ),
+      Book(
+        "C:\\", // path
+        "Hokkaido Gals Are Super Adorable: Volume 1", // title
+        "link", // link
+        "Hokkaido Gals Are Super Adorable", // series
+        ["Ikada Kai"], // author
+        ["Romance", "Comedy"], // tags
+        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
+        false, // favorite
+        true, // read later
       ),
     ];
 

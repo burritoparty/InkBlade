@@ -39,14 +39,18 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     Authors(),
     TagPage(),
     Favorites(),
+    Later(),
     Filter(),
+    Settings()
   ];
   static const _pageTitles = [
     'Library',
     'Authors',
     'Tags',
     'Favorites',
+    'Read Later',
     'Filter Library',
+    'Settings',
   ];
 
   // update selected index and rebuild
@@ -57,7 +61,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     return Scaffold(
       // appbar: conditional back button on search
       appBar: AppBar(
-        // show back arrow on pages 3+ (Favorites, Filter)
+        // show back arrow on pages 3+ (Favorites, Later, Filter, Settings)
         leading: _selectedIndex >= 3
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -141,9 +145,11 @@ class NavDrawer extends StatelessWidget {
               child: Text('Library Searching', style: TextStyle(fontSize: 30)),
             ),
           ),
-          // each item switches pages 4, 5
+          // each item switches pages 3, 4, 5, 6
           _buildItem(context, Icons.favorite, 'Favorites', 3),
-          _buildItem(context, Icons.filter_alt, 'Filter Library', 4),
+          _buildItem(context, Icons.bookmark, 'Later', 4),
+          _buildItem(context, Icons.filter_alt, 'Filter Library', 5),
+          _buildItem(context, Icons.settings, 'Settings', 6),
         ],
       ),
     );

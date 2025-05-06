@@ -36,11 +36,9 @@ class AppRouter {
         // unpack the given map
         final args = settings.arguments as Map<String, dynamic>;
         final author = args['author'] as String;
-        final allAuthors = List<String>.from(args['allAuthors'] as List);
         return MaterialPageRoute(
           builder: (_) => AuthorDetails(
             author: author,
-            allAuthors: allAuthors,
           ),
         );
       // route for FAB (import)
