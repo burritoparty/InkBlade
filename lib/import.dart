@@ -345,7 +345,7 @@ class _CoverImageState extends State<CoverImage> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: Colors.grey[800],
       child: InkWell(
         onTap: () {
           setState(() {});
