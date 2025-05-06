@@ -1,0 +1,55 @@
+// repositories/library_repository.dart
+
+import 'dart:io';
+import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
+import '../models/book.dart';
+
+class LibraryRepository {
+  // placeholder for json file
+  late final File _file;
+
+  // call once app starts to setup the file
+  Future<void> init() async {
+    // get the application documents directory
+    // and create a file called library.json in it
+    final dir = await getApplicationDocumentsDirectory();
+    // create app folder if it doesn't exist
+    final appDir = Directory('${dir.path}/InkBlade');
+    if (!await appDir.exists()) {
+      await appDir.create(recursive: true);
+    }
+
+    // create library folder if it doesn't exist
+    final libraryFolder = Directory('${appDir.path}/library');
+    if (!await libraryFolder.exists()) {
+      await libraryFolder.create(recursive: true);
+    }
+
+    // point the file at where library.json should be
+    _file = File('${appDir.path}/library.json');
+    // check if the file exists, if not create it
+    if (!await _file.exists()) {
+      await _file.writeAsString(jsonEncode({'book': []}));
+    }
+  }
+
+  // read and parse json into real dart objects
+  Future<List<Book>> loadBooks() async {
+    // read the file as a string
+    final raw = await _file.readAsString();
+    // decode the string into a Dart Map<String, dynamic>
+    final data = jsonDecode(raw) as Map<String, dynamic>;
+    // exrtact the books list, cast it to a List<Map<String, dynamic>>
+    // String being the key and dynamic being the value
+    final list = (data['book'] as List).cast<Map<String, dynamic>>();
+    // return the list of books as a List<Book>
+    return list.map(Book.fromJson).toList();
+  }
+
+  // save the books to the file as a json string
+  Future<void> saveBooks(List<Book> books) async {
+    final data = {'book': books.map((b) => b.toJson()).toList()};
+    await _file.writeAsString(jsonEncode(data));
+  }
+}

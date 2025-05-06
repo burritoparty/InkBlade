@@ -36,63 +36,64 @@ class _FilterState extends State<Filter> {
   void initState() {
     super.initState();
     // set up all books
-    allBooks = [
+    final allBooks = [
       Book(
-        "C:\\", // path
-        "Full Metal Alchemist Brotherhood", // title
-        "link", // link
-        "Full Metal Alchemist", // series
-        ["Hiromu Arakawa"], // author
-        ["Adventure", "Fantasy"], // tags
-        ["Edward", "Alphonse", "Winry"], // characters
-        true, // favorite
-        false, // read later
+        path: "C:\\",
+        title: "Full Metal Alchemist Brotherhood",
+        link: "link",
+        series: "Full Metal Alchemist",
+        authors: ["Hiromu Arakawa"],
+        tags: ["Adventure", "Fantasy"],
+        characters: ["Edward", "Alphonse", "Winry"],
+        favorite: true,
+        readLater: false,
       ),
       Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 1", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Gojo"], // characters
-        true, // favorite
-        false, // read later
+        path: "C:\\",
+        title: "My Dress Up Darling: Volume 1",
+        link: "link",
+        series: "My Dress Up Darling",
+        authors: ["Shinichi Fukuda"],
+        tags: ["Romance", "Comedy", "Cosplay"],
+        characters: ["Marin Kitagawa", "Gojo"],
+        favorite: true,
+        readLater: false,
       ),
       Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 2", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Wakana Gojo"], // characters
-        true, // favorite
-        false, // read later
+        path: "C:\\",
+        title: "My Dress Up Darling: Volume 2",
+        link: "link",
+        series: "My Dress Up Darling",
+        authors: ["Shinichi Fukuda"],
+        tags: ["Romance", "Comedy", "Cosplay"],
+        characters: ["Marin Kitagawa", "Wakana Gojo"],
+        favorite: true,
+        readLater: false,
       ),
       Book(
-        "C:\\", // path
-        "Komi Can't Communicate: Volume 1", // title
-        "link", // link
-        "Komi Can't Communicate", // series
-        ["Tomohito Oda"], // author
-        ["Romance", "Comedy", "Slice of Life"], // tags
-        ["Komi Shoko", "Tadano Hitohito"], // characters
-        false, // favorite
-        true, // read later
+        path: "C:\\",
+        title: "Komi Can't Communicate: Volume 1",
+        link: "link",
+        series: "Komi Can't Communicate",
+        authors: ["Tomohito Oda"],
+        tags: ["Romance", "Comedy", "Slice of Life"],
+        characters: ["Komi Shoko", "Tadano Hitohito"],
+        favorite: false,
+        readLater: true,
       ),
       Book(
-        "C:\\", // path
-        "Hokkaido Gals Are Super Adorable: Volume 1", // title
-        "link", // link
-        "Hokkaido Gals Are Super Adorable", // series
-        ["Ikada Kai"], // author
-        ["Romance", "Comedy"], // tags
-        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
-        false, // favorite
-        true, // read later
+        path: "C:\\",
+        title: "Hokkaido Gals Are Super Adorable: Volume 1",
+        link: "link",
+        series: "Hokkaido Gals Are Super Adorable",
+        authors: ["Ikada Kai"],
+        tags: ["Romance", "Comedy"],
+        characters: ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"],
+        favorite: false,
+        readLater: true,
       ),
     ];
+
     // set up filtered books
     filteredBooks = List.from(allBooks);
 
