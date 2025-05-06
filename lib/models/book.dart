@@ -1,4 +1,6 @@
 // models/book.dart
+import 'dart:io';
+import 'package:path/path.dart' as p;
 
 class Book {
   String path;
@@ -46,4 +48,32 @@ class Book {
     'favorite': favorite,
     'readLater': readLater,
   };
+
+  String getCoverPath() {
+    // ensure the directory exists
+    final dir = Directory(path);
+    if (!dir.existsSync()) {
+      return '';
+    }
+
+    // list all entries in the folder
+    final entries = dir.listSync();
+
+    // filter to just files with image extensions
+    final images = entries.whereType<File>().where((file) {
+      final ext = p.extension(file.path).toLowerCase();
+      return ['.jpg', '.jpeg', '.png', '.webp'].contains(ext);
+    }).toList();
+
+    // if no images, bail out
+    if (images.isEmpty) {
+      return '';
+    }
+
+    // sort by filename so it's consistent
+    images.sort((a, b) => a.path.compareTo(b.path));
+
+    // return the very first image's path
+    return images.first.path;
+  }
 }

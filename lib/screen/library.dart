@@ -4,7 +4,7 @@ import 'package:flutter_manga_reader/models/book.dart';
 import 'package:provider/provider.dart';
 
 import '../router/routes.dart';
-import '../services/book_repository.dart';
+import '../widgets/book_grid.dart';
 
 // main library screen, holds state for the list of books
 class Library extends StatefulWidget {
@@ -33,11 +33,13 @@ class LibraryState extends State<Library> {
     _searchController.addListener(
       () {
         final q = _searchController.text.toLowerCase();
-        setState(() {
-          filteredBooks = libraryController.books
-              .where((b) => b.title.toLowerCase().contains(q))
-              .toList();
-        });
+        setState(
+          () {
+            filteredBooks = libraryController.books
+                .where((b) => b.title.toLowerCase().contains(q))
+                .toList();
+          },
+        );
       },
     );
   }
@@ -53,11 +55,13 @@ class LibraryState extends State<Library> {
             hintText: 'Search books...',
             onChanged: (value) {
               final q = value.toLowerCase();
-              setState(() {
-                filteredBooks = libraryController.books
-                    .where((b) => b.title.toLowerCase().contains(q))
-                    .toList();
-              });
+              setState(
+                () {
+                  filteredBooks = libraryController.books
+                      .where((b) => b.title.toLowerCase().contains(q))
+                      .toList();
+                },
+              );
             },
           ),
         ),
