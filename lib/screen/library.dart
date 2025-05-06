@@ -29,6 +29,9 @@ class LibraryState extends State<Library> {
     // show all to start
     filteredBooks = List.of(libraryController.books);
 
+    // rebuild any time controller changes
+    libraryController.addListener(_onLibraryChanged);
+
     // controller to whenever the text changes, refilter
     _searchController.addListener(
       () {
@@ -40,6 +43,19 @@ class LibraryState extends State<Library> {
                 .toList();
           },
         );
+      },
+    );
+  }
+
+  // clean up the controller when the widget is disposed
+  void _onLibraryChanged() {
+    if (!mounted) return; // don’t do anything if we’ve been disposed
+    final q = _searchController.text.toLowerCase();
+    setState(
+      () {
+        filteredBooks = libraryController.books
+            .where((b) => b.title.toLowerCase().contains(q))
+            .toList();
       },
     );
   }

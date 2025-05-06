@@ -55,7 +55,19 @@ class _ImportState extends State<Import> {
                 Icons.check,
                 size: 24, // Slightly larger icon
               ),
-              onPressed: () {},
+              onPressed: () {
+                // add the book to the library
+                libraryController.addBook(newBook).then(
+                  (value) {
+                    // tell the user it was added successfully
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Imported “${newBook.title}”')),
+                    );
+                    // pop back to the library screen
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
               label: const Text(
                 "Import book",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -155,9 +167,11 @@ class _ImportState extends State<Import> {
                           child: StringEditor(
                             name: "Title",
                             controller: titleController,
-                            onSubmitted: (newTitle) => setState(() {
-                              newBook.title = newTitle;
-                            }),
+                            onSubmitted: (newTitle) => setState(
+                              () {
+                                newBook.title = newTitle;
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -195,7 +209,14 @@ class _ImportState extends State<Import> {
                             initial: newBook.series,
                             // convert set to list for the editor
                             all: libraryController.series.toList(),
-                            onSelected: (sel) => setState(() {}),
+                            onSelected: (sel) => setState(
+                              () {
+                                // add them if not already in
+                                if (!newBook.series.contains(sel)) {
+                                  newBook.series = sel;
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ),

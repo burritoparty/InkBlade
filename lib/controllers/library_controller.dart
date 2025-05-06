@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import '../models/book.dart';
 import '../services/library_repository.dart';
+import 'package:path_provider/path_provider.dart'; // for getApplicationDocumentsDirectory()
+import 'package:path/path.dart' as p;
 
 class LibraryController extends ChangeNotifier {
   final LibraryRepository _libraryRepository;
@@ -51,9 +55,37 @@ class LibraryController extends ChangeNotifier {
     }
   }
 
+  // recursively copy a folder
+  Future<void> _copyDirectory(Directory source, Directory destination) async {
+    if (!await destination.exists()) {
+      // create destination and any missing parent dirs
+      await destination.create(recursive: true);
+    }
+    for (final entity in source.listSync()) {
+      final newPath = p.join(destination.path, p.basename(entity.path));
+      if (entity is Directory) {
+        // recurse into sub-directory
+        await _copyDirectory(entity, Directory(newPath));
+      } else if (entity is File) {
+        // copy file
+        await entity.copy(newPath);
+      }
+    }
+  }
+
   // add a book to the list and save it to the json file
   // checks if the book already exists in the list
   Future<void> addBook(Book book) async {
+    // determine your app documents dir
+    final docsDir = await getApplicationDocumentsDirectory();
+    // build the target Library/<bookTitle> path
+    final targetDir = Directory(
+      p.join(docsDir.path, 'InkBlade', 'Library', book.title),
+    );
+    // copy the entire folder over
+    await _copyDirectory(Directory(book.path), targetDir);
+    // update the book’s path to the new internal location
+    book.path = targetDir.path;
     // check if the book already exists in the list
     if (_books.any((b) => b.path == book.path)) {
       return;
