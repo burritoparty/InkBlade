@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'controllers/library_controller.dart';
 import 'services/library_repository.dart';
-import 'models/book.dart';
 import 'screen/screens.dart';
 import 'router/routes.dart';
 
@@ -11,54 +12,24 @@ void main() async {
 
   // initialize the library repository, for managing the json file
   final libraryRepository = LibraryRepository();
-  // call init to create the json file if it doesn't exist
-  await libraryRepository.init();
-  // load books from the json file on disk
-  final Books = await libraryRepository.loadBooks();
-
-  // set up sets for unique values
-  final authors = <String>{};
-  final tags = <String>{};
-  final series = <String>{};
-  final characters = <String>{};
-
-  // loop through all books and add their values to the sets
-  for (final book in Books) {
-    authors.addAll(book.authors);
-    tags.addAll(book.tags);
-    series.add(book.series);
-    characters.addAll(book.characters);
-  }
+  // initialize the library controller, for managing the books
+  final libraryController = LibraryController(libraryRepository);
+  // call init to load the books from the json file, and build the sets
+  await libraryController.init();
 
   // run the app with the loaded data
   runApp(
-    MyApp(
-      libraryRepository: libraryRepository,
-      allBooks: Books,
-      allAuthors: authors.toList(),
-      allTags: tags.toList(),
-      allSeries: series.toList(),
-      allCharacters: characters.toList(),
+    ChangeNotifierProvider<LibraryController>.value(
+      value: libraryController,
+      child: MyApp(),
     ),
   );
 }
 
 // root widget: sets up theme and home screen
 class MyApp extends StatelessWidget {
-  final LibraryRepository libraryRepository;
-  final List<Book> allBooks;
-  final List<String> allAuthors;
-  final List<String> allTags;
-  final List<String> allSeries;
-  final List<String> allCharacters;
   const MyApp({
     super.key,
-    required this.libraryRepository,
-    required this.allBooks,
-    required this.allAuthors,
-    required this.allTags,
-    required this.allSeries,
-    required this.allCharacters,
   });
 
   @override
