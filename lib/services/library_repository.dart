@@ -29,9 +29,8 @@ class LibraryRepository {
     // point the file at where library.json should be
     _file = File('${appDir.path}/library.json');
     // check if the file exists, if not create it
-    if (!await _file.exists()) {
-      await _file.writeAsString(jsonEncode({'book': []}));
-    }
+    await _file
+        .writeAsString(JsonEncoder.withIndent('  ').convert({'book': []}));
   }
 
   // read and parse json into real dart objects
@@ -50,6 +49,7 @@ class LibraryRepository {
   // save the books to the file as a json string
   Future<void> saveBooks(List<Book> books) async {
     final data = {'book': books.map((b) => b.toJson()).toList()};
-    await _file.writeAsString(jsonEncode(data));
+    // write out indented JSON
+    await _file.writeAsString(JsonEncoder.withIndent('  ').convert(data));
   }
 }
