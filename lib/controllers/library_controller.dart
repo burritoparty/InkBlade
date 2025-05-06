@@ -167,20 +167,22 @@ class LibraryController extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> updateAuthors(Book book, String newAuthor) async {
+  Future<bool> updateAuthors(Book book, String newAuthor, bool remove) async {
     // find the book in the list
     final index = _books.indexWhere((b) => b.path == book.path);
     // normalize input
     newAuthor = newAuthor.trim();
     // protect against empty author, and if author already exists
     // and if the book exists in the list
-    if (index == -1 ||
-        newAuthor.isEmpty ||
-        _books[index].authors.contains(newAuthor)) {
+    if (index == -1 || newAuthor.isEmpty) {
       return false;
     }
     // update the authors of the book
-    _books[index].authors.add(newAuthor);
+    if (remove) {
+      _books[index].authors.remove(newAuthor);
+    } else {
+      _books[index].authors.add(newAuthor);
+    }
     // rebuild the sets with the new author
     _rebuildSets();
     // save the books to the json file
@@ -191,18 +193,22 @@ class LibraryController extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> updateTags(Book book, String newTag) async {
+  Future<bool> updateTags(Book book, String newTag, bool remove) async {
     // find the book in the list
     final index = _books.indexWhere((b) => b.path == book.path);
     // normalize input
     newTag = newTag.trim();
     // protect against empty tag, and if tag already exists
     // and if the book exists in the list
-    if (index == -1 || newTag.isEmpty || _books[index].tags.contains(newTag)) {
+    if (index == -1 || newTag.isEmpty) {
       return false;
     }
     // update the tags of the book
-    _books[index].tags.add(newTag);
+    if (remove) {
+      _books[index].tags.remove(newTag);
+    } else {
+      _books[index].tags.add(newTag);
+    }
     // rebuild the sets with the new tag
     _rebuildSets();
     // save the books to the json file
@@ -213,20 +219,23 @@ class LibraryController extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> updateCharacters(Book book, String newCharacter) async {
+  Future<bool> updateCharacters(Book book, String newCharacter, bool remove) async {
     // find the book in the list
     final index = _books.indexWhere((b) => b.path == book.path);
     // normalize input
     newCharacter = newCharacter.trim();
     // protect against empty character, and if character already exists
     // and if the book exists in the list
-    if (index == -1 ||
-        newCharacter.isEmpty ||
-        _books[index].characters.contains(newCharacter)) {
+    if (index == -1 || newCharacter.isEmpty) {
       return false;
     }
     // update the characters of the book
-    _books[index].characters.add(newCharacter);
+    if (remove) {
+      _books[index].characters.remove(newCharacter);
+    }
+    else {
+      _books[index].characters.add(newCharacter);
+    }
     // rebuild the sets with the new character
     _rebuildSets();
     // save the books to the json file
