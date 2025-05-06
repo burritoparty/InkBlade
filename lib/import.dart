@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
 import '/widgets/widgets.dart';
+import '../controllers/library_controller.dart';
+import 'package:provider/provider.dart';
 
 class Import extends StatefulWidget {
   const Import({super.key});
@@ -10,131 +12,35 @@ class Import extends StatefulWidget {
 }
 
 class _ImportState extends State<Import> {
-  Book book = Book(
+  late final LibraryController libraryController;
+  // controller for text editing field
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController linkController = TextEditingController();
+
+  Book newBook = Book(
     path: "",
     title: "",
-    link: "",
-    series: "",
     authors: [],
+    series: "",
     tags: [],
     characters: [],
+    link: "",
     favorite: false,
     readLater: false,
   );
-  // grab the books
-  List<Book> allBooks = [];
-  // grab the authors
-  List<String> allAuthors = [];
-  // grab the tags
-  List<String> allTags = [];
-  // grab the series
-  List<String> allSeries = [];
-  // grab the characters
-  List<String> allCharacters = [];
 
   @override
   void initState() {
     super.initState();
-
-    // set up all books, make one a fave
-    final allBooks = [
-      Book(
-        path: "C:\\",
-        title: "Full Metal Alchemist Brotherhood",
-        link: "link",
-        series: "Full Metal Alchemist",
-        authors: ["Hiromu Arakawa"],
-        tags: ["Adventure", "Fantasy"],
-        characters: ["Edward", "Alphonse", "Winry"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "My Dress Up Darling: Volume 1",
-        link: "link",
-        series: "My Dress Up Darling",
-        authors: ["Shinichi Fukuda"],
-        tags: ["Romance", "Comedy", "Cosplay"],
-        characters: ["Marin Kitagawa", "Gojo"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "My Dress Up Darling: Volume 2",
-        link: "link",
-        series: "My Dress Up Darling",
-        authors: ["Shinichi Fukuda"],
-        tags: ["Romance", "Comedy", "Cosplay"],
-        characters: ["Marin Kitagawa", "Wakana Gojo"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "Komi Can't Communicate: Volume 1",
-        link: "link",
-        series: "Komi Can't Communicate",
-        authors: ["Tomohito Oda"],
-        tags: ["Romance", "Comedy", "Slice of Life"],
-        characters: ["Komi Shoko", "Tadano Hitohito"],
-        favorite: false,
-        readLater: true,
-      ),
-      Book(
-        path: "C:\\",
-        title: "Hokkaido Gals Are Super Adorable: Volume 1",
-        link: "link",
-        series: "Hokkaido Gals Are Super Adorable",
-        authors: ["Ikada Kai"],
-        tags: ["Romance", "Comedy"],
-        characters: ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"],
-        favorite: false,
-        readLater: true,
-      ),
-    ];
-
-    // iterate each book
-    for (Book book in allBooks) {
-      // iterate through the books tags
-      for (String tag in book.tags) {
-        // add them if not already in
-        if (!allTags.contains(tag)) {
-          allTags.add(tag);
-        }
-      }
-
-      // iterate trhough the books characters
-      for (String character in book.characters) {
-        // add them if not already in
-        if (!allCharacters.contains(character)) {
-          allCharacters.add(character);
-        }
-      }
-
-      // add author if not already in
-      for (String author in book.authors) {
-        // add them if not already in
-        if (!allAuthors.contains(author)) {
-          allAuthors.add(author);
-        }
-      }
-
-      // add series if not already in
-      if (!allSeries.contains(book.series)) {
-        allSeries.add(book.series);
-      }
-    }
+    // initialize the library controller
+    libraryController = context.read<LibraryController>();
+    // controller for text editing field
+    titleController.text = newBook.title;
+    linkController.text = newBook.link;
   }
 
   @override
   Widget build(BuildContext context) {
-    // controller for text editing field
-    final TextEditingController titleController =
-        TextEditingController(text: book.title);
-    final TextEditingController linkController =
-        TextEditingController(text: book.link);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -180,10 +86,10 @@ class _ImportState extends State<Import> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: FavoriteButton(
-                          isFavorite: book.favorite,
+                          isFavorite: newBook.favorite,
                           onFavoriteToggle: (newVal) => setState(
                             () {
-                              book.favorite = newVal;
+                              newBook.favorite = newVal;
                             },
                           ),
                         ),
@@ -193,10 +99,10 @@ class _ImportState extends State<Import> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: LaterButton(
-                          isReadLater: book.readLater,
+                          isReadLater: newBook.readLater,
                           onReadLaterToggle: (newVal) => setState(
                             () {
-                              book.readLater = newVal;
+                              newBook.readLater = newVal;
                             },
                           ),
                         ),
@@ -231,7 +137,7 @@ class _ImportState extends State<Import> {
                             name: "Title",
                             controller: titleController,
                             onSubmitted: (newTitle) => setState(() {
-                              book.title = newTitle;
+                              newBook.title = newTitle;
                             }),
                           ),
                         ),
@@ -241,17 +147,18 @@ class _ImportState extends State<Import> {
                           padding: const EdgeInsets.all(8.0),
                           child: ListEditor(
                             name: "author",
-                            item: book.authors,
-                            allItems: allAuthors,
+                            item: newBook.authors,
+                            // convert set to list for the editor
+                            allItems: libraryController.authors.toList(),
                             onAdded: (sel) => setState(() {
                               // add them if not already in
-                              if (!book.authors.contains(sel)) {
-                                book.authors.add(sel);
+                              if (!newBook.authors.contains(sel)) {
+                                newBook.authors.add(sel);
                               }
                             }),
                             onRemoved: (author) => setState(() {
                               // remove them if already in
-                              book.authors.remove(author);
+                              newBook.authors.remove(author);
                             }),
                           ),
                         ),
@@ -266,8 +173,9 @@ class _ImportState extends State<Import> {
                           padding: const EdgeInsets.all(8.0),
                           child: DropdownEditor(
                             name: "Series",
-                            initial: book.series,
-                            all: allSeries,
+                            initial: newBook.series,
+                            // convert set to list for the editor
+                            all: libraryController.series.toList(),
                             onSelected: (sel) => setState(() {}),
                           ),
                         ),
@@ -277,17 +185,18 @@ class _ImportState extends State<Import> {
                           padding: const EdgeInsets.all(8.0),
                           child: ListEditor(
                             name: "tag",
-                            item: book.tags,
-                            allItems: allTags,
+                            item: newBook.tags,
+                            // convert set to list for the editor
+                            allItems: libraryController.tags.toList(),
                             onAdded: (sel) => setState(() {
                               // if new tag add to list
-                              if (!book.tags.contains(sel)) {
-                                book.tags.add(sel);
+                              if (!newBook.tags.contains(sel)) {
+                                newBook.tags.add(sel);
                               }
                             }),
                             onRemoved: (tag) => setState(() {
                               // remove them if already in
-                              book.tags.remove(tag);
+                              newBook.tags.remove(tag);
                             }),
                           ),
                         ),
@@ -304,7 +213,7 @@ class _ImportState extends State<Import> {
                             name: "Link",
                             controller: linkController,
                             onSubmitted: (newLink) => setState(() {
-                              book.link = newLink;
+                              newBook.link = newLink;
                             }),
                           ),
                         ),
@@ -314,17 +223,18 @@ class _ImportState extends State<Import> {
                           padding: const EdgeInsets.all(8.0),
                           child: ListEditor(
                             name: "character",
-                            item: book.characters,
-                            allItems: allCharacters,
+                            item: newBook.characters,
+                            // convert set to list for the editor
+                            allItems: libraryController.characters.toList(),
                             onAdded: (sel) => setState(() {
                               // if new character add to list
-                              if (!book.characters.contains(sel)) {
-                                book.characters.add(sel);
+                              if (!newBook.characters.contains(sel)) {
+                                newBook.characters.add(sel);
                               }
                             }),
                             onRemoved: (character) => setState(() {
                               // remove them if already in
-                              book.characters.remove(character);
+                              newBook.characters.remove(character);
                             }),
                           ),
                         ),
