@@ -25,7 +25,6 @@ class _BookDetailsState extends State<BookDetails> {
   // grab the characters
   List<String> allCharacters = [];
   int imagesPerRow = 10;
-  int totalPages = 30;
 
   @override
   void initState() {
@@ -312,7 +311,7 @@ class _BookDetailsState extends State<BookDetails> {
               ),
             ),
             PagesGrid(
-              totalPages: totalPages,
+              book: widget.book,
               imagesPerRow: imagesPerRow,
             ),
           ],
@@ -353,8 +352,8 @@ class CoverImage extends StatelessWidget {
 }
 
 class PagesGrid extends StatelessWidget {
-  /// How many “pages” (placeholders) to show
-  final int totalPages;
+  /// The book object
+  final Book book;
 
   /// Images per row
   final int imagesPerRow;
@@ -364,13 +363,15 @@ class PagesGrid extends StatelessWidget {
 
   const PagesGrid({
     super.key,
-    required this.totalPages,
+    required this.book,
     this.imagesPerRow = 3,
     this.childAspectRatio = 2 / 3,
   });
 
   @override
   Widget build(BuildContext context) {
+    // set the files
+    final pages = book.getPageFiles();
     return Expanded(
       child: GridView.builder(
         padding: const EdgeInsets.only(top: 16.0),
@@ -380,9 +381,12 @@ class PagesGrid extends StatelessWidget {
           mainAxisSpacing: 12,
           childAspectRatio: childAspectRatio,
         ),
-        itemCount: totalPages,
-        itemBuilder: (context, index) {
-          return const Placeholder();
+        itemCount: book.getPageCount(),
+        itemBuilder: (_, i) {
+          return Image.file(
+            pages[i],
+            fit: BoxFit.cover,
+          );
         },
       ),
     );

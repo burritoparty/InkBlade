@@ -26,28 +26,28 @@ class Book {
   });
 
   factory Book.fromJson(Map<String, dynamic> json) => Book(
-    path: json['path'] as String,
-    title: json['title'] as String,
-    link: json['link'] as String,
-    series: json['series'] as String,
-    authors: List<String>.from(json['authors'] ?? []),
-    tags: List<String>.from(json['tags'] ?? []),
-    characters: List<String>.from(json['characters'] ?? []),
-    favorite: json['favorite'] as bool,
-    readLater: json['readLater'] as bool,
-  );
+        path: json['path'] as String,
+        title: json['title'] as String,
+        link: json['link'] as String,
+        series: json['series'] as String,
+        authors: List<String>.from(json['authors'] ?? []),
+        tags: List<String>.from(json['tags'] ?? []),
+        characters: List<String>.from(json['characters'] ?? []),
+        favorite: json['favorite'] as bool,
+        readLater: json['readLater'] as bool,
+      );
 
   Map<String, dynamic> toJson() => {
-    'path': path,
-    'title': title,
-    'link': link,
-    'series': series,
-    'authors': authors,
-    'tags': tags,
-    'characters': characters,
-    'favorite': favorite,
-    'readLater': readLater,
-  };
+        'path': path,
+        'title': title,
+        'link': link,
+        'series': series,
+        'authors': authors,
+        'tags': tags,
+        'characters': characters,
+        'favorite': favorite,
+        'readLater': readLater,
+      };
 
   String getCoverPath() {
     // ensure the directory exists
@@ -75,5 +75,24 @@ class Book {
 
     // return the very first image's path
     return images.first.path;
+  }
+
+  // getter for the page count
+  int getPageCount() {
+    return getPageFiles().length;
+  }
+
+  // get the book's pages and return as File objects
+  List<File> getPageFiles() {
+    final dir = Directory(path);
+    if (!dir.existsSync()) return [];
+
+    final images = dir.listSync().whereType<File>().where((f) {
+      final ext = p.extension(f.path).toLowerCase();
+      return ['.jpg', '.jpeg', '.png', '.webp'].contains(ext);
+    }).toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
+
+    return images;
   }
 }
