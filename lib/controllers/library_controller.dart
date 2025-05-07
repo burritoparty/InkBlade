@@ -279,4 +279,26 @@ class LibraryController extends ChangeNotifier {
     // return true to indicate success
     return true;
   }
+
+  Future<void> removeAuthorFromBooks(String author) async {
+    for (final book in _books) {
+      book.authors.remove(author);
+    }
+    // Rebuild the sets and save the updated books
+    _rebuildSets();
+    await _libraryRepository.saveBooks(_books);
+    notifyListeners();
+  }
+
+  Future<void> renameAuthor(String oldAuthor, String newAuthor) async {
+    for (final book in _books) {
+      if (book.authors.remove(oldAuthor)) {
+        book.authors.add(newAuthor);
+      }
+    }
+    // Rebuild the sets and save the updated books
+    _rebuildSets();
+    await _libraryRepository.saveBooks(_books);
+    notifyListeners();
+  }
 }

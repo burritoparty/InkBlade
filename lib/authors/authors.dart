@@ -44,8 +44,18 @@ class _AuthorsState extends State<Authors> {
     // set up the library controller, which holds the list of books
     // it watches for changes to the list of books, and rebuilds the widget tree
     final libraryController = context.watch<LibraryController>();
-    // Filter the authors dynamically
+    // Get all authors dynamically
     final allAuthors = libraryController.authors.toList();
+
+    // Update filteredAuthors based on the current search query
+    if (_searchController.text.isEmpty) {
+      filteredAuthors = List.from(allAuthors);
+    } else {
+      filteredAuthors = allAuthors
+          .where((author) =>
+              author.toLowerCase().contains(_searchController.text.toLowerCase()))
+          .toList();
+    }
 
     return Column(
       children: [
