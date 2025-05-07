@@ -15,8 +15,6 @@ class Filter extends StatefulWidget {
 }
 
 class _FilterState extends State<Filter> {
-  // TODO need to pass in object with all books
-
   // filtering tools
   late List<Book> allBooks = [];
   late List<Book> filteredBooks = [];
@@ -45,7 +43,7 @@ class _FilterState extends State<Filter> {
     allBooks = libraryController.books;
     // set up filtered books
     filteredBooks = List.from(allBooks);
-    // opulate filters authors, tags, series, characters
+    // populate filters authors, tags, series, characters
     for (Book book in allBooks) {
       for (String tag in book.tags) {
         if (!allTags.contains(tag)) {
@@ -74,10 +72,6 @@ class _FilterState extends State<Filter> {
       () {
         filteredBooks = allBooks.where(
           (book) {
-            // final matchesTitle = title.isEmpty ||
-            //     book.title.toLowerCase().contains(title.toLowerCase());
-            // final matchesAuthor = author.isEmpty ||
-            //     book.authors.toLowerCase() == author.toLowerCase();
             final matchesSeries = book.series.isEmpty ||
                 series.every((series) => book.series.contains(series));
             final matchesTags =
@@ -87,7 +81,6 @@ class _FilterState extends State<Filter> {
             final matchesCharacters = characters.isEmpty ||
                 characters
                     .every((character) => book.characters.contains(character));
-            // return matchesTitle && matchesAuthor && matchesTags;
             return matchesAuthors &&
                 matchesSeries &&
                 matchesTags &&
@@ -101,8 +94,11 @@ class _FilterState extends State<Filter> {
   @override
   Widget build(BuildContext context) {
     // set up the library controller, which holds the list of books
+    // it watches for changes to the list of books, and rebuilds the widget tree
     final libraryController = context.watch<LibraryController>();
     allBooks = libraryController.books;
+    // will reapply filters when the library changes
+    _applyFilters();
     return Column(
       children: [
         Row(
