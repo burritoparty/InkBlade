@@ -28,9 +28,11 @@ class LibraryRepository {
 
     // point the file at where library.json should be
     _file = File('${appDir.path}/library.json');
-    // check if the file exists, if not create it
-    await _file
-        .writeAsString(JsonEncoder.withIndent('  ').convert({'book': []}));
+    // Check if the file exists, if not create it
+    if (!await _file.exists()) {
+      await _file
+          .writeAsString(JsonEncoder.withIndent('  ').convert({'book': []}));
+    }
   }
 
   // read and parse json into real dart objects
