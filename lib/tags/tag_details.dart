@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_manga_reader/widgets/widgets.dart';
+import 'package:provider/provider.dart';
+import '../widgets/book_grid.dart';
 import '../router/routes.dart';
-import '../services/book_repository.dart';
-import '../models/book.dart';
+import '../widgets/widgets.dart';
+import '../controllers/library_controller.dart';
 
 class TagDetails extends StatefulWidget {
   final String tag;
-  // const TagDetails({Key? key, required this.tag}) : super(key: key);
+
   const TagDetails({
     super.key,
     required this.tag,
@@ -17,168 +18,101 @@ class TagDetails extends StatefulWidget {
 }
 
 class _TagDetailsState extends State<TagDetails> {
-  late TextEditingController _controller;
-  late String _currentTag;
-  late String _originalTag;
-  final List<String> allTags = List.generate(15, (i) => 'tagname$i');
-  late final List<Book> allBooks;
-  late final List<Book> filteredBooks = [];
+  late String _tag;
 
   @override
   void initState() {
     super.initState();
-    _originalTag = widget.tag;
-    _currentTag = widget.tag;
-    _controller = TextEditingController(text: _currentTag);
-
-    // TODO: be passed all books, and search for author
-    // dummy data
-    allBooks = [
-      Book(
-        "C:\\", // path
-        "Full Metal Alchemist Brotherhood", // title
-        "link", // link
-        "Full Metal Alchemist", // series
-        ["Hiromu Arakawa"], // author
-        ["Adventure", "Fantasy"], // tags
-        ["Edward", "Alphonse", "Winry"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 1", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 2", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Wakana Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Komi Can't Communicate: Volume 1", // title
-        "link", // link
-        "Komi Can't Communicate", // series
-        ["Tomohito Oda"], // author
-        ["Romance", "Comedy", "Slice of Life"], // tags
-        ["Komi Shoko", "Tadano Hitohito"], // characters
-        false, // favorite
-        true, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Hokkaido Gals Are Super Adorable: Volume 1", // title
-        "link", // link
-        "Hokkaido Gals Are Super Adorable", // series
-        ["Ikada Kai"], // author
-        ["Romance", "Comedy"], // tags
-        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
-        false, // favorite
-        true, // read later
-      ),
-    ];
-
-    // iterate through all books
-    for (final Book book in allBooks) {
-      // iterate through each tag
-      for (final String tag in book.tags) {
-        // if it finds a tag that matches
-        if (tag == widget.tag) {
-          // add it to the filtered books for the grid
-          filteredBooks.add(book);
-        }
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onSubmitted(String newTag) {
-    final oldTag = _originalTag;
-
-    // replace tag on every book
-    for (final Book book in allBooks) {
-      for (int i = 0; i < book.tags.length; i++) {
-        // if it finds the old tag, swap it out
-        if (book.tags[i] == oldTag) {
-          book.tags[i] = newTag;
-        }
-      }
-    }
-
-    // update master tag list
-    final int idx = allTags.indexOf(oldTag);
-    if (idx != -1) {
-      allTags[idx] = newTag;
-    }
-
-    // update state and re-filter
-    setState(() {
-      _originalTag = newTag; // next rename uses this as oldTag
-      _currentTag = newTag;
-      _controller.text = newTag;
-      filteredBooks
-        ..clear()
-        ..addAll(allBooks.where((b) => b.tags.contains(newTag)));
-    });
+    _tag = widget.tag;
   }
 
   @override
   Widget build(BuildContext context) {
+    // set up the library controller, which holds the list of books
+    final libraryController = context.watch<LibraryController>();
+    // filter the books dynamically
+    final filteredBooks = libraryController.books
+        .where((book) => book.tags.contains(_tag))
+        .toList();
+    // get all tags from the library controller
+    final allTags = libraryController.tags.toList();
+
     return Scaffold(
-      appBar: AppBar(title: Text(_currentTag)),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            // edit tag name
-            Row(
-              children: [
-                Expanded(
-                  child: StringEditor(
-                    name: "Rename tag",
-                    controller: _controller,
-                    onSubmitted: _onSubmitted,
+      appBar: AppBar(
+        title: Text(_tag),
+      ),
+      body: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DropdownEditor(
+                    name: "Rename Tag",
+                    initial: _tag,
+                    all: allTags,
+                    onSelected: (sel) async {
+                      if (_tag != sel) {
+                        final libraryController = context.read<LibraryController>();
+                        // Rename the tag in all books
+                        await libraryController.renameTag(_tag, sel);
+                        setState(() {
+                          _tag = sel;
+                        });
+                      }
+                    },
                   ),
                 ),
-                DeleteButton(onDelete: () {
-                  // TODO: delete logic here
-                }),
-              ],
-            ),
-            // book grid
-            Expanded(
-              child: BookGrid(
-                books: filteredBooks,
-                onBookTap: (index) async {
-                  await Navigator.pushNamed(
-                    context,
-                    Routes.details,
-                    arguments: filteredBooks[index],
-                  );
-                  setState(() {}); // pick up any changes on return
-                },
               ),
+              DeleteButton(onDelete: () async {
+                if (!mounted) return; // Ensure the widget is still mounted
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Confirm Deletion'),
+                      content: const Text('Are you sure you want to delete this tag?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false), // Cancel
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true), // Confirm
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (confirm == true) {
+                  final libraryController = context.read<LibraryController>();
+                  // remove the tag from all books
+                  await libraryController.removeTagFromBooks(_tag);
+                  // back to the previous screen
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
+                }
+              }),
+            ],
+          ),
+          Expanded(
+            child: BookGrid(
+              books: filteredBooks,
+              onBookTap: (index) async {
+                await Navigator.pushNamed(
+                  context,
+                  Routes.details,
+                  arguments: filteredBooks[index],
+                );
+                setState(() {}); // refresh the screen after returning
+              },
             ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }

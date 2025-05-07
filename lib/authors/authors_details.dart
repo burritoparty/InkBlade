@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../services/book_repository.dart';
-import '../models/book.dart';
+import 'package:provider/provider.dart';
+import '../widgets/book_grid.dart';
 import '../router/routes.dart';
 import '../widgets/widgets.dart';
+import '../controllers/library_controller.dart';
 
 class AuthorDetails extends StatefulWidget {
   final String author;
@@ -18,93 +19,25 @@ class AuthorDetails extends StatefulWidget {
 
 class AuthorDetailsState extends State<AuthorDetails> {
   late String _author;
-  late List<String> allAuthors = [];
-  late final List<Book> allBooks;
-  late List<Book> filteredBooks = [];
 
   @override
   void initState() {
     super.initState();
     _author = widget.author;
-
-    // get all the books
-    allBooks = [
-      Book(
-        "C:\\", // path
-        "Full Metal Alchemist Brotherhood", // title
-        "link", // link
-        "Full Metal Alchemist", // series
-        ["Hiromu Arakawa"], // author
-        ["Adventure", "Fantasy"], // tags
-        ["Edward", "Alphonse", "Winry"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 1", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 2", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Wakana Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Komi Can't Communicate: Volume 1", // title
-        "link", // link
-        "Komi Can't Communicate", // series
-        ["Tomohito Oda"], // author
-        ["Romance", "Comedy", "Slice of Life"], // tags
-        ["Komi Shoko", "Tadano Hitohito"], // characters
-        false, // favorite
-        true, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Hokkaido Gals Are Super Adorable: Volume 1", // title
-        "link", // link
-        "Hokkaido Gals Are Super Adorable", // series
-        ["Ikada Kai"], // author
-        ["Romance", "Comedy"], // tags
-        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
-        false, // favorite
-        true, // read later
-      ),
-    ];
-
-    // look through the books and only load up the ones with author
-    for (Book book in allBooks) {
-      // iterate thru every books authors
-      for (String author in book.authors) {
-        // if new author add to list
-        if (!allAuthors.contains(author)) {
-          allAuthors.add(author);
-        }
-        // if author matches author add to list
-        // TODO this may cause an error when changing the author name
-        if (author == _author) {
-          filteredBooks.add(book);
-        }
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // set up the library controller, which holds the list of books
+    // it watches for changes to the list of books, and rebuilds the widget tree
+    final libraryController = context.watch<LibraryController>();
+    // Filter the books dynamically
+    final filteredBooks = libraryController.books
+        .where((book) => book.authors.contains(_author))
+        .toList();
+      // get all authors from the library controller
+    final allAuthors = libraryController.authors.toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_author),
@@ -120,20 +53,51 @@ class AuthorDetailsState extends State<AuthorDetails> {
                     name: "Rename Author",
                     initial: _author,
                     all: allAuthors,
-                    onSelected: (sel) => setState(() {
-                      // add sel to book.tags if it’s not already there
+                    onSelected: (sel) async {
                       if (_author != sel) {
-                        _author = sel;
+                        final libraryController = context.read<LibraryController>();
+                        // rename the author in all books
+                        await libraryController.renameAuthor(_author, sel);
+                        setState(() {
+                          _author = sel;
+                        });
                       }
-                      // TODO: this prob needs changed when implementing database
-                      if (!allAuthors.contains(sel)) allAuthors.add(sel);
-                    }),
+                    },
                   ),
                 ),
               ),
-              DeleteButton(
-                onDelete: () { }
-              ),
+              DeleteButton(onDelete: () async {
+                if (!mounted) return; // Ensure the widget is still mounted
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Confirm Deletion'),
+                      content: const Text('Are you sure you want to delete this author?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false), // Cancel
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true), // Confirm
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (confirm == true) {
+                  final libraryController = context.read<LibraryController>();
+                  // Remove the author from all books
+                  await libraryController.removeAuthorFromBooks(_author);
+                  // Navigate back to the previous screen
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
+                }
+              }),
             ],
           ),
           Expanded(
@@ -145,7 +109,7 @@ class AuthorDetailsState extends State<AuthorDetails> {
                   Routes.details,
                   arguments: filteredBooks[index],
                 );
-                setState(() {}); // pick up any changes on return
+                setState(() {}); // Refresh UI on return
               },
             ),
           )

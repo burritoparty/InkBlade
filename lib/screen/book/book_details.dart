@@ -4,6 +4,9 @@ import '../../router/routes.dart';
 import '../../widgets/widgets.dart';
 import 'dart:io';
 
+import 'package:provider/provider.dart';
+import 'package:flutter_manga_reader/controllers/library_controller.dart';
+
 class BookDetails extends StatefulWidget {
   final Book book;
   const BookDetails({super.key, required this.book});
@@ -13,114 +16,14 @@ class BookDetails extends StatefulWidget {
 }
 
 class _BookDetailsState extends State<BookDetails> {
-  // mock data
-  // grab the books
-  List<Book> allBooks = [];
-  // grab the authors
-  List<String> allAuthors = [];
-  // grab the tags
-  List<String> allTags = [];
-  // grab the series
-  List<String> allSeries = [];
-  // grab the characters
-  List<String> allCharacters = [];
+  late final LibraryController libraryController;
   int imagesPerRow = 10;
-  int totalPages = 30;
 
   @override
   void initState() {
     super.initState();
-
-    // set up all books, make one a fave
-    allBooks = [
-      Book(
-        "C:\\", // path
-        "Full Metal Alchemist Brotherhood", // title
-        "link", // link
-        "Full Metal Alchemist", // series
-        ["Hiromu Arakawa"], // author
-        ["Adventure", "Fantasy"], // tags
-        ["Edward", "Alphonse", "Winry"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 1", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 2", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Wakana Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Komi Can't Communicate: Volume 1", // title
-        "link", // link
-        "Komi Can't Communicate", // series
-        ["Tomohito Oda"], // author
-        ["Romance", "Comedy", "Slice of Life"], // tags
-        ["Komi Shoko", "Tadano Hitohito"], // characters
-        false, // favorite
-        true, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Hokkaido Gals Are Super Adorable: Volume 1", // title
-        "link", // link
-        "Hokkaido Gals Are Super Adorable", // series
-        ["Ikada Kai"], // author
-        ["Romance", "Comedy"], // tags
-        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
-        false, // favorite
-        true, // read later
-      ),
-    ];
-
-    // iterate each book
-    for (Book book in allBooks) {
-      // iterate through the books tags
-      for (String tag in book.tags) {
-        // add them if not already in
-        if (!allTags.contains(tag)) {
-          allTags.add(tag);
-        }
-      }
-
-      // iterate trhough the books characters
-      for (String character in book.characters) {
-        // add them if not already in
-        if (!allCharacters.contains(character)) {
-          allCharacters.add(character);
-        }
-      }
-
-      // iterate trhough the books characters
-      for (String author in book.authors) {
-        // add them if not already in
-        if (!allAuthors.contains(author)) {
-          allAuthors.add(author);
-        }
-      }
-
-      // add series if not already in
-      if (!allSeries.contains(book.series)) {
-        allSeries.add(book.series);
-      }
-    }
+    // initialize the library controller
+    libraryController = context.read<LibraryController>();
   }
 
   @override
@@ -158,11 +61,19 @@ class _BookDetailsState extends State<BookDetails> {
                           child: StringEditor(
                             name: "Title",
                             controller: titleController,
-                            onSubmitted: (newTitle) => setState(
-                              () {
-                                widget.book.title = newTitle;
-                              },
-                            ),
+                            onSubmitted: (newTitle) async {
+                              // wait for the title to be updated
+                              final success = await libraryController
+                                  .updateTitle(widget.book, newTitle);
+                              // then if it was successful, update the book title
+                              if (success) {
+                                setState(
+                                  () {
+                                    widget.book.title = newTitle;
+                                  },
+                                );
+                              }
+                            },
                           ),
                         ),
                         Padding(
@@ -170,14 +81,15 @@ class _BookDetailsState extends State<BookDetails> {
                           child: DropdownEditor(
                             name: "Series",
                             initial: widget.book.series,
-                            all: allSeries,
+                            all: libraryController.series.toList(),
                             onSelected: (sel) => setState(() {
-                              // add sel to book.tags if it’s not already there
+                              // add sel to book.series if it’s not already there
                               if (widget.book.series != sel) {
                                 widget.book.series = sel;
                               }
-                              // TODO: this prob needs changed when implementing database
-                              if (!allSeries.contains(sel)) allSeries.add(sel);
+                              if (!libraryController.series.contains(sel)) {
+                                libraryController.series.add(sel);
+                              }
                             }),
                           ),
                         ),
@@ -187,11 +99,19 @@ class _BookDetailsState extends State<BookDetails> {
                           child: StringEditor(
                             name: "Link",
                             controller: linkController,
-                            onSubmitted: (newLink) => setState(
-                              () {
-                                widget.book.link = newLink;
-                              },
-                            ),
+                            onSubmitted: (newLink) async {
+                              // wait for the link to be updated
+                              final success = await libraryController
+                                  .updateLink(widget.book, newLink);
+                              // then if it was successful, update the book title
+                              if (success) {
+                                setState(
+                                  () {
+                                    widget.book.link = newLink;
+                                  },
+                                );
+                              }
+                            },
                           ),
                         ),
                         // favorite and read later
@@ -202,11 +122,19 @@ class _BookDetailsState extends State<BookDetails> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: FavoriteButton(
                                   isFavorite: widget.book.favorite,
-                                  onFavoriteToggle: (newVal) => setState(
-                                    () {
-                                      widget.book.favorite = newVal;
-                                    },
-                                  ),
+                                  onFavoriteToggle: (newVal) async {
+                                    // Update the book's favorite status and save to JSON
+                                    final success = await libraryController
+                                        .updateFavorite(widget.book, newVal);
+                                    if (success) {
+                                      setState(
+                                        () {
+                                          widget.book.favorite =
+                                              newVal; // Update the UI
+                                        },
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -215,9 +143,19 @@ class _BookDetailsState extends State<BookDetails> {
                               padding: const EdgeInsets.all(8.0),
                               child: LaterButton(
                                 isReadLater: widget.book.readLater,
-                                onReadLaterToggle: (newVal) => setState(() {
-                                  widget.book.readLater = newVal;
-                                }),
+                                onReadLaterToggle: (newVal) async {
+                                  // Update the book's readLater status and save to JSON
+                                  final success = await libraryController
+                                      .updateReadLater(widget.book, newVal);
+                                  if (success) {
+                                    setState(
+                                      () {
+                                        widget.book.readLater =
+                                            newVal; // Update the UI
+                                      },
+                                    );
+                                  }
+                                },
                               ),
                             ))
                           ],
@@ -238,19 +176,31 @@ class _BookDetailsState extends State<BookDetails> {
                           child: ListEditor(
                             name: "author",
                             item: widget.book.authors,
-                            allItems: allAuthors,
-                            onAdded: (sel) => setState(() {
-                              // add sel to book.authors if it’s not already there
+                            allItems: libraryController.authors.toList(),
+                            onAdded: (sel) async {
                               if (!widget.book.authors.contains(sel)) {
-                                widget.book.authors.add(sel);
+                                // Update the book's authors and save to JSON
+                                final success = await libraryController
+                                    .updateAuthors(widget.book, sel, false);
+                                if (success) {
+                                  setState(() {}); // Just update the UI
+                                }
                               }
-                              // TODO: this prob needs changed when implementing database
-                              if (!allAuthors.contains(sel))
-                                allAuthors.add(sel);
-                            }),
-                            onRemoved: (author) => setState(() {
-                              widget.book.authors.remove(author);
-                            }),
+                            },
+                            onRemoved: (author) async {
+                              if (widget.book.authors.contains(author)) {
+                                // Update the book's authors and save to JSON
+                                final success = await libraryController
+                                    .updateAuthors(widget.book, author, true);
+                                if (success) {
+                                  setState(
+                                    () {
+                                      widget.book.authors.remove(author);
+                                    },
+                                  );
+                                }
+                              }
+                            },
                           ),
                         ),
                         // tags
@@ -259,18 +209,31 @@ class _BookDetailsState extends State<BookDetails> {
                           child: ListEditor(
                             name: "tag",
                             item: widget.book.tags,
-                            allItems: allTags,
-                            onAdded: (sel) => setState(() {
-                              // add sel to book.tags if it’s not already there
+                            allItems: libraryController.tags.toList(),
+                            onAdded: (sel) async {
                               if (!widget.book.tags.contains(sel)) {
-                                widget.book.tags.add(sel);
+                                // Update the book's tags and save to JSON
+                                final success = await libraryController
+                                    .updateTags(widget.book, sel, false);
+                                if (success) {
+                                  setState(() {}); // Just update the UI
+                                }
                               }
-                              // TODO: this prob needs changed when implementing database
-                              if (!allTags.contains(sel)) allTags.add(sel);
-                            }),
-                            onRemoved: (tag) => setState(() {
-                              widget.book.tags.remove(tag);
-                            }),
+                            },
+                            onRemoved: (tag) async {
+                              if (widget.book.tags.contains(tag)) {
+                                // Update the book's tags and save to JSON
+                                final success = await libraryController
+                                    .updateTags(widget.book, tag, true);
+                                if (success) {
+                                  setState(
+                                    () {
+                                      widget.book.tags.remove(tag);
+                                    },
+                                  );
+                                }
+                              }
+                            },
                           ),
                         ),
                         // characters
@@ -279,30 +242,83 @@ class _BookDetailsState extends State<BookDetails> {
                           child: ListEditor(
                             name: "character",
                             item: widget.book.characters,
-                            allItems: allCharacters,
-                            onAdded: (sel) => setState(() {
-                              // add sel to book.chars if it’s not already there
+                            allItems: libraryController.characters.toList(),
+                            onAdded: (sel) async {
                               if (!widget.book.characters.contains(sel)) {
-                                widget.book.characters.add(sel);
+                                // Update the book's characters and save to JSON
+                                final success = await libraryController
+                                    .updateCharacters(widget.book, sel, false);
+                                if (success) {
+                                  setState(() {}); // Just update the UI
+                                }
                               }
-                              // TODO: this prob needs changed when implementing database
-                              if (!allCharacters.contains(sel))
-                                allCharacters.add(sel);
-                            }),
-                            onRemoved: (character) => setState(() {
-                              widget.book.characters.remove(character);
-                            }),
+                            },
+                            onRemoved: (character) async {
+                              if (widget.book.characters.contains(character)) {
+                                // Update the book's characters and save to JSON
+                                final success =
+                                    await libraryController.updateCharacters(
+                                        widget.book, character, true);
+                                if (success) {
+                                  setState(
+                                    () {
+                                      widget.book.characters.remove(character);
+                                    },
+                                  );
+                                }
+                              }
+                            },
                           ),
                         ),
                         // explorer and delete
                         Row(
                           children: [
-                            ExplorerButton(onExplorer: () {
-                              Process.run("explorer", [widget.book.path]);
-                            }),
-                            DeleteButton(onDelete: () {
-                              // delete logic here
-                            }),
+                            ExplorerButton(
+                              onExplorer: () {
+                                Process.run("explorer", [widget.book.path]);
+                              },
+                            ),
+                            DeleteButton(
+                              onDelete: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Delete Book"),
+                                    content: const Text(
+                                        "Are you sure you want to delete this book?"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(
+                                            context, false), // Cancel
+                                        child: const Text("Cancel"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(
+                                            context, true), // Confirm
+                                        child: const Text("Delete"),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                                if (confirm == true) {
+                                  // Remove the book from the library
+                                  await libraryController
+                                      .removeBook(widget.book);
+
+                                  // Delete the book's files from the filesystem
+                                  final bookDir = Directory(widget.book.path);
+                                  if (await bookDir.exists()) {
+                                    await bookDir.delete(recursive: true);
+                                  }
+
+                                  // Navigate back to the previous screen
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                  }
+                                }
+                              },
+                            ),
                           ],
                         ),
                       ],
@@ -312,7 +328,7 @@ class _BookDetailsState extends State<BookDetails> {
               ),
             ),
             PagesGrid(
-              totalPages: totalPages,
+              book: widget.book,
               imagesPerRow: imagesPerRow,
             ),
           ],
@@ -325,7 +341,7 @@ class _BookDetailsState extends State<BookDetails> {
 class CoverImage extends StatelessWidget {
   final Book book;
   // requires the book as a param
-  const CoverImage({Key? key, required this.book}) : super(key: key);
+  const CoverImage({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {
@@ -342,9 +358,9 @@ class CoverImage extends StatelessWidget {
               arguments: book, // object passed it
             );
           },
-          child: const AspectRatio(
+          child: AspectRatio(
             aspectRatio: 2 / 3,
-            child: Placeholder(),
+            child: Image.file(File(book.getCoverPath())),
           ),
         ),
       ),
@@ -353,8 +369,8 @@ class CoverImage extends StatelessWidget {
 }
 
 class PagesGrid extends StatelessWidget {
-  /// How many “pages” (placeholders) to show
-  final int totalPages;
+  /// The book object
+  final Book book;
 
   /// Images per row
   final int imagesPerRow;
@@ -363,14 +379,16 @@ class PagesGrid extends StatelessWidget {
   final double childAspectRatio;
 
   const PagesGrid({
-    Key? key,
-    required this.totalPages,
+    super.key,
+    required this.book,
     this.imagesPerRow = 3,
     this.childAspectRatio = 2 / 3,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    // set the files
+    final pages = book.getPageFiles();
     return Expanded(
       child: GridView.builder(
         padding: const EdgeInsets.only(top: 16.0),
@@ -380,9 +398,12 @@ class PagesGrid extends StatelessWidget {
           mainAxisSpacing: 12,
           childAspectRatio: childAspectRatio,
         ),
-        itemCount: totalPages,
-        itemBuilder: (context, index) {
-          return const Placeholder();
+        itemCount: book.getPageCount(),
+        itemBuilder: (_, i) {
+          return Image.file(
+            pages[i],
+            fit: BoxFit.cover,
+          );
         },
       ),
     );

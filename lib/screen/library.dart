@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_manga_reader/controllers/library_controller.dart';
 import 'package:flutter_manga_reader/models/book.dart';
+import 'package:provider/provider.dart';
 
 import '../router/routes.dart';
-import '../services/book_repository.dart';
+import '../widgets/book_grid.dart';
 
 // main library screen, holds state for the list of books
 class Library extends StatefulWidget {
@@ -13,85 +15,47 @@ class Library extends StatefulWidget {
 }
 
 class LibraryState extends State<Library> {
-  // temporary in‐memory list until we load from JSON
-  late List<Book> temporaryBooks;
-  late final List<Book> allBooks;
+  late final LibraryController libraryController;
   late List<Book> filteredBooks;
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // dummy data
-    allBooks = [
-      Book(
-        "C:\\", // path
-        "Full Metal Alchemist Brotherhood", // title
-        "link", // link
-        "Full Metal Alchemist", // series
-        ["Hiromu Arakawa"], // author
-        ["Adventure", "Fantasy"], // tags
-        ["Edward", "Alphonse", "Winry"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 1", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 2", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Wakana Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Komi Can't Communicate: Volume 1", // title
-        "link", // link
-        "Komi Can't Communicate", // series
-        ["Tomohito Oda"], // author
-        ["Romance", "Comedy", "Slice of Life"], // tags
-        ["Komi Shoko", "Tadano Hitohito"], // characters
-        false, // favorite
-        true, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Hokkaido Gals Are Super Adorable: Volume 1", // title
-        "link", // link
-        "Hokkaido Gals Are Super Adorable", // series
-        ["Ikada Kai"], // author
-        ["Romance", "Comedy"], // tags
-        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
-        false, // favorite
-        true, // read later
-      ),
-    ];
+
+    // get the library controller from the provider
+    libraryController = context.read<LibraryController>();
 
     // show all to start
-    filteredBooks = List.of(allBooks);
+    filteredBooks = List.of(libraryController.books);
+
+    // rebuild any time controller changes
+    libraryController.addListener(_onLibraryChanged);
 
     // controller to whenever the text changes, refilter
     _searchController.addListener(
       () {
         final q = _searchController.text.toLowerCase();
-        setState(() {
-          filteredBooks =
-              allBooks.where((b) => b.title.toLowerCase().contains(q)).toList();
-        });
+        setState(
+          () {
+            filteredBooks = libraryController.books
+                .where((b) => b.title.toLowerCase().contains(q))
+                .toList();
+          },
+        );
+      },
+    );
+  }
+
+  // clean up the controller when the widget is disposed
+  void _onLibraryChanged() {
+    if (!mounted) return; // don’t do anything if we’ve been disposed
+    final q = _searchController.text.toLowerCase();
+    setState(
+      () {
+        filteredBooks = libraryController.books
+            .where((b) => b.title.toLowerCase().contains(q))
+            .toList();
       },
     );
   }
@@ -107,11 +71,13 @@ class LibraryState extends State<Library> {
             hintText: 'Search books...',
             onChanged: (value) {
               final q = value.toLowerCase();
-              setState(() {
-                filteredBooks = allBooks
-                    .where((b) => b.title.toLowerCase().contains(q))
-                    .toList();
-              });
+              setState(
+                () {
+                  filteredBooks = libraryController.books
+                      .where((b) => b.title.toLowerCase().contains(q))
+                      .toList();
+                },
+              );
             },
           ),
         ),

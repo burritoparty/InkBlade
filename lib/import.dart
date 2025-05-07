@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
 import '/widgets/widgets.dart';
+import '../controllers/library_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:file_selector/file_selector.dart';
+import 'dart:io';
+import 'package:path/path.dart' as p;
 
 class Import extends StatefulWidget {
   const Import({super.key});
@@ -10,121 +15,35 @@ class Import extends StatefulWidget {
 }
 
 class _ImportState extends State<Import> {
-  Book book = Book("", "", "", "", [], [], [], false, false);
-  // grab the books
-  List<Book> allBooks = [];
-  // grab the authors
-  List<String> allAuthors = [];
-  // grab the tags
-  List<String> allTags = [];
-  // grab the series
-  List<String> allSeries = [];
-  // grab the characters
-  List<String> allCharacters = [];
+  late final LibraryController libraryController;
+  // controller for text editing field
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController linkController = TextEditingController();
+
+  Book newBook = Book(
+    path: "",
+    title: "",
+    authors: [],
+    series: "",
+    tags: [],
+    characters: [],
+    link: "",
+    favorite: false,
+    readLater: false,
+  );
 
   @override
   void initState() {
     super.initState();
-
-    // set up all books, make one a fave
-    allBooks = [
-      Book(
-        "C:\\", // path
-        "Full Metal Alchemist Brotherhood", // title
-        "link", // link
-        "Full Metal Alchemist", // series
-        ["Hiromu Arakawa"], // author
-        ["Adventure", "Fantasy"], // tags
-        ["Edward", "Alphonse", "Winry"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 1", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "My Dress Up Darling: Volume 2", // title
-        "link", // link
-        "My Dress Up Darling", // series
-        ["Shinichi Fukuda"], // author
-        ["Romance", "Comedy", "Cosplay"], // tags
-        ["Marin Kitagawa", "Wakana Gojo"], // characters
-        true, // favorite
-        false, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Komi Can't Communicate: Volume 1", // title
-        "link", // link
-        "Komi Can't Communicate", // series
-        ["Tomohito Oda"], // author
-        ["Romance", "Comedy", "Slice of Life"], // tags
-        ["Komi Shoko", "Tadano Hitohito"], // characters
-        false, // favorite
-        true, // read later
-      ),
-      Book(
-        "C:\\", // path
-        "Hokkaido Gals Are Super Adorable: Volume 1", // title
-        "link", // link
-        "Hokkaido Gals Are Super Adorable", // series
-        ["Ikada Kai"], // author
-        ["Romance", "Comedy"], // tags
-        ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"], // characters
-        false, // favorite
-        true, // read later
-      ),
-    ];
-
-    // iterate each book
-    for (Book book in allBooks) {
-      // iterate through the books tags
-      for (String tag in book.tags) {
-        // add them if not already in
-        if (!allTags.contains(tag)) {
-          allTags.add(tag);
-        }
-      }
-
-      // iterate trhough the books characters
-      for (String character in book.characters) {
-        // add them if not already in
-        if (!allCharacters.contains(character)) {
-          allCharacters.add(character);
-        }
-      }
-
-      // add author if not already in
-      for (String author in book.authors) {
-        // add them if not already in
-        if (!allAuthors.contains(author)) {
-          allAuthors.add(author);
-        }
-      }
-
-      // add series if not already in
-      if (!allSeries.contains(book.series)) {
-        allSeries.add(book.series);
-      }
-    }
+    // initialize the library controller
+    libraryController = context.read<LibraryController>();
+    // controller for text editing field
+    titleController.text = newBook.title;
+    linkController.text = newBook.link;
   }
 
   @override
   Widget build(BuildContext context) {
-    // controller for text editing field
-    final TextEditingController titleController =
-        TextEditingController(text: book.title);
-    final TextEditingController linkController =
-        TextEditingController(text: book.link);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -136,7 +55,19 @@ class _ImportState extends State<Import> {
                 Icons.check,
                 size: 24, // Slightly larger icon
               ),
-              onPressed: () {},
+              onPressed: () {
+                // add the book to the library
+                libraryController.addBook(newBook).then(
+                  (value) {
+                    // tell the user it was added successfully
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Imported “${newBook.title}”')),
+                    );
+                    // pop back to the library screen
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
               label: const Text(
                 "Import book",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -170,10 +101,10 @@ class _ImportState extends State<Import> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: FavoriteButton(
-                          isFavorite: book.favorite,
+                          isFavorite: newBook.favorite,
                           onFavoriteToggle: (newVal) => setState(
                             () {
-                              book.favorite = newVal;
+                              newBook.favorite = newVal;
                             },
                           ),
                         ),
@@ -183,10 +114,10 @@ class _ImportState extends State<Import> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: LaterButton(
-                          isReadLater: book.readLater,
+                          isReadLater: newBook.readLater,
                           onReadLaterToggle: (newVal) => setState(
                             () {
-                              book.readLater = newVal;
+                              newBook.readLater = newVal;
                             },
                           ),
                         ),
@@ -194,11 +125,27 @@ class _ImportState extends State<Import> {
                     )
                   ],
                 ),
-                const Expanded(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CoverImage(),
-                )),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CoverImage(
+                      folderPath: newBook.path,
+                      onFolderSelected: (path) => setState(
+                        () {
+                          // set the path to the selected folder
+                          newBook.path = path;
+                          // clean up the string for the title
+                          String title = p.basename(path);
+                          title = cleanString(title);
+                          // set the title to the cleaned up string
+                          titleController.text = title;
+                          newBook.title = title;
+                          // TODO: find a way to set StringEditor for title to green
+                        },
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -220,9 +167,11 @@ class _ImportState extends State<Import> {
                           child: StringEditor(
                             name: "Title",
                             controller: titleController,
-                            onSubmitted: (newTitle) => setState(() {
-                              book.title = newTitle;
-                            }),
+                            onSubmitted: (newTitle) => setState(
+                              () {
+                                newBook.title = newTitle;
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -231,17 +180,18 @@ class _ImportState extends State<Import> {
                           padding: const EdgeInsets.all(8.0),
                           child: ListEditor(
                             name: "author",
-                            item: book.authors,
-                            allItems: allAuthors,
+                            item: newBook.authors,
+                            // convert set to list for the editor
+                            allItems: libraryController.authors.toList(),
                             onAdded: (sel) => setState(() {
                               // add them if not already in
-                              if (!book.authors.contains(sel)) {
-                                book.authors.add(sel);
+                              if (!newBook.authors.contains(sel)) {
+                                newBook.authors.add(sel);
                               }
                             }),
                             onRemoved: (author) => setState(() {
                               // remove them if already in
-                              book.authors.remove(author);
+                              newBook.authors.remove(author);
                             }),
                           ),
                         ),
@@ -256,9 +206,17 @@ class _ImportState extends State<Import> {
                           padding: const EdgeInsets.all(8.0),
                           child: DropdownEditor(
                             name: "Series",
-                            initial: book.series,
-                            all: allSeries,
-                            onSelected: (sel) => setState(() {}),
+                            initial: newBook.series,
+                            // convert set to list for the editor
+                            all: libraryController.series.toList(),
+                            onSelected: (sel) => setState(
+                              () {
+                                // add them if not already in
+                                if (!newBook.series.contains(sel)) {
+                                  newBook.series = sel;
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -267,17 +225,18 @@ class _ImportState extends State<Import> {
                           padding: const EdgeInsets.all(8.0),
                           child: ListEditor(
                             name: "tag",
-                            item: book.tags,
-                            allItems: allTags,
+                            item: newBook.tags,
+                            // convert set to list for the editor
+                            allItems: libraryController.tags.toList(),
                             onAdded: (sel) => setState(() {
                               // if new tag add to list
-                              if (!book.tags.contains(sel)) {
-                                book.tags.add(sel);
+                              if (!newBook.tags.contains(sel)) {
+                                newBook.tags.add(sel);
                               }
                             }),
                             onRemoved: (tag) => setState(() {
                               // remove them if already in
-                              book.tags.remove(tag);
+                              newBook.tags.remove(tag);
                             }),
                           ),
                         ),
@@ -294,7 +253,7 @@ class _ImportState extends State<Import> {
                             name: "Link",
                             controller: linkController,
                             onSubmitted: (newLink) => setState(() {
-                              book.link = newLink;
+                              newBook.link = newLink;
                             }),
                           ),
                         ),
@@ -304,17 +263,18 @@ class _ImportState extends State<Import> {
                           padding: const EdgeInsets.all(8.0),
                           child: ListEditor(
                             name: "character",
-                            item: book.characters,
-                            allItems: allCharacters,
+                            item: newBook.characters,
+                            // convert set to list for the editor
+                            allItems: libraryController.characters.toList(),
                             onAdded: (sel) => setState(() {
                               // if new character add to list
-                              if (!book.characters.contains(sel)) {
-                                book.characters.add(sel);
+                              if (!newBook.characters.contains(sel)) {
+                                newBook.characters.add(sel);
                               }
                             }),
                             onRemoved: (character) => setState(() {
                               // remove them if already in
-                              book.characters.remove(character);
+                              newBook.characters.remove(character);
                             }),
                           ),
                         ),
@@ -332,28 +292,51 @@ class _ImportState extends State<Import> {
 }
 
 class CoverImage extends StatefulWidget {
-  const CoverImage({super.key});
+  final String? folderPath;
+  final String? bookName;
+  final ValueChanged<String> onFolderSelected;
+
+  const CoverImage({
+    super.key,
+    this.folderPath,
+    this.bookName,
+    required this.onFolderSelected,
+  });
 
   @override
   State<CoverImage> createState() => _CoverImageState();
 }
 
 class _CoverImageState extends State<CoverImage> {
-  // keep track of when folder selected should be a plus
   bool _folderSelected = false;
+
+  @override
+  void didUpdateWidget(CoverImage old) {
+    super.didUpdateWidget(old);
+    if (widget.folderPath == null || widget.folderPath!.isEmpty) {
+      _folderSelected = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.grey[800],
+      color: _folderSelected ? Colors.transparent : Colors.grey[800],
       child: InkWell(
-        onTap: () {
-          setState(() {});
-          // TODO: i want to select a folder here
-          _folderSelected = true;
+        onTap: () async {
+          // uses native picker on all platforms
+          final String? dir = await getDirectoryPath();
+          if (dir != null) {
+            setState(() => _folderSelected = true);
+            widget.onFolderSelected(dir);
+          }
         },
         child: _folderSelected
-            ? const Placeholder()
+            ? Center(
+                child: Image.file(
+                  File(getCoverPath(_folderSelected ? widget.folderPath! : "")),
+                ),
+              )
             : Icon(
                 Icons.add,
                 size: 48,
@@ -362,4 +345,45 @@ class _CoverImageState extends State<CoverImage> {
       ),
     );
   }
+}
+
+// just copy pasted code from the book model
+// to get the cover image from the folder path
+String getCoverPath(String path) {
+  // ensure the directory exists
+  final dir = Directory(path);
+  if (!dir.existsSync()) {
+    return '';
+  }
+
+  // list all entries in the folder
+  final entries = dir.listSync();
+
+  // filter to just files with image extensions
+  final images = entries.whereType<File>().where((file) {
+    final ext = p.extension(file.path).toLowerCase();
+    return ['.jpg', '.jpeg', '.png', '.webp'].contains(ext);
+  }).toList();
+
+  // if no images, bail out
+  if (images.isEmpty) {
+    return '';
+  }
+
+  // sort by filename so it's consistent
+  images.sort((a, b) => a.path.compareTo(b.path));
+
+  // return the very first image's path
+  return images.first.path;
+}
+
+// cleans up the string for the name
+String cleanString(String input) {
+  // remove any [...] or (...) or {...} and their contents
+  // remove any leading digits
+  // trim residual whitespace
+  return input
+      .replaceAll(RegExp(r'\[.*?\]|\(.*?\)|\{.*?\}'), '')
+      .replaceAll(RegExp(r'^\d+'), '')
+      .trim();
 }

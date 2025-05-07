@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
+import 'dart:io';
 
 /*
 repository for passing in a list of books to display
@@ -82,7 +83,12 @@ class BookTile extends StatelessWidget {
                 ),
               ),
               // placeholder for cover
-              const Expanded(child: Placeholder()),
+              Expanded(
+                child: Image.file(
+                  File(book.getCoverPath()),
+
+                ),
+              ),
             ],
           ),
         ),

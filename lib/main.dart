@@ -1,13 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'controllers/library_controller.dart';
+import 'services/library_repository.dart';
 import 'screen/screens.dart';
 import 'router/routes.dart';
 
 // entry point: inflate the widget tree
-void main() => runApp(const MyApp());
+void main() async {
+  // make sure engine and bindings are ready
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // initialize the library repository, for managing the json file
+  final libraryRepository = LibraryRepository();
+  // initialize the library controller, for managing the books
+  final libraryController = LibraryController(libraryRepository);
+  // call init to load the books from the json file, and build the sets
+  await libraryController.init();
+
+  // run the app with the loaded data
+  runApp(
+    ChangeNotifierProvider<LibraryController>.value(
+      value: libraryController,
+      child: MyApp(),
+    ),
+  );
+}
 
 // root widget: sets up theme and home screen
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
