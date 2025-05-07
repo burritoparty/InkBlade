@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_manga_reader/models/book.dart';
+import 'dart:async';
 
 class BookReader extends StatefulWidget {
   final Book book;
-  const BookReader({Key? key, required this.book}) : super(key: key);
+  const BookReader({super.key, required this.book});
 
   @override
   BookReaderState createState() => BookReaderState();
@@ -21,6 +22,11 @@ class BookReaderState extends State<BookReader> {
   bool _upHeld = false;
   bool _downHeld = false;
 
+  // scroll timer for smooth scrolling
+  // and page turn debounce timer
+  Timer? _scrollTimer;
+  Timer? _pageTurnDebounce;
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +37,8 @@ class BookReaderState extends State<BookReader> {
   // for clearing controllers
   @override
   void dispose() {
+    _scrollTimer?.cancel();
+    _pageTurnDebounce?.cancel();
     _pageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -90,49 +98,92 @@ class BookReaderState extends State<BookReader> {
     if (picked != null) _goToPage(picked - 1);
   }
 
+// start a timer for scrolling, and call the action
+  void _startScrollTimer(void Function() action) {
+    _scrollTimer?.cancel();
+    _scrollTimer = Timer.periodic(const Duration(milliseconds: 50), (_) => action());
+  }
+
+  // stop the scroll timer
+  void _stopScrollTimer() {
+    _scrollTimer?.cancel();
+    _scrollTimer = null;
+  }
+
+  // start a timer for rapid page turning, and call the action
+  void _startRapidPageTurnTimer(void Function() action) {
+    _scrollTimer?.cancel();
+    _scrollTimer = Timer.periodic(const Duration(milliseconds: 200), (_) => action());
+  }
+
   // keyboard events for nav and zoom
   void _handleKey(KeyEvent event) {
-  final key = event.logicalKey;
+    final key = event.logicalKey;
 
-  // Track the up/down or w/s states
-  if (key == LogicalKeyboardKey.keyW || key == LogicalKeyboardKey.arrowUp) {
-    _upHeld = event is KeyDownEvent;
-  }
-  if (key == LogicalKeyboardKey.keyS || key == LogicalKeyboardKey.arrowDown) {
-    _downHeld = event is KeyDownEvent;
-  }
+    // track the up/down or w/s states
+    if (key == LogicalKeyboardKey.keyW || key == LogicalKeyboardKey.arrowUp) {
+      _upHeld = event is KeyDownEvent;
+      if (_upHeld && _zoomedIn && _scrollController.hasClients) {
+        _startScrollTimer(() {
+          final increment = MediaQuery.of(context).size.height * 0.1; // Reduced to 10%
+          final newOffset = (_scrollController.offset - increment)
+              .clamp(0.0, _scrollController.position.maxScrollExtent);
+          _scrollController.jumpTo(newOffset);
+        });
+      } else {
+        _stopScrollTimer();
+      }
+    }
+    if (key == LogicalKeyboardKey.keyS || key == LogicalKeyboardKey.arrowDown) {
+      _downHeld = event is KeyDownEvent;
+      if (_downHeld && _zoomedIn && _scrollController.hasClients) {
+        _startScrollTimer(() {
+          final increment = MediaQuery.of(context).size.height * 0.1; // Reduced to 10%
+          final newOffset = (_scrollController.offset + increment)
+              .clamp(0.0, _scrollController.position.maxScrollExtent);
+          _scrollController.jumpTo(newOffset);
+        });
+      } else {
+        _stopScrollTimer();
+      }
+    }
 
-  if (event is KeyDownEvent) {
-    if (key == LogicalKeyboardKey.escape) {
-      // Escape, go back a page
-      Navigator.pop(context);
-    } else if (key == LogicalKeyboardKey.space) {
-      // Alter zoom state, reset the scroll position to top
-      _zoomedIn = !_zoomedIn;
-      _resetScroll();
-      setState(() {});
-    } else if (key == LogicalKeyboardKey.keyA ||
-        key == LogicalKeyboardKey.arrowLeft) {
-      // Turn page previous
-      _goToPage(_currentPage - 1);
-    } else if (key == LogicalKeyboardKey.keyD ||
-        key == LogicalKeyboardKey.arrowRight) {
-      // Turn page next
-      _goToPage(_currentPage + 1);
-    } else if (_zoomedIn && _scrollController.hasClients) {
-      // When zoomed in, scroll up/down when held
-      if (_upHeld) {
-        final newOffset = (_scrollController.offset - 100)
-            .clamp(0.0, _scrollController.position.maxScrollExtent);
-        _scrollController.jumpTo(newOffset);
-      } else if (_downHeld) {
-        final newOffset = (_scrollController.offset + 100)
-            .clamp(0.0, _scrollController.position.maxScrollExtent);
-        _scrollController.jumpTo(newOffset);
+    if (event is KeyDownEvent) {
+      if (key == LogicalKeyboardKey.escape) {
+        // escape, go back a page
+        Navigator.pop(context);
+      } else if (key == LogicalKeyboardKey.space) {
+        // alter zoom state, reset the scroll position to top
+        _zoomedIn = !_zoomedIn;
+        _resetScroll();
+        setState(() {});
+      } else if (key == LogicalKeyboardKey.keyA || key == LogicalKeyboardKey.arrowLeft) {
+        // immediate page turn
+        _goToPage(_currentPage - 1);
+        // start rapid page turning after 1 second
+        _scrollTimer?.cancel();
+        _scrollTimer = Timer(const Duration(seconds: 1), () {
+          _startRapidPageTurnTimer(() => _goToPage(_currentPage - 1));
+        });
+      } else if (key == LogicalKeyboardKey.keyD || key == LogicalKeyboardKey.arrowRight) {
+        // immediate page turn
+        _goToPage(_currentPage + 1);
+        // start rapid page turning after 1 second
+        _scrollTimer?.cancel();
+        _scrollTimer = Timer(const Duration(seconds: 1), () {
+          _startRapidPageTurnTimer(() => _goToPage(_currentPage + 1));
+        });
+      }
+    } else if (event is KeyUpEvent) {
+      if (key == LogicalKeyboardKey.keyA ||
+          key == LogicalKeyboardKey.arrowLeft ||
+          key == LogicalKeyboardKey.keyD ||
+          key == LogicalKeyboardKey.arrowRight) {
+        // stop rapid page turning
+        _stopScrollTimer();
       }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
