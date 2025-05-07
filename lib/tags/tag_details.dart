@@ -28,13 +28,13 @@ class _TagDetailsState extends State<TagDetails> {
 
   @override
   Widget build(BuildContext context) {
-    // Set up the library controller, which holds the list of books
+    // set up the library controller, which holds the list of books
     final libraryController = context.watch<LibraryController>();
-    // Filter the books dynamically
+    // filter the books dynamically
     final filteredBooks = libraryController.books
         .where((book) => book.tags.contains(_tag))
         .toList();
-    // Get all tags from the library controller
+    // get all tags from the library controller
     final allTags = libraryController.tags.toList();
 
     return Scaffold(
@@ -89,9 +89,9 @@ class _TagDetailsState extends State<TagDetails> {
 
                 if (confirm == true) {
                   final libraryController = context.read<LibraryController>();
-                  // Remove the tag from all books
+                  // remove the tag from all books
                   await libraryController.removeTagFromBooks(_tag);
-                  // Navigate back to the previous screen
+                  // back to the previous screen
                   if (mounted) {
                     Navigator.pop(context);
                   }
@@ -108,7 +108,7 @@ class _TagDetailsState extends State<TagDetails> {
                   Routes.details,
                   arguments: filteredBooks[index],
                 );
-                setState(() {}); // Refresh UI on return
+                setState(() {}); // refresh the screen after returning
               },
             ),
           )

@@ -17,7 +17,7 @@ class _AuthorsState extends State<Authors> {
   @override
   void initState() {
     super.initState();
-    // Initialize filteredAuthors with all authors from the LibraryController
+    // initialize filteredAuthors with all authors from the LibraryController
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final libraryController = context.read<LibraryController>();
       setState(() {
@@ -44,10 +44,10 @@ class _AuthorsState extends State<Authors> {
     // set up the library controller, which holds the list of books
     // it watches for changes to the list of books, and rebuilds the widget tree
     final libraryController = context.watch<LibraryController>();
-    // Get all authors dynamically
+    // get all authors dynamically
     final allAuthors = libraryController.authors.toList();
 
-    // Update filteredAuthors based on the current search query
+    // update filteredAuthors based on the current search query
     if (_searchController.text.isEmpty) {
       filteredAuthors = List.from(allAuthors);
     } else {

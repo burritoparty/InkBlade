@@ -87,7 +87,6 @@ class _BookDetailsState extends State<BookDetails> {
                               if (widget.book.series != sel) {
                                 widget.book.series = sel;
                               }
-                              // TODO: this prob needs changed when implementing database
                               if (!libraryController.series.contains(sel)) {
                                 libraryController.series.add(sel);
                               }

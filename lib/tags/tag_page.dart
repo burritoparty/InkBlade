@@ -18,7 +18,7 @@ class _TagPageState extends State<TagPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize filteredTags with all tags from the LibraryController
+    // initialize filteredTags with all tags from the LibraryController
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final libraryController = context.read<LibraryController>();
       setState(() {
@@ -27,6 +27,7 @@ class _TagPageState extends State<TagPage> {
     });
   }
 
+  // filter tags based on search query
   void filterTags(String query, List<String> allTags) {
     setState(() {
       if (query.isEmpty) {
@@ -41,12 +42,12 @@ class _TagPageState extends State<TagPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Set up the library controller, which holds the list of tags
+    // set up the library controller, which holds the list of books
     final libraryController = context.watch<LibraryController>();
-    // Get all tags dynamically
+    // get all tags dynamically
     final allTags = libraryController.tags.toList();
 
-    // Update filteredTags based on the current search query
+    // update filteredTags based on the current search query
     if (_searchController.text.isEmpty) {
       filteredTags = List.from(allTags);
     } else {

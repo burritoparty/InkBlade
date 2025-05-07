@@ -56,7 +56,7 @@ class AuthorDetailsState extends State<AuthorDetails> {
                     onSelected: (sel) async {
                       if (_author != sel) {
                         final libraryController = context.read<LibraryController>();
-                        // Rename the author in all books
+                        // rename the author in all books
                         await libraryController.renameAuthor(_author, sel);
                         setState(() {
                           _author = sel;

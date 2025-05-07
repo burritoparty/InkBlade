@@ -284,7 +284,7 @@ class LibraryController extends ChangeNotifier {
     for (final book in _books) {
       book.authors.remove(author);
     }
-    // Rebuild the sets and save the updated books
+    // rebuild the sets and save the updated books
     _rebuildSets();
     await _libraryRepository.saveBooks(_books);
     notifyListeners();
@@ -296,7 +296,7 @@ class LibraryController extends ChangeNotifier {
         book.authors.add(newAuthor);
       }
     }
-    // Rebuild the sets and save the updated books
+    // rebuild the sets and save the updated books
     _rebuildSets();
     await _libraryRepository.saveBooks(_books);
     notifyListeners();
@@ -308,7 +308,7 @@ class LibraryController extends ChangeNotifier {
         book.tags.add(newTag);
       }
     }
-    // Rebuild the sets and save the updated books
+    // rebuild the sets and save the updated books
     _rebuildSets();
     await _libraryRepository.saveBooks(_books);
     notifyListeners();
