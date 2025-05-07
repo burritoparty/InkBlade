@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'tag_details.dart';
-import '../models/book.dart';
+import '../controllers/library_controller.dart';
 
 class TagPage extends StatefulWidget {
   const TagPage({super.key});
@@ -12,85 +13,21 @@ class TagPage extends StatefulWidget {
 class _TagPageState extends State<TagPage> {
   // controller for search input field
   final TextEditingController _searchController = TextEditingController();
-  List<Book> allBooks = [];
-  List<String> allTags = [];
   List<String> filteredTags = [];
 
   @override
   void initState() {
     super.initState();
-
-    final allBooks = [
-      Book(
-        path: "C:\\",
-        title: "Full Metal Alchemist Brotherhood",
-        link: "link",
-        series: "Full Metal Alchemist",
-        authors: ["Hiromu Arakawa"],
-        tags: ["Adventure", "Fantasy"],
-        characters: ["Edward", "Alphonse", "Winry"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "My Dress Up Darling: Volume 1",
-        link: "link",
-        series: "My Dress Up Darling",
-        authors: ["Shinichi Fukuda"],
-        tags: ["Romance", "Comedy", "Cosplay"],
-        characters: ["Marin Kitagawa", "Gojo"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "My Dress Up Darling: Volume 2",
-        link: "link",
-        series: "My Dress Up Darling",
-        authors: ["Shinichi Fukuda"],
-        tags: ["Romance", "Comedy", "Cosplay"],
-        characters: ["Marin Kitagawa", "Wakana Gojo"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "Komi Can't Communicate: Volume 1",
-        link: "link",
-        series: "Komi Can't Communicate",
-        authors: ["Tomohito Oda"],
-        tags: ["Romance", "Comedy", "Slice of Life"],
-        characters: ["Komi Shoko", "Tadano Hitohito"],
-        favorite: false,
-        readLater: true,
-      ),
-      Book(
-        path: "C:\\",
-        title: "Hokkaido Gals Are Super Adorable: Volume 1",
-        link: "link",
-        series: "Hokkaido Gals Are Super Adorable",
-        authors: ["Ikada Kai"],
-        tags: ["Romance", "Comedy"],
-        characters: ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"],
-        favorite: false,
-        readLater: true,
-      ),
-    ];
-
-    // load up the tags
-    for (Book book in allBooks) {
-      for (String tag in book.tags) {
-        if (!allTags.contains(tag)) {
-          allTags.add(tag);
-        }
-      }
-    }
-    filteredTags = List.from(allTags);
+    // Initialize filteredTags with all tags from the LibraryController
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final libraryController = context.read<LibraryController>();
+      setState(() {
+        filteredTags = libraryController.tags.toList();
+      });
+    });
   }
 
-  // fitlters the tags based on the given to update the list
-  void filterTags(String query) {
+  void filterTags(String query, List<String> allTags) {
     setState(() {
       if (query.isEmpty) {
         filteredTags = List.from(allTags);
@@ -104,6 +41,21 @@ class _TagPageState extends State<TagPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Set up the library controller, which holds the list of tags
+    final libraryController = context.watch<LibraryController>();
+    // Get all tags dynamically
+    final allTags = libraryController.tags.toList();
+
+    // Update filteredTags based on the current search query
+    if (_searchController.text.isEmpty) {
+      filteredTags = List.from(allTags);
+    } else {
+      filteredTags = allTags
+          .where((tag) =>
+              tag.toLowerCase().contains(_searchController.text.toLowerCase()))
+          .toList();
+    }
+
     return Column(
       children: [
         // search bar
@@ -114,7 +66,7 @@ class _TagPageState extends State<TagPage> {
               controller: _searchController,
               hintText: 'Search tags...',
               onChanged: (value) {
-                filterTags(value);
+                filterTags(value, allTags);
               },
             ),
           ),
@@ -123,7 +75,6 @@ class _TagPageState extends State<TagPage> {
         TagButtons(
           filteredTags: filteredTags,
           allTags: allTags,
-          // onTagPressed: _showTagOptions,
         ),
       ],
     );
@@ -134,13 +85,11 @@ class _TagPageState extends State<TagPage> {
 class TagButtons extends StatelessWidget {
   final List<String> filteredTags;
   final List<String> allTags;
-  // final void Function(BuildContext, String) onTagPressed;
 
   const TagButtons({
     super.key,
     required this.filteredTags,
     required this.allTags,
-    // required this.onTagPressed,
   });
 
   @override

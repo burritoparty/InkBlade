@@ -301,4 +301,26 @@ class LibraryController extends ChangeNotifier {
     await _libraryRepository.saveBooks(_books);
     notifyListeners();
   }
+
+  Future<void> renameTag(String oldTag, String newTag) async {
+    for (final book in _books) {
+      if (book.tags.remove(oldTag)) {
+        book.tags.add(newTag);
+      }
+    }
+    // Rebuild the sets and save the updated books
+    _rebuildSets();
+    await _libraryRepository.saveBooks(_books);
+    notifyListeners();
+  }
+
+  Future<void> removeTagFromBooks(String tag) async {
+    for (final book in _books) {
+      book.tags.remove(tag);
+    }
+    // Rebuild the sets and save the updated books
+    _rebuildSets();
+    await _libraryRepository.saveBooks(_books);
+    notifyListeners();
+  }
 }
