@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_manga_reader/models/book.dart';
@@ -12,7 +11,6 @@ class BookReader extends StatefulWidget {
 }
 
 class BookReaderState extends State<BookReader> {
-  final int totalPages = 28;
   late PageController _pageController;
   late ScrollController _scrollController;
   int _currentPage = 0;
@@ -48,7 +46,7 @@ class BookReaderState extends State<BookReader> {
 
   // jump to a page given the index, as long as in range
   void _goToPage(int index) {
-    final target = index.clamp(0, totalPages - 1);
+    final target = index.clamp(0, widget.book.getPageCount() - 1);
     if (target == _currentPage) return;
     // instant page jump without animation
     _pageController.jumpToPage(target);
@@ -93,62 +91,59 @@ class BookReaderState extends State<BookReader> {
   }
 
   // keyboard events for nav and zoom
-  void _handleKey(RawKeyEvent event) {
-    final key = event.logicalKey;
-    // track the up/down or w/s states
-    if (key == LogicalKeyboardKey.keyW || key == LogicalKeyboardKey.arrowUp) {
-      _upHeld = event is RawKeyDownEvent;
-    }
-    if (key == LogicalKeyboardKey.keyS || key == LogicalKeyboardKey.arrowDown) {
-      _downHeld = event is RawKeyDownEvent;
-    }
+  void _handleKey(KeyEvent event) {
+  final key = event.logicalKey;
 
-    if (event is RawKeyDownEvent) {
-      if (key == LogicalKeyboardKey.escape) {
-        // escape, go back a page
-        Navigator.pop(context);
-      } else if (key == LogicalKeyboardKey.space) {
-        // alter zoom state, reset the scroll position to top
-        _zoomedIn = !_zoomedIn;
-        _resetScroll();
-        setState(() {});
-      } else if (key == LogicalKeyboardKey.keyA ||
-          key == LogicalKeyboardKey.arrowLeft) {
-        // turn page previous
-        _goToPage(_currentPage - 1);
-        // check if zoomed in, if holding up or down, dont change page
-        // if (!_zoomedIn || (!_upHeld && !_downHeld)) {
-        //   _goToPage(_currentPage - 1);
-        // }
-      } else if (key == LogicalKeyboardKey.keyD ||
-          key == LogicalKeyboardKey.arrowRight) {
-        // turn page next
-        _goToPage(_currentPage + 1);
-        // check if zoomed in, if holding up or down, dont change page
-        // if (!_zoomedIn || (!_upHeld && !_downHeld)) {
-        //   _goToPage(_currentPage + 1);
-        // }
-      } else if (_zoomedIn && _scrollController.hasClients) {
-        // when zoomed in scroll up down when held
-        if (_upHeld) {
-          final newOffset = (_scrollController.offset - 100)
-              .clamp(0.0, _scrollController.position.maxScrollExtent);
-          _scrollController.jumpTo(newOffset);
-        } else if (_downHeld) {
-          final newOffset = (_scrollController.offset + 100)
-              .clamp(0.0, _scrollController.position.maxScrollExtent);
-          _scrollController.jumpTo(newOffset);
-        }
+  // Track the up/down or w/s states
+  if (key == LogicalKeyboardKey.keyW || key == LogicalKeyboardKey.arrowUp) {
+    _upHeld = event is KeyDownEvent;
+  }
+  if (key == LogicalKeyboardKey.keyS || key == LogicalKeyboardKey.arrowDown) {
+    _downHeld = event is KeyDownEvent;
+  }
+
+  if (event is KeyDownEvent) {
+    if (key == LogicalKeyboardKey.escape) {
+      // Escape, go back a page
+      Navigator.pop(context);
+    } else if (key == LogicalKeyboardKey.space) {
+      // Alter zoom state, reset the scroll position to top
+      _zoomedIn = !_zoomedIn;
+      _resetScroll();
+      setState(() {});
+    } else if (key == LogicalKeyboardKey.keyA ||
+        key == LogicalKeyboardKey.arrowLeft) {
+      // Turn page previous
+      _goToPage(_currentPage - 1);
+    } else if (key == LogicalKeyboardKey.keyD ||
+        key == LogicalKeyboardKey.arrowRight) {
+      // Turn page next
+      _goToPage(_currentPage + 1);
+    } else if (_zoomedIn && _scrollController.hasClients) {
+      // When zoomed in, scroll up/down when held
+      if (_upHeld) {
+        final newOffset = (_scrollController.offset - 100)
+            .clamp(0.0, _scrollController.position.maxScrollExtent);
+        _scrollController.jumpTo(newOffset);
+      } else if (_downHeld) {
+        final newOffset = (_scrollController.offset + 100)
+            .clamp(0.0, _scrollController.position.maxScrollExtent);
+        _scrollController.jumpTo(newOffset);
       }
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
-    return RawKeyboardListener(
+    // get the list of pages from the book
+    final pages = widget.book.getPageFiles();
+    // get the total number of pages
+    final totalPages = pages.length;
+    return KeyboardListener(
       // makes sure this recieves the key events
       focusNode: FocusNode()..requestFocus(),
-      onKey: _handleKey,
+      onKeyEvent: _handleKey,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -171,7 +166,8 @@ class BookReaderState extends State<BookReader> {
             });
           },
           itemBuilder: (context, index) {
-            final file = File(r'lib\placeholders\portrait.jpg');
+            // get the file for this page
+            final file = pages[index];
             if (_zoomedIn) {
               // scale zoomed in view to x of screen width
               final screenW = MediaQuery.of(context).size.width;
