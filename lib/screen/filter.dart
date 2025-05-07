@@ -1,7 +1,11 @@
+import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import '../models/book.dart';
 import '../widgets/book_grid.dart';
 import '../router/routes.dart';
+
+import '../controllers/library_controller.dart';
+import 'package:provider/provider.dart';
+import '../models/book.dart';
 
 class Filter extends StatefulWidget {
   const Filter({super.key});
@@ -35,95 +39,29 @@ class _FilterState extends State<Filter> {
   @override
   void initState() {
     super.initState();
-    // set up all books
-    final allBooks = [
-      Book(
-        path: "C:\\",
-        title: "Full Metal Alchemist Brotherhood",
-        link: "link",
-        series: "Full Metal Alchemist",
-        authors: ["Hiromu Arakawa"],
-        tags: ["Adventure", "Fantasy"],
-        characters: ["Edward", "Alphonse", "Winry"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "My Dress Up Darling: Volume 1",
-        link: "link",
-        series: "My Dress Up Darling",
-        authors: ["Shinichi Fukuda"],
-        tags: ["Romance", "Comedy", "Cosplay"],
-        characters: ["Marin Kitagawa", "Gojo"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "My Dress Up Darling: Volume 2",
-        link: "link",
-        series: "My Dress Up Darling",
-        authors: ["Shinichi Fukuda"],
-        tags: ["Romance", "Comedy", "Cosplay"],
-        characters: ["Marin Kitagawa", "Wakana Gojo"],
-        favorite: true,
-        readLater: false,
-      ),
-      Book(
-        path: "C:\\",
-        title: "Komi Can't Communicate: Volume 1",
-        link: "link",
-        series: "Komi Can't Communicate",
-        authors: ["Tomohito Oda"],
-        tags: ["Romance", "Comedy", "Slice of Life"],
-        characters: ["Komi Shoko", "Tadano Hitohito"],
-        favorite: false,
-        readLater: true,
-      ),
-      Book(
-        path: "C:\\",
-        title: "Hokkaido Gals Are Super Adorable: Volume 1",
-        link: "link",
-        series: "Hokkaido Gals Are Super Adorable",
-        authors: ["Ikada Kai"],
-        tags: ["Romance", "Comedy"],
-        characters: ["Fuyuki Minami", "Akino Sayuri", "Shiki Tsubasa"],
-        favorite: false,
-        readLater: true,
-      ),
-    ];
-
+    // access LibraryController
+    final libraryController = context.read<LibraryController>();
+    // set up all books from LibraryController
+    allBooks = libraryController.books;
     // set up filtered books
     filteredBooks = List.from(allBooks);
-
-    // iterate each book
+    // opulate filters authors, tags, series, characters
     for (Book book in allBooks) {
-      // iterate through the books tags
       for (String tag in book.tags) {
-        // add them if not already in
         if (!allTags.contains(tag)) {
           allTags.add(tag);
         }
       }
-
-      // iterate trhough the books characters
       for (String character in book.characters) {
-        // add them if not already in
         if (!allCharacters.contains(character)) {
           allCharacters.add(character);
         }
       }
-
-      // add author if not already in
       for (String author in book.authors) {
-        // add them if not already in
         if (!allAuthors.contains(author)) {
           allAuthors.add(author);
         }
       }
-
-      // add series if not already in
       if (!allSeries.contains(book.series)) {
         allSeries.add(book.series);
       }
@@ -162,6 +100,9 @@ class _FilterState extends State<Filter> {
 
   @override
   Widget build(BuildContext context) {
+    // set up the library controller, which holds the list of books
+    final libraryController = context.watch<LibraryController>();
+    allBooks = libraryController.books;
     return Column(
       children: [
         Row(
@@ -415,62 +356,3 @@ class ListSearchState extends State<ListSearch> {
     );
   }
 }
-
-// To add later maybe
-// class TitleSearch extends StatefulWidget {
-//   final String initialValue;
-//   final ValueChanged<String> onChanged;
-
-//   const TitleSearch({
-//     Key? key,
-//     this.initialValue = '',
-//     required this.onChanged,
-//   }) : super(key: key);
-
-//   @override
-//   TitleSearchState createState() => TitleSearchState();
-// }
-
-// class TitleSearchState extends State<TitleSearch> {
-//   late final TextEditingController _controller;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _controller = TextEditingController(text: widget.initialValue);
-//   }
-
-//   @override
-//   void didUpdateWidget(covariant TitleSearch old) {
-//     super.didUpdateWidget(old);
-//     if (old.initialValue != widget.initialValue) {
-//       // only update if the parent really changed it:
-//       _controller.text = widget.initialValue;
-//       // place cursor at end
-//       _controller.selection = TextSelection.fromPosition(
-//         TextPosition(offset: _controller.text.length),
-//       );
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     _controller.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.all(8),
-//       child: TextField(
-//         controller: _controller,
-//         decoration: const InputDecoration(
-//           labelText: 'Title',
-//           border: OutlineInputBorder(),
-//         ),
-//         onChanged: widget.onChanged,
-//       ),
-//     );
-//   }
-// }
