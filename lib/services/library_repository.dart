@@ -44,12 +44,15 @@ class LibraryRepository {
     // exrtact the books list, cast it to a List<Map<String, dynamic>>
     // String being the key and dynamic being the value
     final list = (data['book'] as List).cast<Map<String, dynamic>>();
-    // return the list of books as a List<Book>
-    return list.map(Book.fromJson).toList();
+    // return the list of books as a List<Book>, sorted alphabetically by title
+    return list.map(Book.fromJson).toList()
+      ..sort((a, b) => a.title.compareTo(b.title));
   }
 
   // save the books to the file as a json string
   Future<void> saveBooks(List<Book> books) async {
+    // sort books alphabetically by title before saving
+    books.sort((a, b) => a.title.compareTo(b.title));
     final data = {'book': books.map((b) => b.toJson()).toList()};
     // write out indented JSON
     await _file.writeAsString(JsonEncoder.withIndent('  ').convert(data));
