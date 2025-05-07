@@ -67,14 +67,35 @@ class AuthorDetailsState extends State<AuthorDetails> {
                 ),
               ),
               DeleteButton(onDelete: () async {
-                final libraryController = context.read<LibraryController>();
-                // Remove the author from all books
-                await libraryController.removeAuthorFromBooks(_author);
-                // Notify listeners to update the previous page
-                libraryController.notifyListeners();
-                // Navigate back to the previous screen
-                if (mounted) {
-                  Navigator.pop(context);
+                if (!mounted) return; // Ensure the widget is still mounted
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Confirm Deletion'),
+                      content: const Text('Are you sure you want to delete this author?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false), // Cancel
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true), // Confirm
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (confirm == true) {
+                  final libraryController = context.read<LibraryController>();
+                  // Remove the author from all books
+                  await libraryController.removeAuthorFromBooks(_author);
+                  // Navigate back to the previous screen
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
                 }
               }),
             ],
