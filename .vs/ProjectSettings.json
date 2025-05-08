@@ -1,3 +1,9 @@
 {
-  "CurrentProjectSetting": "No Configurations"
+  "CurrentProjectSetting": "No Configurations",
+
+  "dart.analysisExcludedFolders": [
+    "${workspaceFolder}/linux",
+    "${workspaceFolder}/macos"
+  ]
+  
 }

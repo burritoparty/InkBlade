@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'InkBlade',
       theme: ThemeData.dark(),
       home: const HomeScaffold(),
       // custom router, go through AppRouter.onGenerateRoute
