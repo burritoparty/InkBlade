@@ -41,6 +41,9 @@ class ListEditor extends StatelessWidget {
               matches.insert(0, input);
             }
 
+            // sort the matches alphabetically
+            matches.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
             return matches;
           },
           onSelected: (item) {
