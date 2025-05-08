@@ -7,6 +7,7 @@ import 'package:flutter_manga_reader/screen/library.dart';
 import 'package:flutter_manga_reader/screen/book/book_details.dart';
 import 'package:flutter_manga_reader/screen/book/book_reader.dart';
 import 'package:flutter_manga_reader/authors/authors_details.dart';
+import 'package:flutter_manga_reader/tags/tag_details.dart';
 
 class Routes {
   static const home = '/';
@@ -14,6 +15,7 @@ class Routes {
   static const details = '/book/details';
   static const reader = '/book/reader';
   static const author = '/authors/details';
+  static const tag = '/tags/details';
   static const import = '../import.dart';
 }
 
@@ -39,6 +41,15 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => AuthorDetails(
             author: author,
+          ),
+        );
+      case Routes.tag:
+        // unpack the given map
+        final args = settings.arguments as Map<String, dynamic>;
+        final tag = args['tag'] as String;
+        return MaterialPageRoute(
+          builder: (_) => TagDetails(
+            tag: tag,
           ),
         );
       // route for FAB (import)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_manga_reader/router/routes.dart';
 
 class ListEditor extends StatelessWidget {
   final String name;
@@ -78,6 +79,25 @@ class ListEditor extends StatelessWidget {
             return InputChip(
               label: Text(item),
               onDeleted: () => onRemoved(item),
+              onPressed: () {
+                if (name == "author") {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.author,
+                    // pass as a map
+                    arguments: {'author': item, 'allAuthors': allItems},
+                  );
+                }
+                else if (name == "tag") {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.tag,
+                    // pass as a map
+                    arguments: {'tag': item, 'allTags': allItems},
+                  );
+                }
+                
+              },
             );
           }).toList(),
         ),
