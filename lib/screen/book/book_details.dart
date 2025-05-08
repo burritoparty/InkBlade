@@ -106,11 +106,15 @@ class _BookDetailsState extends State<BookDetails> {
                                 child: StringEditor(
                                   name: "Title",
                                   controller: titleController,
-                                  onSubmitted: (newTitle) => setState(
-                                    () {
-                                      widget.book.title = newTitle;
-                                    },
-                                  ),
+                                  onSubmitted: (newTitle) async {
+                                    final success = await libraryController
+                                        .updateTitle(widget.book, newTitle);
+                                    if (success) {
+                                      setState(() {
+                                        widget.book.title = newTitle;
+                                      });
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -121,16 +125,26 @@ class _BookDetailsState extends State<BookDetails> {
                                   name: "author",
                                   item: widget.book.authors.toList()..sort(),
                                   allItems: libraryController.authors.toList(),
-                                  onAdded: (sel) => setState(() {
-                                    // add them if not already in
+                                  onAdded: (sel) async {
                                     if (!widget.book.authors.contains(sel)) {
-                                      widget.book.authors.add(sel);
+                                      final success =
+                                          await libraryController.updateAuthors(
+                                              widget.book, sel, false);
+                                      if (success) {
+                                        setState(() {});
+                                      }
                                     }
-                                  }),
-                                  onRemoved: (author) => setState(() {
-                                    // remove them if already in
-                                    widget.book.authors.remove(author);
-                                  }),
+                                  },
+                                  onRemoved: (author) async {
+                                    final success =
+                                        await libraryController.updateAuthors(
+                                            widget.book, author, true);
+                                    if (success) {
+                                      setState(() {
+                                        widget.book.authors.remove(author);
+                                      });
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -147,14 +161,15 @@ class _BookDetailsState extends State<BookDetails> {
                                   initial: widget.book.series,
                                   // convert set to list for the editor
                                   all: libraryController.series.toList(),
-                                  onSelected: (sel) => setState(
-                                    () {
-                                      // add them if not already in
-                                      if (!widget.book.series.contains(sel)) {
+                                  onSelected: (sel) async {
+                                    final success = await libraryController
+                                        .updateSeries(widget.book, sel);
+                                    if (success) {
+                                      setState(() {
                                         widget.book.series = sel;
-                                      }
-                                    },
-                                  ),
+                                      });
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -165,16 +180,24 @@ class _BookDetailsState extends State<BookDetails> {
                                   name: "tag",
                                   item: widget.book.tags.toList()..sort(),
                                   allItems: libraryController.tags.toList(),
-                                  onAdded: (sel) => setState(() {
-                                    // if new tag add to list
+                                  onAdded: (sel) async {
                                     if (!widget.book.tags.contains(sel)) {
-                                      widget.book.tags.add(sel);
+                                      final success = await libraryController
+                                          .updateTags(widget.book, sel, false);
+                                      if (success) {
+                                        setState(() {});
+                                      }
                                     }
-                                  }),
-                                  onRemoved: (tag) => setState(() {
-                                    // remove them if already in
-                                    widget.book.tags.remove(tag);
-                                  }),
+                                  },
+                                  onRemoved: (tag) async {
+                                    final success = await libraryController
+                                        .updateTags(widget.book, tag, true);
+                                    if (success) {
+                                      setState(() {
+                                        widget.book.tags.remove(tag);
+                                      });
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -189,9 +212,15 @@ class _BookDetailsState extends State<BookDetails> {
                                 child: StringEditor(
                                   name: "Link",
                                   controller: linkController,
-                                  onSubmitted: (newLink) => setState(() {
-                                    widget.book.link = newLink;
-                                  }),
+                                  onSubmitted: (newLink) async {
+                                    final success = await libraryController
+                                        .updateLink(widget.book, newLink);
+                                    if (success) {
+                                      setState(() {
+                                        widget.book.link = newLink;
+                                      });
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -203,16 +232,26 @@ class _BookDetailsState extends State<BookDetails> {
                                   item: widget.book.characters.toList()..sort(),
                                   allItems:
                                       libraryController.characters.toList(),
-                                  onAdded: (sel) => setState(() {
-                                    // if new character add to list
+                                  onAdded: (sel) async {
                                     if (!widget.book.characters.contains(sel)) {
-                                      widget.book.characters.add(sel);
+                                      final success =
+                                          await libraryController.updateCharacters(
+                                              widget.book, sel, false);
+                                      if (success) {
+                                        setState(() {});
+                                      }
                                     }
-                                  }),
-                                  onRemoved: (character) => setState(() {
-                                    // remove them if already in
-                                    widget.book.characters.remove(character);
-                                  }),
+                                  },
+                                  onRemoved: (character) async {
+                                    final success =
+                                        await libraryController.updateCharacters(
+                                            widget.book, character, true);
+                                    if (success) {
+                                      setState(() {
+                                        widget.book.characters.remove(character);
+                                      });
+                                    }
+                                  },
                                 ),
                               ),
                             ),
