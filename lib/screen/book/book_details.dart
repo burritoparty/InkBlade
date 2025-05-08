@@ -28,6 +28,9 @@ class _BookDetailsState extends State<BookDetails> {
 
   @override
   Widget build(BuildContext context) {
+    // set up the library controller, which holds the list of books
+    // it watches for changes to the list of books, and rebuilds the widget tree
+    final libraryController = context.watch<LibraryController>();
     // controller for text editing field
     final TextEditingController titleController =
         TextEditingController(text: widget.book.title);
