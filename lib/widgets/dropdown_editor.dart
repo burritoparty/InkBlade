@@ -25,6 +25,13 @@ class _DropdownEditorState extends State<DropdownEditor> {
   bool _hasSaved = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Ensure the list is sorted once during initialization
+    widget.all.sort();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // pick border/label color:
     // gray on pristine
@@ -49,8 +56,7 @@ class _DropdownEditorState extends State<DropdownEditor> {
         // find all existing series matching the input
         final matches = widget.all
             .where((a) => a.toLowerCase().contains(lowerInput))
-            .toList()
-          ..sort();
+            .toList();
 
         // if the exact series isn't in your list yet, offer it first
         if (!widget.all.any((a) => a.toLowerCase() == lowerInput)) {
