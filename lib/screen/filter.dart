@@ -71,8 +71,8 @@ class _FilterState extends State<Filter> {
       () {
         filteredBooks = allBooks.where(
           (book) {
-            final matchesSeries = book.series.isEmpty ||
-                series.every((series) => book.series.contains(series));
+            final matchesSeries = series.isEmpty ||
+                series.every((tag) => book.series.contains(tag));
             final matchesTags =
                 tags.isEmpty || tags.every((tag) => book.tags.contains(tag));
             final matchesAuthors = authors.isEmpty ||
