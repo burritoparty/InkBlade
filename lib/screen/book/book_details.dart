@@ -297,23 +297,20 @@ class CoverImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      flex: 1,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          // switch to the bookreader page
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              Routes.reader, // path to reader
-              arguments: book, // object passed it
-            );
-          },
-          child: AspectRatio(
-            aspectRatio: 2 / 3,
-            child: Image.file(File(book.getCoverPath())),
-          ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        // switch to the bookreader page
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            Routes.reader, // path to reader
+            arguments: book, // object passed it
+          );
+        },
+        child: AspectRatio(
+          aspectRatio: 2 / 3,
+          child: Image.file(File(book.getCoverPath())),
         ),
       ),
     );
@@ -341,23 +338,21 @@ class PagesGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     // set the files
     final pages = book.getPageFiles();
-    return Expanded(
-      child: GridView.builder(
-        padding: const EdgeInsets.only(top: 16.0),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: imagesPerRow,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 12,
-          childAspectRatio: childAspectRatio,
-        ),
-        itemCount: book.getPageCount(),
-        itemBuilder: (_, i) {
-          return Image.file(
-            pages[i],
-            fit: BoxFit.cover,
-          );
-        },
+    return GridView.builder(
+      padding: const EdgeInsets.only(top: 16.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: imagesPerRow,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 12,
+        childAspectRatio: childAspectRatio,
       ),
+      itemCount: book.getPageCount(),
+      itemBuilder: (_, i) {
+        return Image.file(
+          pages[i],
+          fit: BoxFit.cover,
+        );
+      },
     );
   }
 }
