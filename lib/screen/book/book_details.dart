@@ -33,6 +33,7 @@ class _BookDetailsState extends State<BookDetails> {
     });
   }
 
+  // dispose focus node
   @override
   void dispose() {
     // dispose focus node
@@ -289,19 +290,29 @@ class _BookDetailsState extends State<BookDetails> {
                                   ),
                                 );
                                 if (confirm == true) {
+                                  // grab path before pop
+                                  final bookPath = widget.book.path;
+
+                                  // pop first
+                                  if (mounted) Navigator.pop(context);
+
                                   // Remove the book from the library
                                   await libraryController
                                       .removeBook(widget.book);
 
-                                  // Delete the book's files from the filesystem
-                                  final bookDir = Directory(widget.book.path);
-                                  if (await bookDir.exists()) {
-                                    await bookDir.delete(recursive: true);
-                                  }
+                                  // remove from controller, update library list
+                                  await libraryController
+                                      .removeBook(widget.book);
 
-                                  // Navigate back to the previous screen
-                                  if (mounted) {
-                                    Navigator.pop(context);
+                                  // delete the folder, safely catching any errors
+                                  try {
+                                    final bookDir = Directory(bookPath);
+                                    if (await bookDir.exists()) {
+                                      await bookDir.delete(recursive: true);
+                                    }
+                                  } catch (e) {
+                                    debugPrint(
+                                        'Failed to delete book directory: $e');
                                   }
                                 }
                               },
