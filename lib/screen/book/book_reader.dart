@@ -31,11 +31,18 @@ class BookReaderState extends State<BookReader> {
   bool _cursorVisible = true;
   Timer? _cursorTimer;
 
+  late final FocusNode _keyboardFocusNode;
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
     _scrollController = ScrollController();
+    _keyboardFocusNode = FocusNode();
+    // request focus once, after first frame:
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
   }
 
   // for clearing controllers
@@ -46,6 +53,7 @@ class BookReaderState extends State<BookReader> {
     _cursorTimer?.cancel();
     _pageController.dispose();
     _scrollController.dispose();
+    _keyboardFocusNode.dispose();
     super.dispose();
   }
 
@@ -221,7 +229,7 @@ class BookReaderState extends State<BookReader> {
           _cursorVisible ? SystemMouseCursors.basic : SystemMouseCursors.none,
       child: KeyboardListener(
         // makes sure this receives the key events
-        focusNode: FocusNode()..requestFocus(),
+        focusNode: _keyboardFocusNode,
         onKeyEvent: _handleKey,
         child: Scaffold(
           appBar: AppBar(
