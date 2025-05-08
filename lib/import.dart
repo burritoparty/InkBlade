@@ -46,6 +46,18 @@ class _ImportState extends State<Import> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              // navigate back to the home screen
+              Navigator.popUntil(
+                context,
+                ModalRoute.withName('/'),
+              );
+            },
+          ),
+        ],
         centerTitle: true,
         title: Row(
           mainAxisSize: MainAxisSize.min,

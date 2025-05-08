@@ -40,6 +40,18 @@ class _TagDetailsState extends State<TagDetails> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_tag),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              // navigate back to the home screen
+              Navigator.popUntil(
+                context,
+                ModalRoute.withName('/'),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -54,7 +66,8 @@ class _TagDetailsState extends State<TagDetails> {
                     all: allTags,
                     onSelected: (sel) async {
                       if (_tag != sel) {
-                        final libraryController = context.read<LibraryController>();
+                        final libraryController =
+                            context.read<LibraryController>();
                         // Rename the tag in all books
                         await libraryController.renameTag(_tag, sel);
                         setState(() {
@@ -72,14 +85,17 @@ class _TagDetailsState extends State<TagDetails> {
                   builder: (BuildContext context) {
                     return AlertDialog(
                       title: const Text('Confirm Deletion'),
-                      content: const Text('Are you sure you want to delete this tag?'),
+                      content: const Text(
+                          'Are you sure you want to delete this tag?'),
                       actions: [
                         TextButton(
-                          onPressed: () => Navigator.pop(context, false), // Cancel
+                          onPressed: () =>
+                              Navigator.pop(context, false), // Cancel
                           child: const Text('Cancel'),
                         ),
                         TextButton(
-                          onPressed: () => Navigator.pop(context, true), // Confirm
+                          onPressed: () =>
+                              Navigator.pop(context, true), // Confirm
                           child: const Text('Delete'),
                         ),
                       ],

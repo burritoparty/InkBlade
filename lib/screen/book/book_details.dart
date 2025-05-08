@@ -38,7 +38,21 @@ class _BookDetailsState extends State<BookDetails> {
         TextEditingController(text: widget.book.link);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.book.title)),
+      appBar: AppBar(
+        title: Text(widget.book.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              // navigate back to the "Library" screen
+              Navigator.popUntil(
+                context,
+                ModalRoute.withName('/'),
+              );
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -162,8 +176,7 @@ class _BookDetailsState extends State<BookDetails> {
                                 name: "character",
                                 item: widget.book.characters,
                                 // convert set to list for the editor
-                                allItems:
-                                    libraryController.characters.toList(),
+                                allItems: libraryController.characters.toList(),
                                 onAdded: (sel) => setState(() {
                                   // if new character add to list
                                   if (!widget.book.characters.contains(sel)) {
@@ -252,15 +265,14 @@ class _BookDetailsState extends State<BookDetails> {
                               );
                               if (confirm == true) {
                                 // Remove the book from the library
-                                await libraryController
-                                    .removeBook(widget.book);
-                  
+                                await libraryController.removeBook(widget.book);
+
                                 // Delete the book's files from the filesystem
                                 final bookDir = Directory(widget.book.path);
                                 if (await bookDir.exists()) {
                                   await bookDir.delete(recursive: true);
                                 }
-                  
+
                                 // Navigate back to the previous screen
                                 if (mounted) {
                                   Navigator.pop(context);

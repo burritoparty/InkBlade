@@ -35,12 +35,24 @@ class AuthorDetailsState extends State<AuthorDetails> {
     final filteredBooks = libraryController.books
         .where((book) => book.authors.contains(_author))
         .toList();
-      // get all authors from the library controller
+    // get all authors from the library controller
     final allAuthors = libraryController.authors.toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(_author),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              // navigate back to the home screen
+              Navigator.popUntil(
+                context,
+                ModalRoute.withName('/'),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -55,7 +67,8 @@ class AuthorDetailsState extends State<AuthorDetails> {
                     all: allAuthors,
                     onSelected: (sel) async {
                       if (_author != sel) {
-                        final libraryController = context.read<LibraryController>();
+                        final libraryController =
+                            context.read<LibraryController>();
                         // rename the author in all books
                         await libraryController.renameAuthor(_author, sel);
                         setState(() {
@@ -73,14 +86,17 @@ class AuthorDetailsState extends State<AuthorDetails> {
                   builder: (BuildContext context) {
                     return AlertDialog(
                       title: const Text('Confirm Deletion'),
-                      content: const Text('Are you sure you want to delete this author?'),
+                      content: const Text(
+                          'Are you sure you want to delete this author?'),
                       actions: [
                         TextButton(
-                          onPressed: () => Navigator.pop(context, false), // Cancel
+                          onPressed: () =>
+                              Navigator.pop(context, false), // Cancel
                           child: const Text('Cancel'),
                         ),
                         TextButton(
-                          onPressed: () => Navigator.pop(context, true), // Confirm
+                          onPressed: () =>
+                              Navigator.pop(context, true), // Confirm
                           child: const Text('Delete'),
                         ),
                       ],

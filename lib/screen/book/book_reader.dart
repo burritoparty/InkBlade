@@ -101,7 +101,8 @@ class BookReaderState extends State<BookReader> {
 // start a timer for scrolling, and call the action
   void _startScrollTimer(void Function() action) {
     _scrollTimer?.cancel();
-    _scrollTimer = Timer.periodic(const Duration(milliseconds: 50), (_) => action());
+    _scrollTimer =
+        Timer.periodic(const Duration(milliseconds: 50), (_) => action());
   }
 
   // stop the scroll timer
@@ -113,7 +114,8 @@ class BookReaderState extends State<BookReader> {
   // start a timer for rapid page turning, and call the action
   void _startRapidPageTurnTimer(void Function() action) {
     _scrollTimer?.cancel();
-    _scrollTimer = Timer.periodic(const Duration(milliseconds: 200), (_) => action());
+    _scrollTimer =
+        Timer.periodic(const Duration(milliseconds: 200), (_) => action());
   }
 
   // keyboard events for nav and zoom
@@ -125,7 +127,8 @@ class BookReaderState extends State<BookReader> {
       _upHeld = event is KeyDownEvent;
       if (_upHeld && _zoomedIn && _scrollController.hasClients) {
         _startScrollTimer(() {
-          final increment = MediaQuery.of(context).size.height * 0.1; // Reduced to 10%
+          final increment =
+              MediaQuery.of(context).size.height * 0.1; // Reduced to 10%
           final newOffset = (_scrollController.offset - increment)
               .clamp(0.0, _scrollController.position.maxScrollExtent);
           _scrollController.jumpTo(newOffset);
@@ -138,7 +141,8 @@ class BookReaderState extends State<BookReader> {
       _downHeld = event is KeyDownEvent;
       if (_downHeld && _zoomedIn && _scrollController.hasClients) {
         _startScrollTimer(() {
-          final increment = MediaQuery.of(context).size.height * 0.1; // Reduced to 10%
+          final increment =
+              MediaQuery.of(context).size.height * 0.1; // Reduced to 10%
           final newOffset = (_scrollController.offset + increment)
               .clamp(0.0, _scrollController.position.maxScrollExtent);
           _scrollController.jumpTo(newOffset);
@@ -157,7 +161,8 @@ class BookReaderState extends State<BookReader> {
         _zoomedIn = !_zoomedIn;
         _resetScroll();
         setState(() {});
-      } else if (key == LogicalKeyboardKey.keyA || key == LogicalKeyboardKey.arrowLeft) {
+      } else if (key == LogicalKeyboardKey.keyA ||
+          key == LogicalKeyboardKey.arrowLeft) {
         // immediate page turn
         _goToPage(_currentPage - 1);
         // start rapid page turning after 1 second
@@ -165,7 +170,8 @@ class BookReaderState extends State<BookReader> {
         _scrollTimer = Timer(const Duration(seconds: 1), () {
           _startRapidPageTurnTimer(() => _goToPage(_currentPage - 1));
         });
-      } else if (key == LogicalKeyboardKey.keyD || key == LogicalKeyboardKey.arrowRight) {
+      } else if (key == LogicalKeyboardKey.keyD ||
+          key == LogicalKeyboardKey.arrowRight) {
         // immediate page turn
         _goToPage(_currentPage + 1);
         // start rapid page turning after 1 second
@@ -197,6 +203,18 @@ class BookReaderState extends State<BookReader> {
       onKeyEvent: _handleKey,
       child: Scaffold(
         appBar: AppBar(
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.home),
+              onPressed: () {
+                // navigate back to the home screen
+                Navigator.popUntil(
+                  context,
+                  ModalRoute.withName('/'),
+                );
+              },
+            ),
+          ],
           leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.pop(context)),
