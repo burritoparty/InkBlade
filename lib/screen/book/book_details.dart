@@ -5,7 +5,8 @@ import '../../widgets/widgets.dart';
 import 'dart:io';
 
 import 'package:provider/provider.dart';
-import 'package:flutter_manga_reader/controllers/library_controller.dart';
+import '../../controllers/library_controller.dart';
+import '../../controllers/settings_controller.dart';
 import 'package:flutter/services.dart';
 
 class BookDetails extends StatefulWidget {
@@ -18,7 +19,8 @@ class BookDetails extends StatefulWidget {
 
 class _BookDetailsState extends State<BookDetails> {
   late final LibraryController libraryController;
-  int imagesPerRow = 10;
+  late final SettingsController settingsController;
+  late int imagesPerRow;
   late FocusNode _focusNode;
 
   @override
@@ -26,11 +28,14 @@ class _BookDetailsState extends State<BookDetails> {
     super.initState();
     // initialize the library controller
     libraryController = context.read<LibraryController>();
+    // initialize the settings controller
+    settingsController = context.read<SettingsController>();
     // set up focus node and request focus after build
     _focusNode = FocusNode();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+    imagesPerRow = settingsController.pageSliderValue.round();
   }
 
   // dispose focus node
