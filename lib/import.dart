@@ -199,11 +199,13 @@ class _ImportState extends State<Import> {
                               // add them if not already in
                               if (!newBook.authors.contains(sel)) {
                                 newBook.authors.add(sel);
+                                newBook.authors.sort(); 
                               }
                             }),
                             onRemoved: (author) => setState(() {
                               // remove them if already in
                               newBook.authors.remove(author);
+                              newBook.authors.sort();
                             }),
                           ),
                         ),
@@ -244,11 +246,13 @@ class _ImportState extends State<Import> {
                               // if new tag add to list
                               if (!newBook.tags.contains(sel)) {
                                 newBook.tags.add(sel);
+                                newBook.tags.sort(); 
                               }
                             }),
                             onRemoved: (tag) => setState(() {
                               // remove them if already in
                               newBook.tags.remove(tag);
+                              newBook.tags.sort(); 
                             }),
                           ),
                         ),
@@ -282,11 +286,13 @@ class _ImportState extends State<Import> {
                               // if new character add to list
                               if (!newBook.characters.contains(sel)) {
                                 newBook.characters.add(sel);
+                                newBook.characters.sort(); 
                               }
                             }),
                             onRemoved: (character) => setState(() {
                               // remove them if already in
                               newBook.characters.remove(character);
+                              newBook.characters.sort();
                             }),
                           ),
                         ),

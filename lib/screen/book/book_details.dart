@@ -91,8 +91,7 @@ class _BookDetailsState extends State<BookDetails> {
                               padding: const EdgeInsets.all(8.0),
                               child: ListEditor(
                                 name: "author",
-                                item: widget.book.authors,
-                                // convert set to list for the editor
+                                item: widget.book.authors.toList()..sort(),
                                 allItems: libraryController.authors.toList(),
                                 onAdded: (sel) => setState(() {
                                   // add them if not already in
@@ -136,8 +135,8 @@ class _BookDetailsState extends State<BookDetails> {
                               padding: const EdgeInsets.all(8.0),
                               child: ListEditor(
                                 name: "tag",
-                                item: widget.book.tags,
-                                // convert set to list for the editor
+                                item: widget.book.tags.toList()
+                                  ..sort(),
                                 allItems: libraryController.tags.toList(),
                                 onAdded: (sel) => setState(() {
                                   // if new tag add to list
@@ -174,8 +173,8 @@ class _BookDetailsState extends State<BookDetails> {
                               padding: const EdgeInsets.all(8.0),
                               child: ListEditor(
                                 name: "character",
-                                item: widget.book.characters,
-                                // convert set to list for the editor
+                                item: widget.book.characters.toList()
+                                  ..sort(),
                                 allItems: libraryController.characters.toList(),
                                 onAdded: (sel) => setState(() {
                                   // if new character add to list
