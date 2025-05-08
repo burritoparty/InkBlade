@@ -56,7 +56,8 @@ class _DropdownEditorState extends State<DropdownEditor> {
         // find all existing series matching the input
         final matches = widget.all
             .where((a) => a.toLowerCase().contains(lowerInput))
-            .toList()..sort();
+            .toList()
+          ..sort();
 
         // if the exact series isn't in your list yet, offer it first
         if (!widget.all.any((a) => a.toLowerCase() == lowerInput)) {
@@ -93,16 +94,37 @@ class _DropdownEditorState extends State<DropdownEditor> {
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: activeColor),
             ),
+            suffixIcon: textEditingController.text.isNotEmpty
+                ? IconButton(
+                    icon: Icon(Icons.clear, color: activeColor),
+                    onPressed: () {
+                      // clear the field
+                      textEditingController.clear();
+                      // notify parent that they selected “blank”
+                      widget.onSelected('');
+                      // reset dirty/saved state if you want
+                      setState(() {
+                        _isDirty = false;
+                        _hasSaved = true;
+                      });
+                    },
+                  )
+                : null,
           ),
           onChanged: (_) {
-            if (!_isDirty) {
-              setState(() => _isDirty = true);
-            }
+            if (!_isDirty) setState(() => _isDirty = true);
+            // need to rebuild to show/hide clear button
+            setState(() {});
           },
           onSubmitted: (_) {
             // save on enter
             // (will pick the first option)
-            onFieldSubmitted();
+            if (textEditingController.text.isEmpty) {
+              widget.onSelected('');
+            } else {
+              onFieldSubmitted();
+            }
+
             setState(() {
               _isDirty = false;
               _hasSaved = true;
