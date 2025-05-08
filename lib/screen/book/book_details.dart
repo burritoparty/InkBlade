@@ -169,6 +169,8 @@ class _BookDetailsState extends State<BookDetails> {
                                         widget.book.series = sel;
                                       });
                                     }
+                                    // refocus keyboard, fix escape key issue
+                                    _focusNode.requestFocus();
                                   },
                                 ),
                               ),
@@ -234,8 +236,8 @@ class _BookDetailsState extends State<BookDetails> {
                                       libraryController.characters.toList(),
                                   onAdded: (sel) async {
                                     if (!widget.book.characters.contains(sel)) {
-                                      final success =
-                                          await libraryController.updateCharacters(
+                                      final success = await libraryController
+                                          .updateCharacters(
                                               widget.book, sel, false);
                                       if (success) {
                                         setState(() {});
@@ -243,12 +245,13 @@ class _BookDetailsState extends State<BookDetails> {
                                     }
                                   },
                                   onRemoved: (character) async {
-                                    final success =
-                                        await libraryController.updateCharacters(
+                                    final success = await libraryController
+                                        .updateCharacters(
                                             widget.book, character, true);
                                     if (success) {
                                       setState(() {
-                                        widget.book.characters.remove(character);
+                                        widget.book.characters
+                                            .remove(character);
                                       });
                                     }
                                   },
