@@ -300,19 +300,15 @@ class _BookDetailsState extends State<BookDetails> {
                                   await libraryController
                                       .removeBook(widget.book);
 
-                                  // remove from controller, update library list
-                                  await libraryController
-                                      .removeBook(widget.book);
-
                                   // delete the folder, safely catching any errors
                                   try {
-                                    final bookDir = Directory(bookPath);
-                                    if (await bookDir.exists()) {
-                                      await bookDir.delete(recursive: true);
+                                    final dir = Directory(bookPath);
+                                    if (await dir.exists()) {
+                                      await dir.delete(recursive: true);
                                     }
                                   } catch (e) {
                                     debugPrint(
-                                        'Failed to delete book directory: $e');
+                                        'Failed to delete book folder: $e');
                                   }
                                 }
                               },
