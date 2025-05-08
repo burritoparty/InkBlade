@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_manga_reader/models/book.dart';
+import 'package:provider/provider.dart';
+import '../../controllers/settings_controller.dart';
 import 'dart:async';
 
 class BookReader extends StatefulWidget {
@@ -12,6 +14,7 @@ class BookReader extends StatefulWidget {
 }
 
 class BookReaderState extends State<BookReader> {
+  late final SettingsController settingsController;
   late PageController _pageController;
   late ScrollController _scrollController;
   int _currentPage = 0;
@@ -36,6 +39,8 @@ class BookReaderState extends State<BookReader> {
   @override
   void initState() {
     super.initState();
+    // initialize the settings controller
+    settingsController = context.read<SettingsController>();
     _pageController = PageController();
     _scrollController = ScrollController();
     _keyboardFocusNode = FocusNode();
@@ -43,6 +48,9 @@ class BookReaderState extends State<BookReader> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _keyboardFocusNode.requestFocus();
     });
+    if (settingsController.defaultZoom) {
+      _zoomedIn = true;
+    }
   }
 
   // for clearing controllers

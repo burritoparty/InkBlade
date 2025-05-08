@@ -75,10 +75,10 @@ class _ImportState extends State<Import> {
                 final originalPath = newBook.path;
 
                 try {
-                  // 1️⃣ copy into your app directory
+                  // copy into your app directory
                   await libraryController.addBook(newBook);
 
-                  // 2️⃣ only delete once the above is done
+                  // only delete once the above is done
                   if (settingsController.autoDelete) {
                     final dir = Directory(originalPath);
                     if (await dir.exists()) {
@@ -86,7 +86,7 @@ class _ImportState extends State<Import> {
                     }
                   }
 
-                  // 3️⃣ notify & pop
+                  // notify & pop
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Imported “${newBook.title}”')),
                   );
