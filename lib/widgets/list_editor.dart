@@ -26,25 +26,26 @@ class ListEditor extends StatelessWidget {
       children: [
         Autocomplete<String>(
           optionsBuilder: (TextEditingValue textEditingValue) {
-            final input = textEditingValue.text;
+            final input = textEditingValue.text.trim();
             if (input.isEmpty) return const Iterable<String>.empty();
 
             final lowerInput = input.toLowerCase();
 
-            // find all existing items matching the input
-            final matches = allItems
+            // grab all existing tags that contain the input
+            // ignore case then sort them
+            final filtered = allItems
                 .where((t) => t.toLowerCase().contains(lowerInput))
-                .toList();
+                .toList()
+              ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
-            // if the exact item isn't already in your list, offer it first
-            if (!allItems.any((t) => t.toLowerCase() == lowerInput)) {
-              matches.insert(0, input);
+            // if there's no exact case-insensitive match
+            // prepend the raw input as “new tag”
+            if (!filtered.any((t) => t.toLowerCase() == lowerInput)) {
+              return [input, ...filtered];
             }
 
-            // sort the matches alphabetically
-            matches.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-
-            return matches;
+            // otherwise just return the existing matches
+            return filtered;
           },
           onSelected: (item) {
             onAdded(item);
@@ -90,8 +91,7 @@ class ListEditor extends StatelessWidget {
                     // pass as a map
                     arguments: {'author': item, 'allAuthors': allItems},
                   );
-                }
-                else if (name == "tag") {
+                } else if (name == "tag") {
                   Navigator.pushNamed(
                     context,
                     Routes.tag,
@@ -99,7 +99,6 @@ class ListEditor extends StatelessWidget {
                     arguments: {'tag': item, 'allTags': allItems},
                   );
                 }
-                
               },
             );
           }).toList(),
