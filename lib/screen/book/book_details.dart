@@ -44,7 +44,7 @@ class _BookDetailsState extends State<BookDetails> {
           IconButton(
             icon: const Icon(Icons.home),
             onPressed: () {
-              // navigate back to the "Library" screen
+              // navigate back to the home screen
               Navigator.popUntil(
                 context,
                 ModalRoute.withName('/'),
