@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'controllers/library_controller.dart';
+import 'controllers/settings_controller.dart';
 import 'services/library_repository.dart';
 import 'screen/screens.dart';
 import 'router/routes.dart';
@@ -17,11 +18,19 @@ void main() async {
   // call init to load the books from the json file, and build the sets
   await libraryController.init();
 
+  // initialize the settings controller, for managing the settings
+  final settingsController = SettingsController();
+  // call init to load the settings from shared preferences
+  await settingsController.init();
+
   // run the app with the loaded data
   runApp(
-    ChangeNotifierProvider<LibraryController>.value(
-      value: libraryController,
-      child: MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: libraryController),
+        ChangeNotifierProvider.value(value: settingsController),
+      ],
+      child: const MyApp(),
     ),
   );
 }

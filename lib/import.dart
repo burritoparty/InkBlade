@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/models/book.dart';
 import '/widgets/widgets.dart';
 import '../controllers/library_controller.dart';
+import '../controllers/settings_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:file_selector/file_selector.dart';
 import 'dart:io';
@@ -16,6 +17,7 @@ class Import extends StatefulWidget {
 
 class _ImportState extends State<Import> {
   late final LibraryController libraryController;
+  late final SettingsController settingsController;
   // controller for text editing field
   final TextEditingController titleController = TextEditingController();
   final TextEditingController linkController = TextEditingController();
@@ -37,6 +39,8 @@ class _ImportState extends State<Import> {
     super.initState();
     // initialize the library controller
     libraryController = context.read<LibraryController>();
+    // initialize the settings controller
+    settingsController = context.read<SettingsController>();
     // controller for text editing field
     titleController.text = newBook.title;
     linkController.text = newBook.link;
@@ -67,18 +71,34 @@ class _ImportState extends State<Import> {
                 Icons.check,
                 size: 24, // Slightly larger icon
               ),
-              onPressed: () {
-                // add the book to the library
-                libraryController.addBook(newBook).then(
-                  (value) {
-                    // tell the user it was added successfully
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Imported “${newBook.title}”')),
-                    );
-                    // pop back to the library screen
-                    Navigator.of(context).pop();
-                  },
-                );
+              onPressed: () async {
+                final originalPath = newBook.path;
+
+                try {
+                  // 1️⃣ copy into your app directory
+                  await libraryController.addBook(newBook);
+
+                  // 2️⃣ only delete once the above is done
+                  if (settingsController.autoDelete) {
+                    final dir = Directory(originalPath);
+                    if (await dir.exists()) {
+                      await dir.delete(recursive: true);
+                    }
+                  }
+
+                  // 3️⃣ notify & pop
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Imported “${newBook.title}”')),
+                  );
+                  Navigator.of(context).pop();
+                } catch (e, st) {
+                  // handle any errors (copy or delete) gracefully
+                  debugPrint('Import error: $e\n$st');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('Failed to import “${newBook.title}”')),
+                  );
+                }
               },
               label: const Text(
                 "Import book",
@@ -199,7 +219,7 @@ class _ImportState extends State<Import> {
                               // add them if not already in
                               if (!newBook.authors.contains(sel)) {
                                 newBook.authors.add(sel);
-                                newBook.authors.sort(); 
+                                newBook.authors.sort();
                               }
                             }),
                             onRemoved: (author) => setState(() {
@@ -246,13 +266,13 @@ class _ImportState extends State<Import> {
                               // if new tag add to list
                               if (!newBook.tags.contains(sel)) {
                                 newBook.tags.add(sel);
-                                newBook.tags.sort(); 
+                                newBook.tags.sort();
                               }
                             }),
                             onRemoved: (tag) => setState(() {
                               // remove them if already in
                               newBook.tags.remove(tag);
-                              newBook.tags.sort(); 
+                              newBook.tags.sort();
                             }),
                           ),
                         ),
@@ -286,7 +306,7 @@ class _ImportState extends State<Import> {
                               // if new character add to list
                               if (!newBook.characters.contains(sel)) {
                                 newBook.characters.add(sel);
-                                newBook.characters.sort(); 
+                                newBook.characters.sort();
                               }
                             }),
                             onRemoved: (character) => setState(() {

@@ -1,65 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../controllers/settings_controller.dart';
 
-class Settings extends StatefulWidget {
+// replace your existing Settings widget with something like:
+
+class Settings extends StatelessWidget {
   const Settings({super.key});
-
-  @override
-  State<Settings> createState() => _SettingsState();
-}
-
-class _SettingsState extends State<Settings> {
-  bool autoDelete = false;
-  bool defaultZoom = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Delete book after import',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  Checkbox(
-                    value: autoDelete,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        autoDelete = value ?? false;
-                      });
-                    },
-                    activeColor: Colors.blue,
-                  ),
-                ],
+        padding: const EdgeInsets.all(16),
+        child: Consumer<SettingsController>(
+          builder: (ctx, settings, _) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SwitchListTile(
+                title: const Text('Delete book on import'),
+                value: settings.autoDelete,
+                onChanged: (v) => settings.setAutoDelete(v),
+                secondary: const Icon(Icons.delete),
               ),
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Start zoomed in',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  Checkbox(
-                    value: defaultZoom,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        defaultZoom = value ?? false;
-                      });
-                    },
-                    activeColor: Colors.blue,
-                  ),
-                ],
+              SwitchListTile(
+                title: const Text('Start zoomed on reader'),
+                value: settings.defaultZoom,
+                onChanged: (v) => settings.setDefaultZoom(v),
+                secondary: const Icon(Icons.zoom_in),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
