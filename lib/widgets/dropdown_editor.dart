@@ -56,7 +56,7 @@ class _DropdownEditorState extends State<DropdownEditor> {
         // find all existing series matching the input
         final matches = widget.all
             .where((a) => a.toLowerCase().contains(lowerInput))
-            .toList();
+            .toList()..sort();
 
         // if the exact series isn't in your list yet, offer it first
         if (!widget.all.any((a) => a.toLowerCase() == lowerInput)) {
