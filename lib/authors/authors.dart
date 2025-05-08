@@ -91,7 +91,7 @@ class AuthorButtons extends StatelessWidget {
     return Expanded(
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          double buttonWidth = 175.0;
+          double buttonWidth = 200.0;
           int crossAxisCount = (constraints.maxWidth / buttonWidth).floor();
           if (crossAxisCount < 1) {
             crossAxisCount = 1;
@@ -118,7 +118,7 @@ class AuthorButtons extends StatelessWidget {
                   );
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.grey[800],
                   foregroundColor: Colors.white,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
