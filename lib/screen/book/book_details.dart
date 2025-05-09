@@ -28,10 +28,15 @@ class _BookDetailsState extends State<BookDetails> {
   late int imagesPerRow;
   late FocusNode _focusNode;
   bool _isCtrlPressed = false; // Track if Ctrl is pressed
+  // controller for text editing field
+  late final TextEditingController titleController;
+  late final TextEditingController linkController;
 
   @override
   void initState() {
     super.initState();
+    titleController = TextEditingController(text: widget.book.title);
+    linkController = TextEditingController(text: widget.book.link);
     // initialize the library controller
     libraryController = context.read<LibraryController>();
     // initialize the settings controller
@@ -66,11 +71,11 @@ class _BookDetailsState extends State<BookDetails> {
     // set up the library controller, which holds the list of books
     // it watches for changes to the list of books, and rebuilds the widget tree
     final libraryController = context.watch<LibraryController>();
-    // controller for text editing field
-    final TextEditingController titleController =
-        TextEditingController(text: widget.book.title);
-    final TextEditingController linkController =
-        TextEditingController(text: widget.book.link);
+    // // controller for text editing field
+    // final TextEditingController titleController =
+    //     TextEditingController(text: widget.book.title);
+    // final TextEditingController linkController =
+    //     TextEditingController(text: widget.book.link);
 
     return KeyboardListener(
       focusNode: _focusNode,
