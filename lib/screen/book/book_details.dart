@@ -123,6 +123,8 @@ class _BookDetailsState extends State<BookDetails> {
                                         widget.book.title = newTitle;
                                       });
                                     }
+                                    // refocus keyboard, fix escape key issue
+                                    _focusNode.requestFocus();
                                   },
                                 ),
                               ),
@@ -231,6 +233,8 @@ class _BookDetailsState extends State<BookDetails> {
                                         widget.book.link = newLink;
                                       });
                                     }
+                                    // refocus keyboard, fix escape key issue
+                                    _focusNode.requestFocus();
                                   },
                                 ),
                               ),
