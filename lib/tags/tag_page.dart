@@ -52,12 +52,13 @@ class _TagPageState extends State<TagPage> {
 
     // update filteredTags based on the current search query
     if (_searchController.text.isEmpty) {
-      filteredTags = List.from(allTags);
+      filteredTags = List.from(allTags)..sort();
     } else {
       filteredTags = allTags
           .where((tag) =>
               tag.toLowerCase().contains(_searchController.text.toLowerCase()))
-          .toList();
+          .toList()
+        ..sort();
     }
 
     return Column(
