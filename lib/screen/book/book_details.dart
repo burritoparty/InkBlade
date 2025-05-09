@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project-specific imports
 import 'package:flutter_manga_reader/models/book.dart';
@@ -26,6 +27,7 @@ class _BookDetailsState extends State<BookDetails> {
   late final SettingsController settingsController;
   late int imagesPerRow;
   late FocusNode _focusNode;
+  bool _isCtrlPressed = false; // Track if Ctrl is pressed
 
   @override
   void initState() {
@@ -73,7 +75,21 @@ class _BookDetailsState extends State<BookDetails> {
     return KeyboardListener(
       focusNode: _focusNode,
       autofocus: true,
-      onKeyEvent: _handleKeyEvent,
+      onKeyEvent: (KeyEvent event) {
+        _handleKeyEvent(event);
+        // track ctrl key state
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.controlLeft) {
+          setState(() {
+            _isCtrlPressed = true;
+          });
+        } else if (event is KeyUpEvent &&
+            event.logicalKey == LogicalKeyboardKey.controlLeft) {
+          setState(() {
+            _isCtrlPressed = false;
+          });
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           title: Column(
@@ -280,8 +296,18 @@ class _BookDetailsState extends State<BookDetails> {
                                           widget.book.link = newLink;
                                         });
                                       }
-                                      // refocus keyboard, fix escape key issue
+                                      // Refocus keyboard, fix escape key issue
                                       _focusNode.requestFocus();
+                                    },
+                                    onTap: () async {
+                                      if (_isCtrlPressed) {
+                                        final url = Uri.parse(widget.book.link);
+                                        if (await canLaunchUrl(url)) {
+                                          await launchUrl(url);
+                                        } else {
+                                          debugPrint('Could not launch $url');
+                                        }
+                                      }
                                     },
                                   ),
                                 ),

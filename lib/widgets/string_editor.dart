@@ -7,12 +7,15 @@ class StringEditor extends StatefulWidget {
   final TextEditingController controller;
   // submit callback
   final ValueChanged<String> onSubmitted;
+  // for following a link
+  final VoidCallback? onTap;
 
   const StringEditor({
     Key? key,
     required this.name,
     required this.controller,
     required this.onSubmitted,
+    this.onTap,
   }) : super(key: key);
 
   @override
@@ -101,6 +104,7 @@ class _StringEditorsState extends State<StringEditor> {
         widget.onSubmitted(value);
         _focusNode.unfocus();
       },
+      onTap: widget.onTap,
     );
   }
 }
