@@ -112,50 +112,65 @@ class _BookDetailsState extends State<BookDetails> {
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: StringEditor(
-                                  name: "Title",
-                                  controller: titleController,
-                                  onSubmitted: (newTitle) async {
-                                    final success = await libraryController
-                                        .updateTitle(widget.book, newTitle);
-                                    if (success) {
-                                      setState(() {
-                                        widget.book.title = newTitle;
-                                      });
+                                child: Focus(
+                                  onFocusChange: (hasFocus) {
+                                    if (!hasFocus) {
+                                      _focusNode.requestFocus();
                                     }
-                                    // refocus keyboard, fix escape key issue
-                                    _focusNode.requestFocus();
                                   },
+                                  child: StringEditor(
+                                    name: "Title",
+                                    controller: titleController,
+                                    onSubmitted: (newTitle) async {
+                                      final success = await libraryController
+                                          .updateTitle(widget.book, newTitle);
+                                      if (success) {
+                                        setState(() {
+                                          widget.book.title = newTitle;
+                                        });
+                                      }
+                                      // refocus keyboard, fix escape key issue
+                                      _focusNode.requestFocus();
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: ListEditor(
-                                  name: "author",
-                                  item: widget.book.authors.toList()..sort(),
-                                  allItems: libraryController.authors.toList(),
-                                  onAdded: (sel) async {
-                                    if (!widget.book.authors.contains(sel)) {
+                                child: Focus(
+                                  onFocusChange: (hasFocus) {
+                                    if (!hasFocus) {
+                                      _focusNode.requestFocus();
+                                    }
+                                  },
+                                  child: ListEditor(
+                                    name: "author",
+                                    item: widget.book.authors.toList()..sort(),
+                                    allItems:
+                                        libraryController.authors.toList(),
+                                    onAdded: (sel) async {
+                                      if (!widget.book.authors.contains(sel)) {
+                                        final success = await libraryController
+                                            .updateAuthors(
+                                                widget.book, sel, false);
+                                        if (success) {
+                                          setState(() {});
+                                        }
+                                      }
+                                    },
+                                    onRemoved: (author) async {
                                       final success =
                                           await libraryController.updateAuthors(
-                                              widget.book, sel, false);
+                                              widget.book, author, true);
                                       if (success) {
-                                        setState(() {});
+                                        setState(() {
+                                          widget.book.authors.remove(author);
+                                        });
                                       }
-                                    }
-                                  },
-                                  onRemoved: (author) async {
-                                    final success =
-                                        await libraryController.updateAuthors(
-                                            widget.book, author, true);
-                                    if (success) {
-                                      setState(() {
-                                        widget.book.authors.remove(author);
-                                      });
-                                    }
-                                  },
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
@@ -167,50 +182,65 @@ class _BookDetailsState extends State<BookDetails> {
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: DropdownEditor(
-                                  name: "Series",
-                                  initial: widget.book.series,
-                                  // convert set to list for the editor
-                                  all: libraryController.series.toList(),
-                                  onSelected: (sel) async {
-                                    final success = await libraryController
-                                        .updateSeries(widget.book, sel);
-                                    if (success) {
-                                      setState(() {
-                                        widget.book.series = sel;
-                                      });
+                                child: Focus(
+                                  onFocusChange: (hasFocus) {
+                                    if (!hasFocus) {
+                                      _focusNode.requestFocus();
                                     }
-                                    // refocus keyboard, fix escape key issue
-                                    _focusNode.requestFocus();
                                   },
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListEditor(
-                                  name: "tag",
-                                  item: widget.book.tags.toList()..sort(),
-                                  allItems: libraryController.tags.toList(),
-                                  onAdded: (sel) async {
-                                    if (!widget.book.tags.contains(sel)) {
+                                  child: DropdownEditor(
+                                    name: "Series",
+                                    initial: widget.book.series,
+                                    // convert set to list for the editor
+                                    all: libraryController.series.toList(),
+                                    onSelected: (sel) async {
                                       final success = await libraryController
-                                          .updateTags(widget.book, sel, false);
+                                          .updateSeries(widget.book, sel);
                                       if (success) {
-                                        setState(() {});
+                                        setState(() {
+                                          widget.book.series = sel;
+                                        });
                                       }
+                                      // refocus keyboard, fix escape key issue
+                                      _focusNode.requestFocus();
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Focus(
+                                  onFocusChange: (hasFocus) {
+                                    if (!hasFocus) {
+                                      _focusNode.requestFocus();
                                     }
                                   },
-                                  onRemoved: (tag) async {
-                                    final success = await libraryController
-                                        .updateTags(widget.book, tag, true);
-                                    if (success) {
-                                      setState(() {
-                                        widget.book.tags.remove(tag);
-                                      });
-                                    }
-                                  },
+                                  child: ListEditor(
+                                    name: "tag",
+                                    item: widget.book.tags.toList()..sort(),
+                                    allItems: libraryController.tags.toList(),
+                                    onAdded: (sel) async {
+                                      if (!widget.book.tags.contains(sel)) {
+                                        final success =
+                                            await libraryController.updateTags(
+                                                widget.book, sel, false);
+                                        if (success) {
+                                          setState(() {});
+                                        }
+                                      }
+                                    },
+                                    onRemoved: (tag) async {
+                                      final success = await libraryController
+                                          .updateTags(widget.book, tag, true);
+                                      if (success) {
+                                        setState(() {
+                                          widget.book.tags.remove(tag);
+                                        });
+                                      }
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
@@ -222,52 +252,68 @@ class _BookDetailsState extends State<BookDetails> {
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: StringEditor(
-                                  name: "Link",
-                                  controller: linkController,
-                                  onSubmitted: (newLink) async {
-                                    final success = await libraryController
-                                        .updateLink(widget.book, newLink);
-                                    if (success) {
-                                      setState(() {
-                                        widget.book.link = newLink;
-                                      });
+                                child: Focus(
+                                  onFocusChange: (hasFocus) {
+                                    if (!hasFocus) {
+                                      _focusNode.requestFocus();
                                     }
-                                    // refocus keyboard, fix escape key issue
-                                    _focusNode.requestFocus();
                                   },
+                                  child: StringEditor(
+                                    name: "Link",
+                                    controller: linkController,
+                                    onSubmitted: (newLink) async {
+                                      final success = await libraryController
+                                          .updateLink(widget.book, newLink);
+                                      if (success) {
+                                        setState(() {
+                                          widget.book.link = newLink;
+                                        });
+                                      }
+                                      // refocus keyboard, fix escape key issue
+                                      _focusNode.requestFocus();
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: ListEditor(
-                                  name: "character",
-                                  item: widget.book.characters.toList()..sort(),
-                                  allItems:
-                                      libraryController.characters.toList(),
-                                  onAdded: (sel) async {
-                                    if (!widget.book.characters.contains(sel)) {
+                                child: Focus(
+                                  onFocusChange: (hasFocus) {
+                                    if (!hasFocus) {
+                                      _focusNode.requestFocus();
+                                    }
+                                  },
+                                  child: ListEditor(
+                                    name: "character",
+                                    item: widget.book.characters.toList()
+                                      ..sort(),
+                                    allItems:
+                                        libraryController.characters.toList(),
+                                    onAdded: (sel) async {
+                                      if (!widget.book.characters
+                                          .contains(sel)) {
+                                        final success = await libraryController
+                                            .updateCharacters(
+                                                widget.book, sel, false);
+                                        if (success) {
+                                          setState(() {});
+                                        }
+                                      }
+                                    },
+                                    onRemoved: (character) async {
                                       final success = await libraryController
                                           .updateCharacters(
-                                              widget.book, sel, false);
+                                              widget.book, character, true);
                                       if (success) {
-                                        setState(() {});
+                                        setState(() {
+                                          widget.book.characters
+                                              .remove(character);
+                                        });
                                       }
-                                    }
-                                  },
-                                  onRemoved: (character) async {
-                                    final success = await libraryController
-                                        .updateCharacters(
-                                            widget.book, character, true);
-                                    if (success) {
-                                      setState(() {
-                                        widget.book.characters
-                                            .remove(character);
-                                      });
-                                    }
-                                  },
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
