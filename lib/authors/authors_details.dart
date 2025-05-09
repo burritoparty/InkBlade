@@ -93,21 +93,31 @@ class AuthorDetailsState extends State<AuthorDetails> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: DropdownEditor(
-                      name: "Rename Author",
-                      initial: _author,
-                      all: allAuthors,
-                      onSelected: (sel) async {
-                        if (_author != sel) {
-                          final libraryController =
-                              context.read<LibraryController>();
-                          // rename the author in all books
-                          await libraryController.renameAuthor(_author, sel);
-                          setState(() {
-                            _author = sel;
-                          });
+                    child: Focus(
+                      onFocusChange: (hasFocus) {
+                        if (!hasFocus) {
+                          // Refocus the main FocusNode when this widget loses focus
+                          _focusNode.requestFocus();
                         }
                       },
+                      child: DropdownEditor(
+                        name: "Rename Author",
+                        initial: _author,
+                        all: allAuthors,
+                        onSelected: (sel) async {
+                          if (_author != sel) {
+                            final libraryController =
+                                context.read<LibraryController>();
+                            // rename the author in all books
+                            await libraryController.renameAuthor(_author, sel);
+                            setState(() {
+                              _author = sel;
+                            });
+                          }
+                          // refocus keyboard, fix escape key issue
+                          _focusNode.requestFocus();
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -135,7 +145,7 @@ class AuthorDetailsState extends State<AuthorDetails> {
                       );
                     },
                   );
-      
+
                   if (confirm == true) {
                     final libraryController = context.read<LibraryController>();
                     // Remove the author from all books

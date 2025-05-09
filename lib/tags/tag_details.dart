@@ -92,21 +92,31 @@ class _TagDetailsState extends State<TagDetails> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: DropdownEditor(
-                      name: "Rename Tag",
-                      initial: _tag,
-                      all: allTags,
-                      onSelected: (sel) async {
-                        if (_tag != sel) {
-                          final libraryController =
-                              context.read<LibraryController>();
-                          // Rename the tag in all books
-                          await libraryController.renameTag(_tag, sel);
-                          setState(() {
-                            _tag = sel;
-                          });
+                    child: Focus(
+                      onFocusChange: (hasFocus) {
+                        if (!hasFocus) {
+                          // Refocus the main FocusNode when this widget loses focus
+                          _focusNode.requestFocus();
                         }
                       },
+                      child: DropdownEditor(
+                        name: "Rename Tag",
+                        initial: _tag,
+                        all: allTags,
+                        onSelected: (sel) async {
+                          if (_tag != sel) {
+                            final libraryController =
+                                context.read<LibraryController>();
+                            // Rename the tag in all books
+                            await libraryController.renameTag(_tag, sel);
+                            setState(() {
+                              _tag = sel;
+                            });
+                          }
+                          // refocus keyboard, fix escape key issue
+                          _focusNode.requestFocus();
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -134,7 +144,7 @@ class _TagDetailsState extends State<TagDetails> {
                       );
                     },
                   );
-      
+
                   if (confirm == true) {
                     final libraryController = context.read<LibraryController>();
                     // remove the tag from all books
