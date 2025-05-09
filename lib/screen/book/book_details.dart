@@ -76,7 +76,18 @@ class _BookDetailsState extends State<BookDetails> {
       onKeyEvent: _handleKeyEvent,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.book.title),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.book.title),
+              Text(
+                '${widget.book.getPageCount()} pages',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white70,
+                    ),
+              ),
+            ],
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.home),
