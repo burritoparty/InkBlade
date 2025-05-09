@@ -1,9 +1,14 @@
+// Standard Dart imports
+import 'dart:async';
+
+// Third-party package imports
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_manga_reader/models/book.dart';
 import 'package:provider/provider.dart';
+
+// Project-specific imports
+import 'package:flutter_manga_reader/models/book.dart';
 import '../../controllers/settings_controller.dart';
-import 'dart:async';
 
 class BookReader extends StatefulWidget {
   final Book book;

@@ -1,13 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_manga_reader/models/book.dart';
-import '../../router/routes.dart';
-import '../../widgets/widgets.dart';
+// Standard Dart imports
 import 'dart:io';
 
+// Third-party package imports
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
+// Project-specific imports
+import 'package:flutter_manga_reader/models/book.dart';
 import '../../controllers/library_controller.dart';
 import '../../controllers/settings_controller.dart';
-import 'package:flutter/services.dart';
+import '../../router/routes.dart';
+import '../../widgets/widgets.dart';
 
 class BookDetails extends StatefulWidget {
   final Book book;

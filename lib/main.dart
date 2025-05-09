@@ -1,10 +1,13 @@
+// Third-party package imports
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+// Project-specific imports
 import 'controllers/library_controller.dart';
 import 'controllers/settings_controller.dart';
-import 'services/library_repository.dart';
-import 'screen/screens.dart';
 import 'router/routes.dart';
+import 'screen/screens.dart';
+import 'services/library_repository.dart';
 
 // entry point: inflate the widget tree
 void main() async {

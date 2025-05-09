@@ -1,5 +1,7 @@
-// models/book.dart
+// Standard Dart imports
 import 'dart:io';
+
+// Third-party package imports
 import 'package:path/path.dart' as p;
 
 class Book {

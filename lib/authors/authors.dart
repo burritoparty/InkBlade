@@ -1,7 +1,10 @@
+// Third-party package imports
 import 'package:flutter/material.dart';
-import 'package:flutter_manga_reader/router/routes.dart';
 import 'package:provider/provider.dart';
-import '../controllers/library_controller.dart'; 
+
+// Project-specific imports
+import 'package:flutter_manga_reader/router/routes.dart';
+import '../controllers/library_controller.dart';
 
 class Authors extends StatefulWidget {
   const Authors({super.key});

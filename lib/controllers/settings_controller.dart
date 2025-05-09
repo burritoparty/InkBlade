@@ -1,4 +1,4 @@
-// lib/controllers/settings_controller.dart
+// Third-party package imports
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

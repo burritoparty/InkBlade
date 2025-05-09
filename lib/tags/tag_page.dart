@@ -1,7 +1,10 @@
+// Third-party package imports
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'tag_details.dart';
+
+// Project-specific imports
 import '../controllers/library_controller.dart';
+import 'tag_details.dart';
 
 class TagPage extends StatefulWidget {
   const TagPage({super.key});

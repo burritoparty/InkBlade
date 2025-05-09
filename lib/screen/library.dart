@@ -1,8 +1,10 @@
+// Third-party package imports
 import 'package:flutter/material.dart';
-import 'package:flutter_manga_reader/controllers/library_controller.dart';
-import 'package:flutter_manga_reader/models/book.dart';
 import 'package:provider/provider.dart';
 
+// Project-specific imports
+import 'package:flutter_manga_reader/controllers/library_controller.dart';
+import 'package:flutter_manga_reader/models/book.dart';
 import '../router/routes.dart';
 import '../widgets/book_grid.dart';
 

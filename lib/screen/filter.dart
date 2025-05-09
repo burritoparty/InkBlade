@@ -1,10 +1,12 @@
+// Third-party package imports
 import 'package:flutter/material.dart';
-import '../widgets/book_grid.dart';
-import '../router/routes.dart';
-
-import '../controllers/library_controller.dart';
 import 'package:provider/provider.dart';
+
+// Project-specific imports
+import '../controllers/library_controller.dart';
 import '../models/book.dart';
+import '../router/routes.dart';
+import '../widgets/book_grid.dart';
 
 class Filter extends StatefulWidget {
   const Filter({super.key});

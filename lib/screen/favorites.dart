@@ -1,9 +1,11 @@
+// Third-party package imports
 import 'package:flutter/material.dart';
-import '../widgets/book_grid.dart';
-import '../router/routes.dart';
-
-import '../controllers/library_controller.dart';
 import 'package:provider/provider.dart';
+
+// Project-specific imports
+import '../controllers/library_controller.dart';
+import '../router/routes.dart';
+import '../widgets/book_grid.dart';
 
 class Favorites extends StatefulWidget {
   const Favorites({super.key});

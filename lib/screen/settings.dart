@@ -1,5 +1,8 @@
+// Third-party package imports
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+// Project-specific imports
 import '../controllers/settings_controller.dart';
 
 // replace your existing Settings widget with something like:

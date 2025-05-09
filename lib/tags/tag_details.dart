@@ -1,10 +1,13 @@
+// Third-party package imports
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../widgets/book_grid.dart';
-import '../router/routes.dart';
-import '../widgets/widgets.dart';
-import '../controllers/library_controller.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+
+// Project-specific imports
+import '../controllers/library_controller.dart';
+import '../router/routes.dart';
+import '../widgets/book_grid.dart';
+import '../widgets/widgets.dart';
 
 class TagDetails extends StatefulWidget {
   final String tag;

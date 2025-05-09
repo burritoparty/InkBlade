@@ -1,12 +1,13 @@
-// lib/router/routes.dart
-
+// Third-party package imports
 import 'package:flutter/material.dart';
+
+// Project-specific imports
+import 'package:flutter_manga_reader/authors/authors_details.dart';
 import 'package:flutter_manga_reader/import.dart';
 import 'package:flutter_manga_reader/models/book.dart';
-import 'package:flutter_manga_reader/screen/library.dart';
 import 'package:flutter_manga_reader/screen/book/book_details.dart';
 import 'package:flutter_manga_reader/screen/book/book_reader.dart';
-import 'package:flutter_manga_reader/authors/authors_details.dart';
+import 'package:flutter_manga_reader/screen/library.dart';
 import 'package:flutter_manga_reader/tags/tag_details.dart';
 
 class Routes {

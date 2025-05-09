@@ -1,10 +1,14 @@
+// Standard Dart imports
 import 'dart:io';
 
+// Third-party package imports
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
+// Project-specific imports
 import '../models/book.dart';
 import '../services/library_repository.dart';
-import 'package:path_provider/path_provider.dart'; // for getApplicationDocumentsDirectory()
-import 'package:path/path.dart' as p;
 
 class LibraryController extends ChangeNotifier {
   final LibraryRepository _libraryRepository;
