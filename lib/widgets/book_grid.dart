@@ -77,16 +77,18 @@ class BookTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              // placeholder for cover
               Expanded(
-                child: Image.file(
-                  File(book.getCoverPath()),
-
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Image.file(
+                    File(book.getCoverPath()),
+                  
+                  ),
                 ),
               ),
             ],
