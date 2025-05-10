@@ -92,8 +92,27 @@ class Book {
     final images = dir.listSync().whereType<File>().where((f) {
       final ext = p.extension(f.path).toLowerCase();
       return ['.jpg', '.jpeg', '.png', '.webp'].contains(ext);
-    }).toList()
-      ..sort((a, b) => a.path.compareTo(b.path));
+    }).toList();
+
+    // Natural sort by filename
+    images.sort((a, b) {
+      final nameA = p.basenameWithoutExtension(a.path);
+      final nameB = p.basenameWithoutExtension(b.path);
+
+      // Extract numeric parts for comparison
+      final regex = RegExp(r'\d+');
+      final matchA = regex.firstMatch(nameA)?.group(0);
+      final matchB = regex.firstMatch(nameB)?.group(0);
+
+      if (matchA != null && matchB != null) {
+        final numA = int.tryParse(matchA) ?? 0;
+        final numB = int.tryParse(matchB) ?? 0;
+        return numA.compareTo(numB);
+      }
+
+      // Fallback to string comparison if no numbers are found
+      return nameA.compareTo(nameB);
+    });
 
     return images;
   }
