@@ -193,7 +193,7 @@ class BookReaderState extends State<BookReader> {
         _goToPage(_currentPage - 1);
         // start rapid page turning after 1 second
         _scrollTimer?.cancel();
-        _scrollTimer = Timer(const Duration(seconds: 1), () {
+        _scrollTimer = Timer(const Duration(milliseconds: 500), () {
           _startRapidPageTurnTimer(() => _goToPage(_currentPage - 1));
         });
       } else if (key == LogicalKeyboardKey.keyD ||
@@ -202,7 +202,7 @@ class BookReaderState extends State<BookReader> {
         _goToPage(_currentPage + 1);
         // start rapid page turning after 1 second
         _scrollTimer?.cancel();
-        _scrollTimer = Timer(const Duration(seconds: 1), () {
+        _scrollTimer = Timer(const Duration(milliseconds: 500), () {
           _startRapidPageTurnTimer(() => _goToPage(_currentPage + 1));
         });
       }
