@@ -84,10 +84,12 @@ class Book {
     return getPageFiles().length;
   }
 
-  // get the book's pages and return as File objects
+// get the book's pages and return as File objects
   List<File> getPageFiles() {
     final dir = Directory(path);
-    if (!dir.existsSync()) return [];
+    if (!dir.existsSync()) {
+      return [];
+    }
 
     final images = dir.listSync().whereType<File>().where((f) {
       final ext = p.extension(f.path).toLowerCase();
@@ -99,18 +101,27 @@ class Book {
       final nameA = p.basenameWithoutExtension(a.path);
       final nameB = p.basenameWithoutExtension(b.path);
 
-      // Extract numeric parts for comparison
-      final regex = RegExp(r'\d+');
-      final matchA = regex.firstMatch(nameA)?.group(0);
-      final matchB = regex.firstMatch(nameB)?.group(0);
+      // This regex needs to be more specific.
+      // It should target the *last* sequence of digits, ideally after an underscore.
+      // Let's use a regex that matches numbers at the end of the string, optionally prefixed by an underscore.
+      final regex = RegExp(r'_(\d+)$'); // This is the crucial change!
 
-      if (matchA != null && matchB != null) {
-        final numA = int.tryParse(matchA) ?? 0;
-        final numB = int.tryParse(matchB) ?? 0;
+      final matchA = regex.firstMatch(nameA);
+      final matchB = regex.firstMatch(nameB);
+
+      final numStringA =
+          matchA?.group(1); // Get the captured group (the digits)
+      final numStringB =
+          matchB?.group(1); // Get the captured group (the digits)
+          
+      if (numStringA != null && numStringB != null) {
+        final numA = int.tryParse(numStringA) ?? 0;
+        final numB = int.tryParse(numStringB) ?? 0;
         return numA.compareTo(numB);
       }
 
-      // Fallback to string comparison if no numbers are found
+      // Fallback to string comparison if no specific number is found or parsing fails
+      // This fallback will now only be used if the filenames DON'T conform to the expected pattern
       return nameA.compareTo(nameB);
     });
 
