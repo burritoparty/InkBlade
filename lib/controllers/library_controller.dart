@@ -77,6 +77,11 @@ class LibraryController extends ChangeNotifier {
     }
   }
 
+  // Method to check if a book title already exists
+  bool doesBookTitleExist(String title) {
+    return _books.any((book) => book.title.toLowerCase() == title.toLowerCase().trim());
+  }
+
   // add a book to the list and save it to the json file
   // checks if the book already exists in the list
   Future<void> addBook(Book book) async {

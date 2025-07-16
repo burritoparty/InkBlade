@@ -39,6 +39,9 @@ class _ImportState extends State<Import> {
     readLater: false,
   );
 
+  // Added to track if a valid folder with images has been selected
+  bool _isValidFolderSelected = false;
+
   @override
   void initState() {
     super.initState();
@@ -49,10 +52,35 @@ class _ImportState extends State<Import> {
     // controller for text editing field
     titleController.text = newBook.title;
     linkController.text = newBook.link;
+
+    // Listen to changes in the titleController to re-evaluate validation
+    titleController.addListener(_updateImportButtonState);
+  }
+
+  @override
+  void dispose() {
+    titleController.removeListener(_updateImportButtonState);
+    titleController.dispose();
+    linkController.dispose();
+    super.dispose();
+  }
+
+  void _updateImportButtonState() {
+    setState(() {
+      // This will trigger a rebuild and re-evaluate the onPressed condition
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Add a listener to the LibraryController for changes in library to update validation
+    // This will ensure the title existence check is always up-to-date
+    context.watch<LibraryController>();
+
+    final bool isImportButtonEnabled = _isValidFolderSelected &&
+        titleController.text.isNotEmpty &&
+        !libraryController.doesBookTitleExist(titleController.text);
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -76,35 +104,39 @@ class _ImportState extends State<Import> {
                 Icons.check,
                 size: 24, // Slightly larger icon
               ),
-              onPressed: () async {
-                final originalPath = newBook.path;
+              onPressed: isImportButtonEnabled
+                  ? () async {
+                      final originalPath = newBook.path;
 
-                try {
-                  // copy into your app directory
-                  await libraryController.addBook(newBook);
+                      try {
+                        // copy into your app directory
+                        await libraryController.addBook(newBook);
 
-                  // only delete once the above is done
-                  if (settingsController.autoDelete) {
-                    final dir = Directory(originalPath);
-                    if (await dir.exists()) {
-                      await dir.delete(recursive: true);
+                        // only delete once the above is done
+                        if (settingsController.autoDelete) {
+                          final dir = Directory(originalPath);
+                          if (await dir.exists()) {
+                            await dir.delete(recursive: true);
+                          }
+                        }
+
+                        // notify & pop
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Imported “${newBook.title}”')),
+                        );
+                        Navigator.of(context).pop();
+                      } catch (e, st) {
+                        // handle any errors (copy or delete) gracefully
+                        debugPrint('Import error: $e\n$st');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('Failed to import “${newBook.title}”')),
+                        );
+                      }
                     }
-                  }
-
-                  // notify & pop
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Imported “${newBook.title}”')),
-                  );
-                  Navigator.of(context).pop();
-                } catch (e, st) {
-                  // handle any errors (copy or delete) gracefully
-                  debugPrint('Import error: $e\n$st');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text('Failed to import “${newBook.title}”')),
-                  );
-                }
-              },
+                  : null, // Disable button if conditions are not met
               label: const Text(
                 "Import book",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -112,7 +144,9 @@ class _ImportState extends State<Import> {
               style: ElevatedButton.styleFrom(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                backgroundColor: Colors.grey[800],
+                backgroundColor: isImportButtonEnabled
+                    ? Colors.grey[800]
+                    : Colors.grey[600], // Change color when disabled
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -164,22 +198,35 @@ class _ImportState extends State<Import> {
                 ),
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: CoverImage(
                       folderPath: newBook.path,
-                      onFolderSelected: (path) => setState(
-                        () {
-                          // set the path to the selected folder
-                          newBook.path = path;
-                          // clean up the string for the title
-                          String title = p.basename(path);
-                          title = cleanString(title);
-                          // set the title to the cleaned up string
-                          titleController.text = title;
-                          newBook.title = title;
-                          // TODO: find a way to set StringEditor for title to green
-                        },
-                      ),
+                      onFolderSelected: (path) async {
+                        // Check for images in the selected directory
+                        final hasImages = await _checkDirectoryForImages(path);
+                        setState(
+                          () {
+                            if (hasImages) {
+                              newBook.path = path;
+                              String title = p.basename(path);
+                              title = cleanString(title);
+                              titleController.text = title;
+                              newBook.title = title;
+                              _isValidFolderSelected = true;
+                            } else {
+                              newBook.path = ""; // Clear path if no images
+                              _isValidFolderSelected = false;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Selected folder does not contain any image files (JPG, JPEG, PNG, WEBP).'),
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          },
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -209,6 +256,8 @@ class _ImportState extends State<Import> {
                                 newBook.title = newTitle;
                               },
                             ),
+                            // Optional: Add a validator or visual feedback here
+                            // if you want to show issues as the user types
                           ),
                         ),
                       ),
@@ -332,6 +381,22 @@ class _ImportState extends State<Import> {
       ),
     );
   }
+
+  // Checks if a given directory contains any image files.
+  Future<bool> _checkDirectoryForImages(String path) async {
+    final dir = Directory(path);
+    if (!await dir.exists()) {
+      return false;
+    }
+
+    final entries = dir.listSync();
+    final images = entries.whereType<File>().where((file) {
+      final ext = p.extension(file.path).toLowerCase();
+      return ['.jpg', '.jpeg', '.png', '.webp'].contains(ext);
+    }).toList();
+
+    return images.isNotEmpty;
+  }
 }
 
 class CoverImage extends StatefulWidget {
@@ -351,46 +416,35 @@ class CoverImage extends StatefulWidget {
 }
 
 class _CoverImageState extends State<CoverImage> {
-  bool _folderSelected = false;
+  // Removed _folderSelected state here as it's now managed by the parent
+  // using newBook.path to determine if a folder is selected.
 
   @override
   void didUpdateWidget(CoverImage old) {
     super.didUpdateWidget(old);
-    if (widget.folderPath == null || widget.folderPath!.isEmpty) {
-      _folderSelected = false;
-    }
+    // No need to set _folderSelected here, parent manages folderPath
   }
 
   @override
   Widget build(BuildContext context) {
+    // Determine if a folder is selected based on widget.folderPath
+    final bool folderHasPath =
+        widget.folderPath != null && widget.folderPath!.isNotEmpty;
+
     return Material(
-      color: _folderSelected ? Colors.transparent : Colors.grey[800],
+      color: folderHasPath ? Colors.transparent : Colors.grey[800],
       child: InkWell(
         onTap: () async {
-          // uses native picker on all platforms
           final String? dir = await getDirectoryPath();
           if (dir != null) {
-            // Check if the selected directory contains image files
-            final hasImages = await _checkDirectoryForImages(dir);
-            if (hasImages) {
-              setState(() => _folderSelected = true);
-              widget.onFolderSelected(dir);
-            } else {
-              // Show a message to the user if no images are found
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Selected folder does not contain any image files (JPG, JPEG, PNG, WEBP).'),
-                  duration: Duration(seconds: 3),
-                ),
-              );
-              setState(() => _folderSelected = false); // Ensure the state reflects no folder selected visually
-            }
+            widget.onFolderSelected(
+                dir); // Let the parent handle validation and state update
           }
         },
-        child: _folderSelected
+        child: folderHasPath
             ? Center(
                 child: Image.file(
-                  File(getCoverPath(_folderSelected ? widget.folderPath! : "")),
+                  File(getCoverPath(widget.folderPath!)),
                 ),
               )
             : Icon(
@@ -401,23 +455,6 @@ class _CoverImageState extends State<CoverImage> {
       ),
     );
   }
-
-  // Checks if a given directory contains any image files.
-  Future<bool> _checkDirectoryForImages(String path) async {
-    final dir = Directory(path);
-    if (!await dir.exists()) {
-      return false;
-    }
-
-    final entries = dir.listSync();
-    final images = entries.whereType<File>().where((file) {
-      final ext = p.extension(file.path).toLowerCase();
-      return ['.jpg', '.jpeg', '.png', '.webp'].contains(ext);
-    }).toList();
-
-    return images.isNotEmpty;
-  }
-
 }
 
 // just copy pasted code from the book model
