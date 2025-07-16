@@ -21,6 +21,53 @@ class Settings extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Divider(),
+              // Add dropdown for badge position
+              ListTile(
+                leading: const Icon(Icons.confirmation_number),
+                title: const Text('Page count badge position',
+                    style: TextStyle(fontSize: 16)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                trailing: DropdownButton<String>(
+                  value: settings.badgePosition,
+                  items: const [
+                    DropdownMenuItem(value: 'off', child: Text('Off')),
+                    DropdownMenuItem(value: 'topLeft', child: Text('Top Left')),
+                    DropdownMenuItem(
+                        value: 'topRight', child: Text('Top Right')),
+                    DropdownMenuItem(
+                        value: 'bottomLeft', child: Text('Bottom Left')),
+                    DropdownMenuItem(
+                        value: 'bottomRight', child: Text('Bottom Right')),
+                  ],
+                  onChanged: (v) => settings.setBadgePosition(v!),
+                ),
+              ),
+              // Add slider for badge font size
+              ListTile(
+                leading: const Icon(Icons.text_fields),
+                title: Row(
+                  children: [
+                    Text(
+                      'Badge font size: ${settings.badgeFontSize.toStringAsFixed(0)}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    Expanded(
+                      child: Slider(
+                        min: 8,
+                        max: 32,
+                        divisions: 12,
+                        label: settings.badgeFontSize.toStringAsFixed(0),
+                        value: settings.badgeFontSize,
+                        onChanged: (v) => settings.setBadgeFontSize(v),
+                      ),
+                    ),
+                  ],
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+
+              const Divider(),
+
               SwitchListTile(
                 title: const Text(
                   'Delete book on import',
@@ -39,6 +86,7 @@ class Settings extends StatelessWidget {
                 onChanged: (v) => settings.setDefaultZoom(v),
                 secondary: const Icon(Icons.zoom_in),
               ),
+
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.grid_on),
