@@ -370,8 +370,21 @@ class _CoverImageState extends State<CoverImage> {
           // uses native picker on all platforms
           final String? dir = await getDirectoryPath();
           if (dir != null) {
-            setState(() => _folderSelected = true);
-            widget.onFolderSelected(dir);
+            // Check if the selected directory contains image files
+            final hasImages = await _checkDirectoryForImages(dir);
+            if (hasImages) {
+              setState(() => _folderSelected = true);
+              widget.onFolderSelected(dir);
+            } else {
+              // Show a message to the user if no images are found
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Selected folder does not contain any image files (JPG, JPEG, PNG, WEBP).'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+              setState(() => _folderSelected = false); // Ensure the state reflects no folder selected visually
+            }
           }
         },
         child: _folderSelected
@@ -388,6 +401,23 @@ class _CoverImageState extends State<CoverImage> {
       ),
     );
   }
+
+  // Checks if a given directory contains any image files.
+  Future<bool> _checkDirectoryForImages(String path) async {
+    final dir = Directory(path);
+    if (!await dir.exists()) {
+      return false;
+    }
+
+    final entries = dir.listSync();
+    final images = entries.whereType<File>().where((file) {
+      final ext = p.extension(file.path).toLowerCase();
+      return ['.jpg', '.jpeg', '.png', '.webp'].contains(ext);
+    }).toList();
+
+    return images.isNotEmpty;
+  }
+
 }
 
 // just copy pasted code from the book model
