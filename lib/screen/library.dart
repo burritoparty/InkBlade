@@ -1,6 +1,7 @@
 // Third-party package imports
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 // Project-specific imports
 import 'package:flutter_manga_reader/controllers/library_controller.dart';
@@ -64,13 +65,16 @@ class LibraryState extends State<Library> {
 
   @override
   Widget build(BuildContext context) {
+    // Format the number of books with commas
+    final formatter = NumberFormat('#,###');
+    final formattedBookCount = formatter.format(libraryController.books.length);
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(8),
           child: SearchBar(
             controller: _searchController,
-            hintText: 'Search books...',
+            hintText: 'Search $formattedBookCount books...',
             onChanged: (value) {
               final q = value.toLowerCase();
               setState(

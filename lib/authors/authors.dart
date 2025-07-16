@@ -1,6 +1,7 @@
 // Third-party package imports
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 // Project-specific imports
 import 'package:flutter_manga_reader/router/routes.dart';
@@ -47,6 +48,10 @@ class _AuthorsState extends State<Authors> {
     final libraryController = context.watch<LibraryController>();
     final allAuthors = libraryController.authors.toList();
 
+    // Format the number of aauthors with commas
+    final formatter = NumberFormat('#,###');
+    final formattedAuthorCount = formatter.format(libraryController.authors.length);
+
     if (_searchController.text.isEmpty) {
       filteredAuthors = List.from(allAuthors)..sort();
     } else {
@@ -64,7 +69,7 @@ class _AuthorsState extends State<Authors> {
             padding: const EdgeInsets.all(8),
             child: SearchBar(
               controller: _searchController,
-              hintText: 'Search authors...',
+              hintText: 'Search $formattedAuthorCount authors...',
               onChanged: (value) {
                 filterAuthors(value, allAuthors);
               },
