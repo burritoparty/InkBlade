@@ -1,4 +1,6 @@
 // Third-party package imports
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -105,41 +107,91 @@ class TagButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use the mapped value directly from settings
     final buttonSize = context.watch<SettingsController>().tagButtonHeight;
+    final tagThumbnails = context.watch<LibraryController>().tagThumbnails;
 
     return Expanded(
       child: LayoutBuilder(
         builder: (context, constraints) {
           int crossAxisCount = (constraints.maxWidth / buttonSize).floor();
           if (crossAxisCount < 1) crossAxisCount = 1;
+
           return GridView.builder(
             padding: const EdgeInsets.all(8.0),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: 1, // square buttons
+              childAspectRatio: 1,
               crossAxisSpacing: 8.0,
               mainAxisSpacing: 8.0,
             ),
             itemCount: filteredTags.length,
             itemBuilder: (context, index) {
               final tag = filteredTags[index];
+              final thumbnailPath = tagThumbnails[tag];
+
               return SizedBox(
                 width: buttonSize.toDouble(),
                 height: buttonSize.toDouble(),
                 child: TextButton(
-                  onPressed: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => TagDetails(tag: tag))),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => TagDetails(tag: tag)),
+                  ),
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.grey[800],
                     foregroundColor: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(tag),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Thumbnail image (fills the button)
+                      if (thumbnailPath != null &&
+                          File(thumbnailPath).existsSync())
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(thumbnailPath),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+
+                      // Dark overlay to make the text readable
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+
+                      // Centered tag text
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            tag,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black,
+                                  offset: Offset(0, 1),
+                                  blurRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

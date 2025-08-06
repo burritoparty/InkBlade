@@ -1,5 +1,6 @@
 // Standard Dart imports
 import 'dart:io';
+import 'package:flutter/painting.dart';
 
 // Third-party package imports
 import 'package:flutter/foundation.dart';
@@ -389,6 +390,8 @@ class LibraryController extends ChangeNotifier {
     final savedFile = await File(imagePath).copy(destPath);
 
     tagThumbnails[tag] = savedFile.path;
+    //  ── Evict any cached version of this file so it reloads next time
+    await FileImage(File(savedFile.path)).evict();
     await _saveLibraryJson();
     notifyListeners();
   }
