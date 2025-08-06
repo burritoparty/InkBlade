@@ -391,6 +391,7 @@ class LibraryController extends ChangeNotifier {
 
     tagThumbnails[tag] = savedFile.path;
     //  ── Evict any cached version of this file so it reloads next time
+    // wow this was a pain to figure out
     await FileImage(File(savedFile.path)).evict();
     await _saveLibraryJson();
     notifyListeners();

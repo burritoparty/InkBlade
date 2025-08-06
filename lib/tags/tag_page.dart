@@ -148,44 +148,62 @@ class TagButtons extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Thumbnail image (fills the button)
-                      if (thumbnailPath != null &&
-                          File(thumbnailPath).existsSync())
-                        ClipRRect(
+                      // thumbnail image or placeholder, inset by 4px
+                      Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(thumbnailPath),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-
-                      // Dark overlay to make the text readable
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.4),
-                          borderRadius: BorderRadius.circular(8),
+                          child: thumbnailPath != null &&
+                                  File(thumbnailPath).existsSync()
+                              ? Image.file(
+                                  File(thumbnailPath),
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(color: Colors.grey[700]),
                         ),
                       ),
 
-                      // Centered tag text
+                      // dark overlay (also inset by 4px)
+                      Positioned.fill(
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.4),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // text with its own backdrop
                       Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            tag,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black,
-                                  offset: Offset(0, 1),
-                                  blurRadius: 2,
-                                ),
-                              ],
+                          padding: const EdgeInsets.all(12.0),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.35),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              tag,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 4,
+                                    color: Colors.black54,
+                                    offset: Offset(1, 1),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
