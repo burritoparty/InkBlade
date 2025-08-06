@@ -13,13 +13,14 @@ import '../services/library_repository.dart';
 class LibraryController extends ChangeNotifier {
   final LibraryRepository _libraryRepository;
 
-  // this will hold the keys to the kingdom
   List<Book> _books = [];
-
   final Set<String> _authors = {};
   final Set<String> _tags = {};
   final Set<String> _series = {};
   final Set<String> _characters = {};
+
+  // Map of tag name to thumbnail path
+  final Map<String, String> tagThumbnails = {};
 
   // initialize the repository
   LibraryController(this._libraryRepository);
@@ -35,12 +36,49 @@ class LibraryController extends ChangeNotifier {
   Future<void> init() async {
     // await the repository to be initialized
     await _libraryRepository.init();
-    // load the books from the json file
-    _books = await _libraryRepository.loadBooks();
-    // update the sets with the loaded books
+
+    // Load the full JSON (not just books)
+    final Map<String, dynamic> json =
+        await _libraryRepository.loadLibraryJson();
+
+    // Load books
+    final booksJson = json['book'] ?? [];
+    _books = List<Book>.from(booksJson.map((b) => Book.fromJson(b)));
+
+    // Load tagThumbnails, ensure it's always a Map<String, String>
+    final tagThumbsJson = json['tagThumbnails'];
+    if (tagThumbsJson is Map) {
+      tagThumbnails
+        ..clear()
+        ..addAll(Map<String, String>.from(tagThumbsJson));
+    } else {
+      tagThumbnails.clear();
+    }
+
+    // If tagThumbnails was missing, ensure it's present in the JSON and save
+    if (json['tagThumbnails'] == null) {
+      await _saveLibraryJson();
+    }
+
+    // Ensure thumbnails directory exists
+    final docsDir = await getApplicationDocumentsDirectory();
+    final thumbnailsDir =
+        Directory(p.join(docsDir.path, 'InkBlade', 'thumbnails'));
+    if (!await thumbnailsDir.exists()) {
+      await thumbnailsDir.create(recursive: true);
+    }
+
     _rebuildSets();
-    // notify listeners to update the UI
     notifyListeners();
+  }
+
+  // Save both books and tagThumbnails to the JSON file
+  Future<void> _saveLibraryJson() async {
+    final Map<String, dynamic> json = {
+      'book': _books.map((b) => b.toJson()).toList(),
+      'tagThumbnails': tagThumbnails,
+    };
+    await _libraryRepository.saveLibraryJson(json);
   }
 
   void _rebuildSets() {
@@ -79,7 +117,8 @@ class LibraryController extends ChangeNotifier {
 
   // Method to check if a book title already exists
   bool doesBookTitleExist(String title) {
-    return _books.any((book) => book.title.toLowerCase() == title.toLowerCase().trim());
+    return _books
+        .any((book) => book.title.toLowerCase() == title.toLowerCase().trim());
   }
 
   // add a book to the list and save it to the json file
@@ -104,7 +143,8 @@ class LibraryController extends ChangeNotifier {
     // update the sets with the new book
     _rebuildSets();
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
+
     // notify listeners to update the UI
     notifyListeners();
   }
@@ -116,7 +156,7 @@ class LibraryController extends ChangeNotifier {
     // update the sets with the new book
     _rebuildSets();
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     // notify listeners to update the UI
     notifyListeners();
   }
@@ -131,7 +171,7 @@ class LibraryController extends ChangeNotifier {
     // update the title of the book
     _books[index].title = newTitle;
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     // notify listeners to update the UI
     notifyListeners();
     // return true to indicate success
@@ -149,7 +189,7 @@ class LibraryController extends ChangeNotifier {
     // update the link of the book
     _books[index].link = newLink;
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     // notify listeners to update the UI
     notifyListeners();
     // return true to indicate success
@@ -169,7 +209,7 @@ class LibraryController extends ChangeNotifier {
     // rebuild the sets with the new series
     _rebuildSets();
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     // notify listeners to update the UI
     notifyListeners();
     // return true to indicate success
@@ -195,7 +235,7 @@ class LibraryController extends ChangeNotifier {
     // rebuild the sets with the new author
     _rebuildSets();
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     // notify listeners to update the UI
     notifyListeners();
     // return true to indicate success
@@ -221,14 +261,15 @@ class LibraryController extends ChangeNotifier {
     // rebuild the sets with the new tag
     _rebuildSets();
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     // notify listeners to update the UI
     notifyListeners();
     // return true to indicate success
     return true;
   }
 
-  Future<bool> updateCharacters(Book book, String newCharacter, bool remove) async {
+  Future<bool> updateCharacters(
+      Book book, String newCharacter, bool remove) async {
     // find the book in the list
     final index = _books.indexWhere((b) => b.path == book.path);
     // normalize input
@@ -241,14 +282,13 @@ class LibraryController extends ChangeNotifier {
     // update the characters of the book
     if (remove) {
       _books[index].characters.remove(newCharacter);
-    }
-    else {
+    } else {
       _books[index].characters.add(newCharacter);
     }
     // rebuild the sets with the new character
     _rebuildSets();
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     // notify listeners thowso update the UI
     notifyListeners();
     // return true to indicate success
@@ -265,7 +305,7 @@ class LibraryController extends ChangeNotifier {
     // update the favorite status of the book
     _books[index].favorite = newFavorite;
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     // notify listeners to update the UI
     notifyListeners();
     // return true to indicate success
@@ -282,7 +322,7 @@ class LibraryController extends ChangeNotifier {
     // update the read later status of the book
     _books[index].readLater = newReadLater;
     // save the books to the json file
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     // notify listeners to update the UI
     notifyListeners();
     // return true to indicate success
@@ -295,7 +335,7 @@ class LibraryController extends ChangeNotifier {
     }
     // rebuild the sets and save the updated books
     _rebuildSets();
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     notifyListeners();
   }
 
@@ -307,7 +347,7 @@ class LibraryController extends ChangeNotifier {
     }
     // rebuild the sets and save the updated books
     _rebuildSets();
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     notifyListeners();
   }
 
@@ -319,7 +359,7 @@ class LibraryController extends ChangeNotifier {
     }
     // rebuild the sets and save the updated books
     _rebuildSets();
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     notifyListeners();
   }
 
@@ -329,7 +369,32 @@ class LibraryController extends ChangeNotifier {
     }
     // Rebuild the sets and save the updated books
     _rebuildSets();
-    await _libraryRepository.saveBooks(_books);
+    await _saveLibraryJson();
     notifyListeners();
+  }
+
+  // Set thumbnail for a tag
+  Future<void> setTagThumbnail(String tag, String imagePath) async {
+    final docsDir = await getApplicationDocumentsDirectory();
+    final thumbnailsDir =
+        Directory(p.join(docsDir.path, 'InkBlade', 'thumbnails'));
+
+    if (!await thumbnailsDir.exists()) {
+      await thumbnailsDir.create(recursive: true);
+    }
+
+    final String ext = p.extension(imagePath).toLowerCase();
+    final String destPath = p.join(thumbnailsDir.path, '$tag$ext');
+
+    final savedFile = await File(imagePath).copy(destPath);
+
+    tagThumbnails[tag] = savedFile.path;
+    await _saveLibraryJson();
+    notifyListeners();
+  }
+
+  // Get thumbnail for a tag (returns null if not set)
+  String? getTagThumbnail(String tag) {
+    return tagThumbnails[tag];
   }
 }

@@ -60,4 +60,15 @@ class LibraryRepository {
     // write out indented JSON
     await _file.writeAsString(JsonEncoder.withIndent('  ').convert(data));
   }
+
+  // Load the entire library JSON as a Map<String, dynamic>
+  Future<Map<String, dynamic>> loadLibraryJson() async {
+    final raw = await _file.readAsString();
+    return jsonDecode(raw) as Map<String, dynamic>;
+  }
+
+  // Save the entire library JSON from a Map<String, dynamic>
+  Future<void> saveLibraryJson(Map<String, dynamic> json) async {
+    await _file.writeAsString(JsonEncoder.withIndent('  ').convert(json));
+  }
 }

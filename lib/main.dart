@@ -18,7 +18,7 @@ void main() async {
   final libraryRepository = LibraryRepository();
   // initialize the library controller, for managing the books
   final libraryController = LibraryController(libraryRepository);
-  // call init to load the books from the json file, and build the sets
+
   await libraryController.init();
 
   // initialize the settings controller, for managing the settings

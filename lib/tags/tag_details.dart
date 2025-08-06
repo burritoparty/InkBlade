@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:file_selector/file_selector.dart';
 
 // Project-specific imports
 import '../controllers/library_controller.dart';
@@ -119,6 +120,25 @@ class _TagDetailsState extends State<TagDetails> {
                       ),
                     ),
                   ),
+                ),
+                ThumbnailButton(
+                  onAdd: () async {
+                    const XTypeGroup typeGroup = XTypeGroup(
+                      label: 'images',
+                      extensions: <String>['jpg', 'png'],
+                    );
+
+                    final XFile? file = await openFile(
+                      acceptedTypeGroups: <XTypeGroup>[typeGroup],
+                    );
+
+                    if (file != null) {
+                      final libraryController =
+                          context.read<LibraryController>();
+                      final tag = _tag;
+                      await libraryController.setTagThumbnail(tag, file.path);
+                    }
+                  },
                 ),
                 DeleteButton(onDelete: () async {
                   if (!mounted) return; // Ensure the widget is still mounted
