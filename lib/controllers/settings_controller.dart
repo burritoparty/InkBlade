@@ -8,27 +8,36 @@ class SettingsController extends ChangeNotifier {
   static const _setPageCountKey = 'sliderValue';
   static const _badgePositionKey = 'badgePosition';
   static const _badgeFontSizeKey = 'badgeFontSize';
+  static const _authorButtonHeightKey = 'authorButtonHeight';
+  static const _tagButtonHeightKey = 'tagButtonHeight'; // <-- add this
 
   bool _autoDelete = false;
   bool _defaultZoom = false;
   double _sliderValue = 5.0;
   String _badgePosition = 'topRight'; // default value
   double _badgeFontSize = 12.0; // default value
+  double _authorButtonHeight = 100.0; // default value
+  double _tagButtonHeight = 50.0; // default value
 
-  bool get autoDelete  => _autoDelete;
+  bool get autoDelete => _autoDelete;
   bool get defaultZoom => _defaultZoom;
   double get pageSliderValue => _sliderValue;
   String get badgePosition => _badgePosition;
   double get badgeFontSize => _badgeFontSize;
+  double get authorButtonHeight => _authorButtonHeight;
+  double get tagButtonHeight => _tagButtonHeight; // <-- add this
 
   // call this on startup to load saved values
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    _autoDelete  = prefs.getBool(_autoDeleteKey)  ?? false;
+    _autoDelete = prefs.getBool(_autoDeleteKey) ?? false;
     _defaultZoom = prefs.getBool(_defaultZoomKey) ?? false;
     _sliderValue = prefs.getDouble(_setPageCountKey) ?? 5.0;
     _badgePosition = prefs.getString(_badgePositionKey) ?? 'topRight';
     _badgeFontSize = prefs.getDouble(_badgeFontSizeKey) ?? 12.0;
+    _authorButtonHeight = prefs.getDouble(_authorButtonHeightKey) ?? 100.0;
+    _tagButtonHeight =
+        prefs.getDouble(_tagButtonHeightKey) ?? 50.0; // <-- add this
     notifyListeners();
   }
 
@@ -64,6 +73,20 @@ class SettingsController extends ChangeNotifier {
     _badgeFontSize = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_badgeFontSizeKey, value);
+    notifyListeners();
+  }
+
+  Future<void> setAuthorButtonHeight(double value) async {
+    _authorButtonHeight = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_authorButtonHeightKey, value);
+    notifyListeners();
+  }
+
+  Future<void> setTagButtonHeight(double value) async {
+    _tagButtonHeight = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_tagButtonHeightKey, value);
     notifyListeners();
   }
 }

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 // Project-specific imports
 import '../controllers/library_controller.dart';
+import '../controllers/settings_controller.dart';
 import 'tag_details.dart';
 
 class TagPage extends StatefulWidget {
@@ -104,37 +105,42 @@ class TagButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use the mapped value directly from settings
+    final buttonSize = context.watch<SettingsController>().tagButtonHeight;
+
     return Expanded(
       child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          double buttonWidth = 200.0;
-          int crossAxisCount = (constraints.maxWidth / buttonWidth).floor();
+        builder: (context, constraints) {
+          int crossAxisCount = (constraints.maxWidth / buttonSize).floor();
           if (crossAxisCount < 1) crossAxisCount = 1;
-
           return GridView.builder(
             padding: const EdgeInsets.all(8.0),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: 3 / 1,
+              childAspectRatio: 1, // square buttons
               crossAxisSpacing: 8.0,
               mainAxisSpacing: 8.0,
             ),
             itemCount: filteredTags.length,
             itemBuilder: (context, index) {
               final tag = filteredTags[index];
-              return TextButton(
-                onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => TagDetails(tag: tag))),
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+              return SizedBox(
+                width: buttonSize.toDouble(),
+                height: buttonSize.toDouble(),
+                child: TextButton(
+                  onPressed: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => TagDetails(tag: tag))),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.grey[800],
+                    foregroundColor: Colors.white,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
                   ),
+                  child: Text(tag),
                 ),
-                child: Text(tag),
               );
             },
           );

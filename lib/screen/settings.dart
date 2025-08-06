@@ -86,7 +86,62 @@ class Settings extends StatelessWidget {
                 onChanged: (v) => settings.setDefaultZoom(v),
                 secondary: const Icon(Icons.zoom_in),
               ),
-
+              // Author button height slider
+              ListTile(
+                leading: const Icon(Icons.aspect_ratio),
+                title: Row(
+                  children: [
+                    Text(
+                      // Show 1-5 mapped to 50-250
+                      'Author button size: ${((settings.authorButtonHeight - 50) / 50 + 1).round()}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    Expanded(
+                      child: Slider(
+                        min: 1,
+                        max: 5,
+                        divisions: 4,
+                        label: ((settings.authorButtonHeight - 50) / 50 + 1)
+                            .round()
+                            .toString(),
+                        value: ((settings.authorButtonHeight - 50) / 50 + 1)
+                            .clamp(1, 5),
+                        onChanged: (v) =>
+                            settings.setAuthorButtonHeight(50 + (v - 1) * 50),
+                      ),
+                    ),
+                  ],
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              // Tag button height slider
+              ListTile(
+                leading: const Icon(Icons.label),
+                title: Row(
+                  children: [
+                    Text(
+                      // Show 1-10 mapped to 120-180 (min) to 120-210 (max bigger)
+                      'Tag button size: ${((settings.tagButtonHeight - 120) / 10 + 1).round()}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    Expanded(
+                      child: Slider(
+                        min: 1,
+                        max: 10,
+                        divisions: 9,
+                        label: ((settings.tagButtonHeight - 120) / 10 + 1)
+                            .round()
+                            .toString(),
+                        value: ((settings.tagButtonHeight - 120) / 10 + 1)
+                            .clamp(1, 10),
+                        onChanged: (v) =>
+                            settings.setTagButtonHeight(120 + (v - 1) * 10),
+                      ),
+                    ),
+                  ],
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.grid_on),

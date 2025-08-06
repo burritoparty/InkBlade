@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 // Project-specific imports
 import 'package:flutter_manga_reader/router/routes.dart';
 import '../controllers/library_controller.dart';
+import '../controllers/settings_controller.dart';
 
 import '../models/book.dart';
 
@@ -107,8 +108,9 @@ class AuthorButtons extends StatelessWidget {
     return Expanded(
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          double buttonWidth = 200.0;
-          int crossAxisCount = (constraints.maxWidth / buttonWidth).floor();
+          final buttonHeight =
+              context.watch<SettingsController>().authorButtonHeight;
+          int crossAxisCount = (constraints.maxHeight / buttonHeight).floor();
           if (crossAxisCount < 1) {
             crossAxisCount = 1;
           }
@@ -117,7 +119,7 @@ class AuthorButtons extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: 3 / 1,
+              childAspectRatio: 1 / 1.5, // adjust aspect ratio of button
               crossAxisSpacing: 8.0,
               mainAxisSpacing: 8.0,
             ),
@@ -128,7 +130,7 @@ class AuthorButtons extends StatelessWidget {
               final book = allBooks.firstWhere(
                 (b) => b.authors.contains(author),
               );
-              final coverPath = book?.getCoverPath() ?? '';
+              final coverPath = book.getCoverPath();
 
               return TextButton(
                 onPressed: () {
@@ -142,35 +144,78 @@ class AuthorButtons extends StatelessWidget {
                   backgroundColor: Colors.grey[800],
                   foregroundColor: Colors.white,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
                 ),
-                child: Row(
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    if (coverPath.isNotEmpty)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.file(
-                          File(coverPath),
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    else
-                      Container(
-                        width: 40,
-                        height: 40,
-                        color: Colors.grey[700],
-                        child: const Icon(Icons.person, color: Colors.white),
+                    // Background image or placeholder with padding
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: coverPath.isNotEmpty
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  File(coverPath),
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[700],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Center(
+                                  child: Icon(Icons.person,
+                                      color: Colors.white, size: 48),
+                                ),
+                              ),
                       ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        author,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                    // Overlay for readability
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    // Author name centered with backdrop
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black
+                                .withOpacity(0.35), // subtle backdrop
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            author,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 4,
+                                  color: Colors.black54,
+                                  offset: Offset(1, 1),
+                                ),
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                        ),
                       ),
                     ),
                   ],
