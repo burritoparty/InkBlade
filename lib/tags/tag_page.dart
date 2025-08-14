@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 // Project-specific imports
 import '../controllers/library_controller.dart';
+import '../controllers/settings_controller.dart';
 import 'tag_details.dart';
 
 class TagPage extends StatefulWidget {
@@ -111,10 +112,17 @@ class TagButtons extends StatelessWidget {
     // get screen size
     final Size screenSize = MediaQuery.of(context).size;
 
-    // compute how many buttons fit per row
-    final crossAxisCount = screenSize.width ~/ 160.0;
-    // derive a consistent button size for squares
-    final buttonSize = (screenSize.width - 32) / crossAxisCount - 8;
+    // NEW: read the desired tile size from settings
+    final settings = context.watch<SettingsController>();
+    final double desiredTileSize = settings.tagButtonHeight; // px from slider
+
+    // Compute how many buttons per row based on desiredTileSize.
+    // Keep at least 1 column.
+    int crossAxisCount = (screenSize.width / (desiredTileSize + 8)).floor();
+    if (crossAxisCount < 1) crossAxisCount = 1;
+
+    // Derive the actual square size that fits evenly
+    final double buttonSize = ((screenSize.width - 32) / crossAxisCount) - 8;
 
     return Expanded(
       child: LayoutBuilder(

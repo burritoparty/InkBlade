@@ -9,7 +9,7 @@ class SettingsController extends ChangeNotifier {
   static const _badgePositionKey = 'badgePosition';
   static const _badgeFontSizeKey = 'badgeFontSize';
   static const _authorButtonHeightKey = 'authorButtonHeight';
-  static const _tagButtonHeightKey = 'tagButtonHeight'; // <-- add this
+  static const _tagButtonHeightKey = 'tagButtonHeight';
 
   bool _autoDelete = false;
   bool _defaultZoom = false;
@@ -25,7 +25,7 @@ class SettingsController extends ChangeNotifier {
   String get badgePosition => _badgePosition;
   double get badgeFontSize => _badgeFontSize;
   double get authorButtonHeight => _authorButtonHeight;
-  double get tagButtonHeight => _tagButtonHeight; // <-- add this
+  double get tagButtonHeight => _tagButtonHeight;
 
   // call this on startup to load saved values
   Future<void> init() async {
@@ -36,8 +36,7 @@ class SettingsController extends ChangeNotifier {
     _badgePosition = prefs.getString(_badgePositionKey) ?? 'topRight';
     _badgeFontSize = prefs.getDouble(_badgeFontSizeKey) ?? 12.0;
     _authorButtonHeight = prefs.getDouble(_authorButtonHeightKey) ?? 100.0;
-    _tagButtonHeight =
-        prefs.getDouble(_tagButtonHeightKey) ?? 50.0; // <-- add this
+    _tagButtonHeight = prefs.getDouble(_tagButtonHeightKey) ?? 50.0;
     notifyListeners();
   }
 
