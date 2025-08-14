@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 
 // Project-specific imports
 import '../controllers/library_controller.dart';
-import '../controllers/settings_controller.dart';
 import 'tag_details.dart';
 
 class TagPage extends StatefulWidget {
@@ -88,41 +87,45 @@ class _TagPageState extends State<TagPage> {
         TagButtons(
           filteredTags: filteredTags,
           allTags: allTags,
+          tagThumbnails: libraryController.tagThumbnails,
         ),
       ],
     );
   }
 }
 
-// grid of buttons for each tag
 class TagButtons extends StatelessWidget {
   final List<String> filteredTags;
   final List<String> allTags;
+  final Map<String, String> tagThumbnails;
 
   const TagButtons({
     super.key,
     required this.filteredTags,
     required this.allTags,
+    required this.tagThumbnails,
   });
 
   @override
   Widget build(BuildContext context) {
-    final buttonSize = context.watch<SettingsController>().tagButtonHeight;
-    final tagThumbnails = context.watch<LibraryController>().tagThumbnails;
+    // get screen size
+    final Size screenSize = MediaQuery.of(context).size;
+
+    // compute how many buttons fit per row
+    final crossAxisCount = screenSize.width ~/ 160.0;
+    // derive a consistent button size for squares
+    final buttonSize = (screenSize.width - 32) / crossAxisCount - 8;
 
     return Expanded(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          int crossAxisCount = (constraints.maxWidth / buttonSize).floor();
-          if (crossAxisCount < 1) crossAxisCount = 1;
-
           return GridView.builder(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
               childAspectRatio: 1,
-              crossAxisSpacing: 8.0,
-              mainAxisSpacing: 8.0,
             ),
             itemCount: filteredTags.length,
             itemBuilder: (context, index) {
@@ -133,10 +136,16 @@ class TagButtons extends StatelessWidget {
                 width: buttonSize.toDouble(),
                 height: buttonSize.toDouble(),
                 child: TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => TagDetails(tag: tag)),
-                  ),
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => TagDetails(tag: tag)),
+                    );
+                    if (context.mounted) {
+                      // Rebuild so a rename shows/hides the right tag immediately
+                      (context as Element).markNeedsBuild();
+                    }
+                  },
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.grey[800],
                     foregroundColor: Colors.white,
@@ -163,15 +172,17 @@ class TagButtons extends StatelessWidget {
                         ),
                       ),
 
-                      // dark overlay (also inset by 4px)
-                      Positioned.fill(
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                      // dim the edges a bit for contrast
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.15),
+                              Colors.black.withOpacity(0.25),
+                            ],
                           ),
                         ),
                       ),

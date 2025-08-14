@@ -353,12 +353,87 @@ class LibraryController extends ChangeNotifier {
   }
 
   Future<void> renameTag(String oldTag, String newTag) async {
+    if (oldTag == newTag) return;
+
+    // 1) Update all books' tag lists
     for (final book in _books) {
       if (book.tags.remove(oldTag)) {
         book.tags.add(newTag);
       }
     }
-    // rebuild the sets and save the updated books
+
+    // 2) If there's a thumbnail mapped to the old tag, rename the file on disk
+    if (tagThumbnails.containsKey(oldTag)) {
+      final String? oldPath = tagThumbnails[oldTag];
+      try {
+        final docsDir = await getApplicationDocumentsDirectory();
+        final thumbnailsDir =
+            Directory(p.join(docsDir.path, 'InkBlade', 'thumbnails'));
+        if (!await thumbnailsDir.exists()) {
+          await thumbnailsDir.create(recursive: true);
+        }
+
+        if (oldPath != null) {
+          final String ext = p.extension(oldPath).toLowerCase();
+          final String newPath = p.join(thumbnailsDir.path, '$newTag$ext');
+
+          // Evict any cached images for the old path before renaming
+          try {
+            await FileImage(File(oldPath)).evict();
+          } catch (_) {}
+
+          if (oldPath != newPath) {
+            // If a file already exists at the new path, replace it
+            final newFile = File(newPath);
+            if (await newFile.exists()) {
+              try {
+                await newFile.delete();
+              } catch (_) {}
+            }
+            final oldFile = File(oldPath);
+            if (await oldFile.exists()) {
+              try {
+                await oldFile.rename(newPath);
+              } catch (_) {
+                // If rename fails (e.g., cross-device), copy as a fallback
+                try {
+                  await oldFile.copy(newPath);
+                  await oldFile.delete();
+                } catch (_) {}
+              }
+            }
+          }
+
+          // Evict any cached images for the new path after renaming
+          try {
+            await FileImage(File(newPath)).evict();
+          } catch (_) {}
+
+          // Update the mapping
+          tagThumbnails.remove(oldTag);
+          tagThumbnails[newTag] = newPath;
+        } else {
+          // oldPath was null: still move the mapping key to keep JSON clean
+          final String newPath = p.join(thumbnailsDir.path, '$newTag.jpg');
+          tagThumbnails.remove(oldTag);
+          tagThumbnails[newTag] = newPath;
+        }
+      } catch (_) {
+        // Best-effort: even if file ops fail, ensure mapping key is updated
+        final String? oldPathLocal = tagThumbnails[oldTag];
+        final String ext = oldPathLocal != null
+            ? p.extension(oldPathLocal).toLowerCase()
+            : '.jpg';
+        final docsDir = await getApplicationDocumentsDirectory();
+        final thumbnailsDir =
+            Directory(p.join(docsDir.path, 'InkBlade', 'thumbnails'));
+        final String newPath = p.join(thumbnailsDir.path, '$newTag$ext');
+        tagThumbnails.remove(oldTag);
+        tagThumbnails[newTag] = newPath;
+      }
+    }
+
+    // 3) Recompute sets and persist JSON
     _rebuildSets();
     await _saveLibraryJson();
     notifyListeners();
@@ -368,7 +443,6 @@ class LibraryController extends ChangeNotifier {
     for (final book in _books) {
       book.tags.remove(tag);
     }
-    // Rebuild the sets and save the updated books
     _rebuildSets();
     await _saveLibraryJson();
     notifyListeners();
@@ -390,9 +464,10 @@ class LibraryController extends ChangeNotifier {
     final savedFile = await File(imagePath).copy(destPath);
 
     tagThumbnails[tag] = savedFile.path;
-    //  ── Evict any cached version of this file so it reloads next time
-    // wow this was a pain to figure out
-    await FileImage(File(savedFile.path)).evict();
+    // Evict any cached version of this file so it reloads next time
+    try {
+      await FileImage(File(savedFile.path)).evict();
+    } catch (_) {}
     await _saveLibraryJson();
     notifyListeners();
   }
