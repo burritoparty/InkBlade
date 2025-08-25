@@ -476,4 +476,34 @@ class LibraryController extends ChangeNotifier {
   String? getTagThumbnail(String tag) {
     return tagThumbnails[tag];
   }
+
+  // In LibraryController
+  Future<void> renameSeries(String from, String to) async {
+    final oldKey = from.trim().toLowerCase();
+    for (final b in books) {
+      final s = (b.series).trim().toLowerCase();
+      if (s == oldKey) {
+        b.series = to.trim();
+      }
+    }
+    // persist if you have a saver, then notify
+    // await saveLibrary(); // if applicable
+    notifyListeners();
+  }
+
+  // In LibraryController
+  Future<void> renameCharacter(String from, String to) async {
+    final oldKey = from.trim().toLowerCase();
+    final newVal = to.trim();
+    for (final b in books) {
+      final list = b.characters;
+      for (var i = 0; i < list.length; i++) {
+        if ((list[i]).trim().toLowerCase() == oldKey) {
+          list[i] = newVal;
+        }
+      }
+    }
+    // await saveLibrary(); // if you persist
+    notifyListeners();
+  }
 }

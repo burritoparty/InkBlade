@@ -77,7 +77,9 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     Favorites(),
     Later(),
     Filter(),
-    Settings()
+    Settings(),
+    SeriesPage(),
+    CharactersPage(),
   ];
   static const _pageTitles = [
     'Library',
@@ -87,6 +89,8 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     'Read Later',
     'Filter Library',
     'Settings',
+    'Series',
+    'Characters',
   ];
 
   // update selected index and rebuild
@@ -174,18 +178,22 @@ class NavDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: [
-          // drawer header
           const DrawerHeader(
             decoration: BoxDecoration(),
             child: Center(
-              child: Text('Library Searching', style: TextStyle(fontSize: 30)),
+              child: Text('InkBlade', style: TextStyle(fontSize: 30)),
             ),
           ),
-          // each item switches pages 3, 4, 5, 6
+          // new order
           _buildItem(context, Icons.favorite, 'Favorites', 3),
           _buildItem(context, Icons.bookmark, 'Later', 4),
+          const Divider(height: 0),
+          _buildItem(context, Icons.auto_stories, 'Series', 7),
+          _buildItem(context, Icons.groups, 'Characters', 8),
+          const Divider(height: 0),
           _buildItem(context, Icons.filter_alt, 'Filter Library', 5),
           _buildItem(context, Icons.settings, 'Settings', 6),
+          const Divider(height: 0),
         ],
       ),
     );
