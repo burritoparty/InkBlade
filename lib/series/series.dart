@@ -43,7 +43,6 @@ class _SeriesPageState extends State<SeriesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        // No text title; the SearchBar IS the title
         automaticallyImplyLeading:
             true, // keeps back arrow if this page was pushed
         titleSpacing: 8,

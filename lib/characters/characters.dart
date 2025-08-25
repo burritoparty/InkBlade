@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/library_controller.dart';
-import 'characters_details.dart';
+import 'characters_details.dart'; // <-- this file exists and exports CharactersDetails
 
 class CharactersPage extends StatefulWidget {
   const CharactersPage({super.key});
@@ -25,7 +25,7 @@ class _CharactersPageState extends State<CharactersPage> {
   Widget build(BuildContext context) {
     final lib = context.watch<LibraryController>();
 
-    // Build unique character -> counts
+    // Build unique character -> counts (defensive: ignore nulls, trim)
     final Map<String, int> charCounts = {};
     for (final b in lib.books) {
       final chars = b.characters;
@@ -48,7 +48,6 @@ class _CharactersPageState extends State<CharactersPage> {
 
     return Scaffold(
       appBar: AppBar(
-        // SearchBar in the title removes the top gap
         titleSpacing: 8,
         toolbarHeight: 64,
         title: SearchBar(
@@ -91,6 +90,7 @@ class _CharactersPageState extends State<CharactersPage> {
               separatorBuilder: (_, __) => const Divider(height: 0),
               itemBuilder: (context, i) {
                 final name = visibleChars[i];
+
                 return MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: ListTile(
@@ -99,16 +99,18 @@ class _CharactersPageState extends State<CharactersPage> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('${charCounts[name]}'),
+                        Text('${charCounts[name] ?? 0}'),
                         const SizedBox(width: 8),
                         const Icon(Icons.chevron_right),
                       ],
                     ),
+                    // ignore: deprecated_member_use
                     hoverColor: scheme.surfaceContainerHighest.withOpacity(0.3),
                     onTap: () {
+                      // push to CharactersDetails — class name must match file’s widget
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) =>
+                          builder: (ctx) =>
                               CharactersDetails(characterName: name),
                         ),
                       );

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../controllers/library_controller.dart';
 import '../widgets/book_grid.dart';
-
 import '../router/routes.dart';
 
 class CharactersDetails extends StatefulWidget {
@@ -20,7 +19,6 @@ class _CharactersDetailsState extends State<CharactersDetails> {
   final String _query = '';
   bool _ascending = true;
 
-  // rename
   late final TextEditingController _renameCtrl;
   late String _currentCharacterName;
   _SaveState _saveState = _SaveState.neutral;
@@ -52,7 +50,7 @@ class _CharactersDetailsState extends State<CharactersDetails> {
 
     setState(() => _saving = true);
     try {
-      // Implement lib.renameCharacter(oldName, newName) in your controller if not present.
+      // Ensure this exists in your controller
       await Future<void>.sync(
           () => lib.renameCharacter(_currentCharacterName, newName));
       if (!mounted) return;
@@ -74,14 +72,17 @@ class _CharactersDetailsState extends State<CharactersDetails> {
   Widget build(BuildContext context) {
     final lib = context.watch<LibraryController>();
 
-    // books containing this (possibly renamed) character
+    // Safely gather books for this character (ignore null/malformed)
     final target = _currentCharacterName.trim().toLowerCase();
     final booksForCharacter = lib.books.where((b) {
-      final chars = b.characters;
-      return chars.any((c) => c.trim().toLowerCase() == target);
+      final list = b.characters;
+      for (final item in list) {
+        if (item.trim().toLowerCase() == target) return true;
+      }
+      return false;
     }).toList();
 
-    // filter by search query
+    // Filter by query across common metadata
     final q = _query.trim().toLowerCase();
     bool listHas(dynamic list) {
       if (q.isEmpty) return true;
@@ -108,9 +109,9 @@ class _CharactersDetailsState extends State<CharactersDetails> {
         return _ascending ? an.compareTo(bn) : bn.compareTo(an);
       });
 
-    // rename box colors
-    final Color red = Colors.redAccent;
-    final Color green = Colors.green;
+    // Rename box state colors
+    final red = Colors.redAccent;
+    final green = Colors.green;
 
     final InputBorder? enabledBorder = (_saveState == _SaveState.neutral)
         ? null
@@ -132,7 +133,6 @@ class _CharactersDetailsState extends State<CharactersDetails> {
             ),
           );
 
-    // label color reacts to state
     final Color? labelColor = switch (_saveState) {
       _SaveState.neutral => null,
       _SaveState.dirty => red,
@@ -145,7 +145,7 @@ class _CharactersDetailsState extends State<CharactersDetails> {
       appBar: AppBar(
         titleSpacing: 8,
         toolbarHeight: 64,
-        title: Text("Character: $_currentCharacterName"),
+        title: Text('Character: $_currentCharacterName'),
         actions: [
           IconButton(
             tooltip: _ascending ? 'Sort Z–A' : 'Sort A–Z',
@@ -156,7 +156,6 @@ class _CharactersDetailsState extends State<CharactersDetails> {
       ),
       body: Column(
         children: [
-          // rename text box (no buttons; Enter to save)
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
             child: TextField(
@@ -168,11 +167,8 @@ class _CharactersDetailsState extends State<CharactersDetails> {
                 labelText: 'Character name',
                 hintText: 'Rename character',
                 isDense: true,
-
-                // label color reacts to state
                 labelStyle: labelTextStyle,
                 floatingLabelStyle: labelTextStyle,
-
                 suffixIcon: _saving
                     ? const Padding(
                         padding: EdgeInsets.all(10),
@@ -197,9 +193,7 @@ class _CharactersDetailsState extends State<CharactersDetails> {
               ),
             ),
           ),
-
           const SizedBox(height: 4),
-
           Expanded(
             child: filtered.isEmpty
                 ? const Center(child: Text('No matching books.'))

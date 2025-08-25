@@ -486,8 +486,6 @@ class LibraryController extends ChangeNotifier {
         b.series = to.trim();
       }
     }
-    // persist if you have a saver, then notify
-    // await saveLibrary(); // if applicable
     notifyListeners();
   }
 
@@ -503,7 +501,18 @@ class LibraryController extends ChangeNotifier {
         }
       }
     }
-    // await saveLibrary(); // if you persist
+    notifyListeners();
+  }
+
+  // In LibraryController
+  Future<void> deleteSeries(String seriesName) async {
+    final key = seriesName.trim().toLowerCase();
+    for (final b in books) {
+      final s = (b.series).trim().toLowerCase();
+      if (s == key) {
+        b.series = "";
+      }
+    }
     notifyListeners();
   }
 }

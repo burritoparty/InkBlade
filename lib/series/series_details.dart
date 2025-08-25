@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../controllers/library_controller.dart';
 import '../widgets/book_grid.dart';
+import '../widgets/delete_button.dart'; // <- uses your existing delete button styling
 import '../router/routes.dart';
 
 class SeriesDetails extends StatefulWidget {
@@ -16,7 +17,7 @@ class SeriesDetails extends StatefulWidget {
 enum _SaveState { neutral, dirty, saved }
 
 class _SeriesDetailsState extends State<SeriesDetails> {
-  final String _query = '';
+  String _query = '';
   bool _ascending = true;
 
   // rename
@@ -106,6 +107,7 @@ class _SeriesDetailsState extends State<SeriesDetails> {
       });
 
     // colors for the rename box
+    final scheme = Theme.of(context).colorScheme;
     final Color red = Colors.redAccent;
     final Color green = Colors.green;
 
@@ -153,50 +155,91 @@ class _SeriesDetailsState extends State<SeriesDetails> {
       ),
       body: Column(
         children: [
-          // rename text box (no buttons)
+          // rename text box + delete button row
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-            child: TextField(
-              controller: _renameCtrl,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _saveRename(lib),
-              enabled: !_saving,
-              decoration: InputDecoration(
-                labelText: 'Series name',
-                hintText: 'Rename series',
-                isDense: true,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _renameCtrl,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _saveRename(lib),
+                    enabled: !_saving,
+                    decoration: InputDecoration(
+                      labelText: 'Series name',
+                      hintText: 'Rename series',
+                      isDense: true,
 
-                // label color changes with state
-                labelStyle: labelTextStyle,
-                floatingLabelStyle: labelTextStyle,
+                      // label color changes with state
+                      labelStyle: labelTextStyle,
+                      floatingLabelStyle: labelTextStyle,
 
-                suffixIcon: _saving
-                    ? const Padding(
-                        padding: EdgeInsets.all(10),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : switch (_saveState) {
-                        _SaveState.neutral => null,
-                        _SaveState.dirty =>
-                          Icon(Icons.circle, color: red, size: 14),
-                        _SaveState.saved =>
-                          Icon(Icons.check_circle, color: green),
-                      },
-                enabledBorder: enabledBorder,
-                focusedBorder: focusedBorder,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                      suffixIcon: _saving
+                          ? const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            )
+                          : switch (_saveState) {
+                              _SaveState.neutral => null,
+                              _SaveState.dirty =>
+                                Icon(Icons.circle, color: red, size: 14),
+                              _SaveState.saved =>
+                                Icon(Icons.check_circle, color: green),
+                            },
+                      enabledBorder: enabledBorder,
+                      focusedBorder: focusedBorder,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+
+                // Delete button (matches tag_page styling via your DeleteButton widget)
+                DeleteButton(onDelete: () async {
+                  if (!mounted) return; // Ensure the widget is still mounted
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Confirm Deletion'),
+                        content: const Text(
+                            'Are you sure you want to delete this series?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pop(context, false), // Cancel
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pop(context, true), // Confirm
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (confirm == true) {
+                    // ignore: use_build_context_synchronously
+                    final libraryController = context.read<LibraryController>();
+                    // remove the tag from all books
+                    await libraryController.deleteSeries(_currentSeriesName);
+                    if (!mounted) return;
+                    // ignore: use_build_context_synchronously
+                    Navigator.pop(context);
+                  }
+                }),
+              ],
             ),
           ),
-
-          const SizedBox(height: 4),
-
           Expanded(
             child: filtered.isEmpty
                 ? const Center(child: Text('No matching books.'))
