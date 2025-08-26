@@ -163,6 +163,9 @@ class _BookDetailsState extends State<BookDetails> {
                                       }
                                       // refocus keyboard, fix escape key issue
                                       _focusNode.requestFocus();
+                                      // sort the library after a title change
+                                      libraryController
+                                          .sortLibraryJsonByTitle();
                                     },
                                   ),
                                 ),

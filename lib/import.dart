@@ -120,6 +120,9 @@ class _ImportState extends State<Import> {
                           }
                         }
 
+                        // sort the library after adding a new book
+                        libraryController.sortLibraryJsonByTitle();
+
                         // notify & pop
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

@@ -122,6 +122,81 @@ class LibraryController extends ChangeNotifier {
         .any((book) => book.title.toLowerCase() == title.toLowerCase().trim());
   }
 
+// Strip leading article only if followed by a LETTER (not a digit)
+  String _stripLeadingArticle(String input, {bool ignoreArticles = true}) {
+    var s = (input).trim();
+    if (!ignoreArticles || s.isEmpty) return s;
+    final re = RegExp(r'^(?:the|a|an)\s+(?=[A-Za-z])', caseSensitive: false);
+    return s.replaceFirst(re, '');
+  }
+
+// Split into numeric and non-numeric segments for natural sort
+  List<dynamic> _naturalSegments(String s) {
+    final segs = <dynamic>[];
+    final re = RegExp(r'(\d+)|(\D+)');
+    for (final m in re.allMatches(s)) {
+      final numPart = m.group(1);
+      if (numPart != null) {
+        segs.add(int.parse(numPart));
+      } else {
+        segs.add(m.group(2)!.toLowerCase());
+      }
+    }
+    return segs;
+  }
+
+// Natural compare with smart article handling
+  int _naturalCompareTitles(String a, String b, {bool ignoreArticles = true}) {
+    final sa = _stripLeadingArticle(a, ignoreArticles: ignoreArticles);
+    final sb = _stripLeadingArticle(b, ignoreArticles: ignoreArticles);
+
+    final A = _naturalSegments(sa);
+    final B = _naturalSegments(sb);
+    final n = A.length < B.length ? A.length : B.length;
+
+    for (var i = 0; i < n; i++) {
+      final x = A[i], y = B[i];
+      if (x is int && y is int) {
+        if (x != y) return x.compareTo(y);
+      } else if (x is int && y is String) {
+        return -1; // numbers sort before letters
+      } else if (x is String && y is int) {
+        return 1; // letters after numbers
+      } else {
+        final cmp = (x as String).compareTo(y as String);
+        if (cmp != 0) return cmp;
+      }
+    }
+    return A.length.compareTo(B.length);
+  }
+
+  // Sort the library JSON on disk (and in memory) by book title.
+  // Uses 'name' if present, otherwise falls back to 'title'.
+  Future<void> sortLibraryJsonByTitle({bool ignoreArticles = true}) async {
+    // Load current JSON
+    final Map<String, dynamic> json =
+        await _libraryRepository.loadLibraryJson();
+
+    final List<dynamic> raw = (json['book'] as List<dynamic>?) ?? <dynamic>[];
+
+    // Sort raw JSON maps without assuming the full Book model
+    raw.sort((a, b) {
+      final at = (a as Map)['name'] ?? (a)['title'] ?? '';
+      final bt = (b as Map)['name'] ?? (b)['title'] ?? '';
+      return _naturalCompareTitles(at.toString(), bt.toString(),
+          ignoreArticles: true);
+    });
+
+    // Save back to disk
+    json['book'] = raw;
+    await _libraryRepository.saveLibraryJson(json);
+
+    // Refresh in-memory list to match the new order
+    _books = List<Book>.from(
+        raw.map((m) => Book.fromJson(Map<String, dynamic>.from(m as Map))));
+    notifyListeners();
+  }
+
   // add a book to the list and save it to the json file
   // checks if the book already exists in the list
   Future<void> addBook(Book book) async {
