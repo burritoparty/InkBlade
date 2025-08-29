@@ -223,10 +223,12 @@ class _CharactersDetailsState extends State<CharactersDetails> {
                   );
 
                   if (confirm == true) {
+                    // ignore: use_build_context_synchronously
                     final libraryController = context.read<LibraryController>();
                     await libraryController
                         .deleteCharacter(_currentCharacterName);
                     if (!mounted) return;
+                    // ignore: use_build_context_synchronously
                     Navigator.pop(context);
                   }
                 }),
@@ -245,7 +247,7 @@ class _CharactersDetailsState extends State<CharactersDetails> {
                         await Navigator.pushNamed(
                           context,
                           Routes.details,
-                          arguments: booksForCharacter[index],
+                          arguments: index,
                         );
                       },
                     ),

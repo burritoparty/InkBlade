@@ -246,7 +246,7 @@ class _SeriesDetailsState extends State<SeriesDetails> {
                         await Navigator.pushNamed(
                           context,
                           Routes.details,
-                          arguments: booksInSeries[index],
+                          arguments: index,
                         );
                       },
                     ),

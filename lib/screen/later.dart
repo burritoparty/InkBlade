@@ -33,7 +33,7 @@ class _LaterState extends State<Later> {
                 await Navigator.pushNamed(
                   context,
                   Routes.details,
-                  arguments: filteredBooks[index],
+                  arguments: index,
                 );
               },
             ),

@@ -33,7 +33,7 @@ class _FavoritesState extends State<Favorites> {
                 await Navigator.pushNamed(
                   context,
                   Routes.details,
-                  arguments: filteredBooks[index],
+                  arguments: index,
                 );
               },
             ),

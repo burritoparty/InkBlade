@@ -163,9 +163,6 @@ class _BookDetailsState extends State<BookDetails> {
                                       }
                                       // refocus keyboard, fix escape key issue
                                       _focusNode.requestFocus();
-                                      // sort the library after a title change
-                                      libraryController
-                                          .sortLibraryJsonByTitle();
                                     },
                                   ),
                                 ),
@@ -440,6 +437,7 @@ class _BookDetailsState extends State<BookDetails> {
                                   final bookPath = widget.book.path;
 
                                   // pop first
+                                  // ignore: use_build_context_synchronously
                                   if (mounted) Navigator.pop(context);
 
                                   // Remove the book from the library
@@ -473,8 +471,11 @@ class _BookDetailsState extends State<BookDetails> {
                 padding: const EdgeInsets.all(8.0),
                 child: PagesGrid(
                   book: widget.book,
-                  imagesPerRow: imagesPerRow,
-                  childAspectRatio: 2 / 3,
+                  crossAxisCount: imagesPerRow,
+                  spacing: 8,
+                  onTapPage: (file, pageNumber) {
+                    // Optional: Handle page tap, e.g., open in reader at specific page
+                  },
                 ),
               ),
             ),
@@ -513,41 +514,116 @@ class CoverImage extends StatelessWidget {
 }
 
 class PagesGrid extends StatelessWidget {
-  /// The book object
-  final Book book;
-
-  /// Images per row
-  final int imagesPerRow;
-
-  /// Width / height ratio of each cell
-  final double childAspectRatio;
-
   const PagesGrid({
     super.key,
     required this.book,
-    this.imagesPerRow = 3,
-    this.childAspectRatio = 2 / 3,
+    this.crossAxisCount = 3,
+    this.spacing = 8,
+    this.onTapPage, // optional: handle open/go-to here
+    this.childAspectRatio = 0.707, // tweak if your thumbs are different
   });
+
+  final dynamic book; // change to your Book class
+  final int crossAxisCount;
+  final double spacing;
+  final double childAspectRatio;
+  final void Function(File pageFile, int pageNumber)? onTapPage;
 
   @override
   Widget build(BuildContext context) {
-    // set the files
-    final pages = book.getPageFiles();
+    final List<File> pages = book.getPageFiles();
+
     return GridView.builder(
-      padding: const EdgeInsets.only(top: 16.0),
+      padding: EdgeInsets.all(spacing),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: imagesPerRow,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 12,
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: spacing,
+        mainAxisSpacing: spacing,
         childAspectRatio: childAspectRatio,
       ),
-      itemCount: book.getPageCount(),
-      itemBuilder: (_, i) {
-        return Image.file(
-          pages[i],
-          fit: BoxFit.cover,
+      itemCount: pages.length,
+      itemBuilder: (context, index) {
+        final file = pages[index];
+        final pageNumber = index + 1;
+
+        return _PageTile(
+          file: file,
+          pageNumber: pageNumber,
+          onTap: () => onTapPage?.call(file, pageNumber),
         );
       },
+    );
+  }
+}
+
+class _PageTile extends StatelessWidget {
+  const _PageTile({
+    required this.file,
+    required this.pageNumber,
+    this.onTap,
+  });
+
+  final File file;
+  final int pageNumber;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Stack(
+          children: [
+            // Page preview
+            Positioned.fill(
+              child: Image.file(
+                file,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: cs.surfaceContainerHighest,
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.image_not_supported_outlined),
+                ),
+              ),
+            ),
+
+            // Bottom-right page number badge
+            Positioned(
+              right: 6,
+              bottom: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.25), width: 1.5),
+                  boxShadow: const [
+                    BoxShadow(
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                      color: Colors.black26,
+                    ),
+                  ],
+                ),
+                child: Text(
+                  '$pageNumber',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
