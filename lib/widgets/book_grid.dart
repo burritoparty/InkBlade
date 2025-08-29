@@ -71,14 +71,14 @@ class _BookTile extends StatelessWidget {
       titlePositionBottom = true;
     }
 
-    // Thumbnail logic (adapt to your model: cover path, bytes, etc.)
+    // Thumbnail logic
     final File? coverFile = _resolveCoverFile(book);
 
     // Example badge label: total pages in the book
     final int pageCount = book.getPageFiles().length;
     final String badgeLabel = '$pageCount';
 
-    const double kBaseFont = 14.0; // how _PillBadge was designed
+    const double kBaseFont = 14.0; // base font size for badge
     const double kBaseGap = 8.0; // gap used when fontSize = 14
 
     final double scale = badgeFontSize / kBaseFont;
@@ -101,105 +101,121 @@ class _BookTile extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Stack(
-          children: [
-            // Cover / fallback
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  image: coverFile != null
-                      ? DecorationImage(
-                          image: FileImage(coverFile),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-              ),
+        hoverColor: Colors.black.withValues(alpha: 0.1),
+        splashColor: Colors.black.withValues(alpha: 0.12),
+        highlightColor: Colors.black.withValues(alpha: 0.06),
+        child: Ink(
+          // The main container for the book tile
+          decoration: BoxDecoration(
+            image: coverFile != null
+                ? DecorationImage(
+                    image: FileImage(coverFile),
+                    fit: BoxFit.cover,
+                  )
+                : null,
+            gradient: LinearGradient(
+              begin: titlePositionBottom
+                  ? Alignment.bottomCenter
+                  : Alignment.topCenter,
+              end: titlePositionBottom
+                  ? Alignment.topCenter
+                  : Alignment.bottomCenter,
+              colors: [
+                Colors.black.withValues(alpha: 0.99),
+                Colors.transparent,
+              ],
+              stops: const [0.0, 0.1],
             ),
-            // fade for title
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: titlePositionBottom
-                        ? Alignment.bottomCenter
-                        : Alignment.topCenter,
-                    end: titlePositionBottom
-                        ? Alignment.topCenter
-                        : Alignment.bottomCenter,
-                    colors: [
-                      // adjust alpha to taste
-                      Colors.black.withValues(alpha: 0.99),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.1],
-                  ),
-                ),
-              ),
-            ),
-            // Title
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: titlePositionBottom ? 0 : null,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
-                child: Text(
-                  (book.title ?? 'Untitled'),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    height: 1,
-                    shadows: [
-                      Shadow(
-                          blurRadius: 2,
-                          color: Colors.black54,
-                          offset: Offset(0, 1)),
-                    ],
+          ),
+          child: Stack(
+            children: [
+              // fade for title
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: titlePositionBottom
+                          ? Alignment.bottomCenter
+                          : Alignment.topCenter,
+                      end: titlePositionBottom
+                          ? Alignment.topCenter
+                          : Alignment.bottomCenter,
+                      colors: [
+                        // adjust alpha to taste
+                        Colors.black.withValues(alpha: 0.99),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.1],
+                    ),
                   ),
                 ),
               ),
-            ),
-            // Badge
-            switch (badgePosition) {
-              'topLeft' => Positioned(
-                  top: edgeGap,
-                  left: edgeGap,
-                  child: Transform.scale(
-                    scale: badgeFontSize / 14.0,
-                    child: _PillBadge(label: badgeLabel),
+
+              // Title
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: titlePositionBottom ? 0 : null,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+                  child: Text(
+                    (book.title ?? 'Untitled'),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      height: 1,
+                      shadows: [
+                        Shadow(
+                            blurRadius: 2,
+                            color: Colors.black54,
+                            offset: Offset(0, 1)),
+                      ],
+                    ),
                   ),
                 ),
-              'topRight' => Positioned(
-                  top: edgeGap,
-                  right: edgeGap,
-                  child: Transform.scale(
-                    scale: badgeFontSize / 14.0,
-                    child: _PillBadge(label: badgeLabel),
+              ),
+
+              // Badge
+              switch (badgePosition) {
+                'topLeft' => Positioned(
+                    top: edgeGap,
+                    left: edgeGap,
+                    child: Transform.scale(
+                      scale: badgeFontSize / 14.0,
+                      child: _PillBadge(label: badgeLabel),
+                    ),
                   ),
-                ),
-              'bottomLeft' => Positioned(
-                  left: edgeGap,
-                  bottom: edgeGap,
-                  child: Transform.scale(
-                    scale: badgeFontSize / 14.0,
-                    child: _PillBadge(label: badgeLabel),
+                'topRight' => Positioned(
+                    top: edgeGap,
+                    right: edgeGap,
+                    child: Transform.scale(
+                      scale: badgeFontSize / 14.0,
+                      child: _PillBadge(label: badgeLabel),
+                    ),
                   ),
-                ),
-              'bottomRight' => Positioned(
-                  right: edgeGap,
-                  bottom: edgeGap,
-                  child: Transform.scale(
-                    scale: badgeFontSize / 14.0,
-                    child: _PillBadge(label: badgeLabel),
+                'bottomLeft' => Positioned(
+                    left: edgeGap,
+                    bottom: edgeGap,
+                    child: Transform.scale(
+                      scale: badgeFontSize / 14.0,
+                      child: _PillBadge(label: badgeLabel),
+                    ),
                   ),
-                ),
-              _ => const SizedBox.shrink(),
-            },
-          ],
+                'bottomRight' => Positioned(
+                    right: edgeGap,
+                    bottom: edgeGap,
+                    child: Transform.scale(
+                      scale: badgeFontSize / 14.0,
+                      child: _PillBadge(label: badgeLabel),
+                    ),
+                  ),
+                _ => const SizedBox.shrink(),
+              },
+            ],
+          ),
         ),
       ),
     );
