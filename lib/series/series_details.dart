@@ -107,7 +107,6 @@ class _SeriesDetailsState extends State<SeriesDetails> {
       });
 
     // colors for the rename box
-    final scheme = Theme.of(context).colorScheme;
     final Color red = Colors.redAccent;
     final Color green = Colors.green;
 
@@ -200,10 +199,8 @@ class _SeriesDetailsState extends State<SeriesDetails> {
                     ),
                   ),
                 ),
-
-                // Delete button (matches tag_page styling via your DeleteButton widget)
                 DeleteButton(onDelete: () async {
-                  if (!mounted) return; // Ensure the widget is still mounted
+                  if (!mounted) return;
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (BuildContext context) {
@@ -213,13 +210,11 @@ class _SeriesDetailsState extends State<SeriesDetails> {
                             'Are you sure you want to delete this series?'),
                         actions: [
                           TextButton(
-                            onPressed: () =>
-                                Navigator.pop(context, false), // Cancel
+                            onPressed: () => Navigator.pop(context, false),
                             child: const Text('Cancel'),
                           ),
                           TextButton(
-                            onPressed: () =>
-                                Navigator.pop(context, true), // Confirm
+                            onPressed: () => Navigator.pop(context, true),
                             child: const Text('Delete'),
                           ),
                         ],

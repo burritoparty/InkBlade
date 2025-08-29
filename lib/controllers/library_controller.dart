@@ -552,7 +552,6 @@ class LibraryController extends ChangeNotifier {
     return tagThumbnails[tag];
   }
 
-  // In LibraryController
   Future<void> renameSeries(String from, String to) async {
     final oldKey = from.trim().toLowerCase();
     for (final b in books) {
@@ -564,7 +563,6 @@ class LibraryController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // In LibraryController
   Future<void> renameCharacter(String from, String to) async {
     final oldKey = from.trim().toLowerCase();
     final newVal = to.trim();
@@ -579,7 +577,6 @@ class LibraryController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // In LibraryController
   Future<void> deleteSeries(String seriesName) async {
     final key = seriesName.trim().toLowerCase();
     for (final b in books) {
@@ -587,6 +584,15 @@ class LibraryController extends ChangeNotifier {
       if (s == key) {
         b.series = "";
       }
+    }
+    notifyListeners();
+  }
+
+  Future<void> deleteCharacter(String characterName) async {
+    final key = characterName.trim().toLowerCase();
+    for (final b in books) {
+      final list = b.characters;
+      list.removeWhere((item) => item.trim().toLowerCase() == key);
     }
     notifyListeners();
   }

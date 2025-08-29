@@ -5,6 +5,8 @@ import '../controllers/library_controller.dart';
 import '../widgets/book_grid.dart';
 import '../router/routes.dart';
 
+import '../widgets/delete_button.dart';
+
 class CharactersDetails extends StatefulWidget {
   final String characterName;
   const CharactersDetails({super.key, required this.characterName});
@@ -158,39 +160,77 @@ class _CharactersDetailsState extends State<CharactersDetails> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-            child: TextField(
-              controller: _renameCtrl,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _saveRename(lib),
-              enabled: !_saving,
-              decoration: InputDecoration(
-                labelText: 'Character name',
-                hintText: 'Rename character',
-                isDense: true,
-                labelStyle: labelTextStyle,
-                floatingLabelStyle: labelTextStyle,
-                suffixIcon: _saving
-                    ? const Padding(
-                        padding: EdgeInsets.all(10),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : switch (_saveState) {
-                        _SaveState.neutral => null,
-                        _SaveState.dirty =>
-                          Icon(Icons.circle, color: red, size: 14),
-                        _SaveState.saved =>
-                          Icon(Icons.check_circle, color: green),
-                      },
-                enabledBorder: enabledBorder,
-                focusedBorder: focusedBorder,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _renameCtrl,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _saveRename(lib),
+                    enabled: !_saving,
+                    decoration: InputDecoration(
+                      labelText: 'Character name',
+                      hintText: 'Rename character',
+                      isDense: true,
+                      labelStyle: labelTextStyle,
+                      floatingLabelStyle: labelTextStyle,
+                      suffixIcon: _saving
+                          ? const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            )
+                          : switch (_saveState) {
+                              _SaveState.neutral => null,
+                              _SaveState.dirty =>
+                                Icon(Icons.circle, color: red, size: 14),
+                              _SaveState.saved =>
+                                Icon(Icons.check_circle, color: green),
+                            },
+                      enabledBorder: enabledBorder,
+                      focusedBorder: focusedBorder,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                DeleteButton(onDelete: () async {
+                  if (!mounted) return;
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Confirm Deletion'),
+                        content: Text(
+                            'Are you sure you want to delete this character?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (confirm == true) {
+                    final libraryController = context.read<LibraryController>();
+                    await libraryController
+                        .deleteCharacter(_currentCharacterName);
+                    if (!mounted) return;
+                    Navigator.pop(context);
+                  }
+                }),
+              ],
             ),
           ),
           const SizedBox(height: 4),
