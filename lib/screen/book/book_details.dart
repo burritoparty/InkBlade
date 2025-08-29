@@ -581,7 +581,13 @@ class _PageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final badgePosition =
+        Provider.of<SettingsController>(context).badgePosition;
+    final badgeFontSize =
+        Provider.of<SettingsController>(context).badgeFontSize;
     final cs = Theme.of(context).colorScheme;
+    // Example badge label: total pages in the book
+    final String badgeLabel = '$pageNumber';
 
     return Material(
       color: Colors.transparent,
@@ -604,36 +610,77 @@ class _PageTile extends StatelessWidget {
               ),
             ),
 
-            // Bottom-right page number badge
-            Positioned(
-              right: 6,
-              bottom: 6,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.65),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.25), width: 1.5),
-                  boxShadow: const [
-                    BoxShadow(
-                      blurRadius: 6,
-                      offset: Offset(0, 2),
-                      color: Colors.black26,
-                    ),
-                  ],
-                ),
-                child: Text(
-                  '$pageNumber',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: [FontFeature.tabularFigures()],
+            switch (badgePosition) {
+              'topLeft' => Positioned(
+                  left: badgeFontSize / 14.0 * 12,
+                  top: badgeFontSize / 14.0 * 12,
+                  child: Transform.scale(
+                    scale: badgeFontSize / 14.0,
+                    child: _PillBadge(label: badgeLabel),
                   ),
                 ),
-              ),
-            ),
+              'topRight' => Positioned(
+                  right: badgeFontSize / 14.0 * 12,
+                  top: badgeFontSize / 14.0 * 12,
+                  child: Transform.scale(
+                    scale: badgeFontSize / 14.0,
+                    child: _PillBadge(label: badgeLabel),
+                  ),
+                ),
+              'bottomLeft' => Positioned(
+                  left: badgeFontSize / 14.0 * 12,
+                  bottom: badgeFontSize / 14.0 * 12,
+                  child: Transform.scale(
+                    scale: badgeFontSize / 14.0,
+                    child: _PillBadge(label: badgeLabel),
+                  ),
+                ),
+              'bottomRight' => Positioned(
+                  right: badgeFontSize / 14.0 * 12,
+                  bottom: badgeFontSize / 14.0 * 12,
+                  child: Transform.scale(
+                    scale: badgeFontSize / 14.0,
+                    child: _PillBadge(label: badgeLabel),
+                  ),
+                ),
+              _ => const SizedBox.shrink(),
+            },
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shared badge widget to keep style identical across grids.
+class _PillBadge extends StatelessWidget {
+  const _PillBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.65),
+        borderRadius: BorderRadius.circular(999),
+        border:
+            Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1.5),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 6,
+            offset: Offset(0, 2),
+            color: Colors.black26,
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontFeatures: [FontFeature.tabularFigures()],
         ),
       ),
     );

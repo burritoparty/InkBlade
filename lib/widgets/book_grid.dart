@@ -1,7 +1,6 @@
 // book_grid.dart (drop-in style-matched badge)
 
 import 'dart:io';
-import 'dart:ui'; // for FontFeature
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/settings_controller.dart';
@@ -61,7 +60,16 @@ class _BookTile extends StatelessWidget {
         Provider.of<SettingsController>(context).badgePosition;
     final badgeFontSize =
         Provider.of<SettingsController>(context).badgeFontSize;
-    final cs = Theme.of(context).colorScheme;
+
+    // If badge is on bottom show top
+    bool titlePositionBottom = false;
+
+    if (badgePosition == 'topLeft' ||
+        badgePosition == 'topRight' ||
+        badgePosition == 'off') {
+      // If badge is on top, or off, show bottom
+      titlePositionBottom = true;
+    }
 
     // Thumbnail logic (adapt to your model: cover path, bytes, etc.)
     final File? coverFile = _resolveCoverFile(book);
@@ -69,6 +77,23 @@ class _BookTile extends StatelessWidget {
     // Example badge label: total pages in the book
     final int pageCount = book.getPageFiles().length;
     final String badgeLabel = '$pageCount';
+
+    const double kBaseFont = 14.0; // how _PillBadge was designed
+    const double kBaseGap = 8.0; // gap used when fontSize = 14
+
+    final double scale = badgeFontSize / kBaseFont;
+    final double edgeGap = kBaseGap * scale; // scales 1:1 with the badge
+
+    Positioned(
+      top: edgeGap,
+      right: edgeGap,
+      child: Transform.scale(
+        alignment:
+            Alignment.topRight, // anchor at the corner you’re spacing from
+        scale: scale,
+        child: _PillBadge(label: badgeLabel),
+      ),
+    );
 
     return Material(
       color: Colors.transparent,
@@ -80,43 +105,93 @@ class _BookTile extends StatelessWidget {
           children: [
             // Cover / fallback
             Positioned.fill(
-              child: coverFile != null
-                  ? Image.file(
-                      coverFile,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _coverFallback(cs),
-                    )
-                  : _coverFallback(cs),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  image: coverFile != null
+                      ? DecorationImage(
+                          image: FileImage(coverFile),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+              ),
             ),
-
+            // fade for title
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: titlePositionBottom
+                        ? Alignment.bottomCenter
+                        : Alignment.topCenter,
+                    end: titlePositionBottom
+                        ? Alignment.topCenter
+                        : Alignment.bottomCenter,
+                    colors: [
+                      // adjust alpha to taste
+                      Colors.black.withValues(alpha: 0.99),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.1],
+                  ),
+                ),
+              ),
+            ),
+            // Title
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: titlePositionBottom ? 0 : null,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+                child: Text(
+                  (book.title ?? 'Untitled'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    height: 1,
+                    shadows: [
+                      Shadow(
+                          blurRadius: 2,
+                          color: Colors.black54,
+                          offset: Offset(0, 1)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Badge
             switch (badgePosition) {
               'topLeft' => Positioned(
-                  left: badgeFontSize / 14.0 * 12,
-                  top: badgeFontSize / 14.0 * 12,
+                  top: edgeGap,
+                  left: edgeGap,
                   child: Transform.scale(
                     scale: badgeFontSize / 14.0,
                     child: _PillBadge(label: badgeLabel),
                   ),
                 ),
               'topRight' => Positioned(
-                  right: badgeFontSize / 14.0 * 12,
-                  top: badgeFontSize / 14.0 * 12,
+                  top: edgeGap,
+                  right: edgeGap,
                   child: Transform.scale(
                     scale: badgeFontSize / 14.0,
                     child: _PillBadge(label: badgeLabel),
                   ),
                 ),
               'bottomLeft' => Positioned(
-                  left: badgeFontSize / 14.0 * 12,
-                  bottom: badgeFontSize / 14.0 * 12,
+                  left: edgeGap,
+                  bottom: edgeGap,
                   child: Transform.scale(
                     scale: badgeFontSize / 14.0,
                     child: _PillBadge(label: badgeLabel),
                   ),
                 ),
               'bottomRight' => Positioned(
-                  right: badgeFontSize / 14.0 * 12,
-                  bottom: badgeFontSize / 14.0 * 12,
+                  right: edgeGap,
+                  bottom: edgeGap,
                   child: Transform.scale(
                     scale: badgeFontSize / 14.0,
                     child: _PillBadge(label: badgeLabel),
@@ -124,43 +199,20 @@ class _BookTile extends StatelessWidget {
                 ),
               _ => const SizedBox.shrink(),
             },
-
-            // (Optional) Add more badges; just stack them in a Row:
-            // Positioned(
-            //   right: 6,
-            //   bottom: 6,
-            //   child: Row(
-            //     children: [
-            //       _PillBadge(label: badgeLabel),
-            //       const SizedBox(width: 6),
-            //       _PillBadge(label: '★'), // favorite example
-            //     ],
-            //   ),
-            // ),
           ],
         ),
       ),
     );
   }
 
-  Widget _coverFallback(ColorScheme cs) {
-    return Container(
-      color: cs.surfaceVariant,
-      alignment: Alignment.center,
-      child: const Icon(Icons.menu_book_outlined),
-    );
-  }
-
   File? _resolveCoverFile(dynamic book) {
-    // If your Book has a stored cover path, return File(book.coverPath)
-    // Or derive from folder (e.g., first image) if you prefer:
     final pages = book.getPageFiles();
     if (pages.isNotEmpty) return pages.first;
     return null;
   }
 }
 
-/// Shared badge widget to keep style identical across grids.
+// Shared badge widget to keep style identical across grids.
 class _PillBadge extends StatelessWidget {
   const _PillBadge({required this.label});
 
