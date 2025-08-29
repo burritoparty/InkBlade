@@ -9,6 +9,7 @@ import 'package:flutter_manga_reader/screen/book/book_details.dart';
 import 'package:flutter_manga_reader/screen/book/book_reader.dart';
 import 'package:flutter_manga_reader/screen/library.dart';
 import 'package:flutter_manga_reader/tags/tag_details.dart';
+import '../../characters/characters_details.dart'; // from /details/ up one level to /screens
 
 class Routes {
   static const home = '/';
@@ -18,6 +19,7 @@ class Routes {
   static const author = '/authors/details';
   static const tag = '/tags/details';
   static const import = '../import.dart';
+  static const character = '/characters/details';
 }
 
 class AppRouter {
@@ -56,7 +58,15 @@ class AppRouter {
       // route for FAB (import)
       case Routes.import:
         return MaterialPageRoute(builder: (_) => const Import());
-
+      case Routes.character:
+        // unpack the given map
+        final args = settings.arguments as Map<String, dynamic>;
+        final character = args['character'] as String;
+        return MaterialPageRoute(
+          builder: (_) => CharactersDetails(
+            characterName: character,
+          ),
+        );
       default:
         return null; // or a “NotFound” page
     }

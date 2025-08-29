@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/router/routes.dart';
 
@@ -97,6 +99,13 @@ class ListEditor extends StatelessWidget {
                     Routes.tag,
                     // pass as a map
                     arguments: {'tag': item, 'allTags': allItems},
+                  );
+                } else if (name == "character") {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.character,
+                    // pass as a map
+                    arguments: {'character': item, 'allCharacters': allItems},
                   );
                 }
               },
