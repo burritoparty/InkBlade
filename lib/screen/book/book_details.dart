@@ -474,7 +474,16 @@ class _BookDetailsState extends State<BookDetails> {
                   crossAxisCount: imagesPerRow,
                   spacing: 8,
                   onTapPage: (file, pageNumber) {
-                    // Optional: Handle page tap, e.g., open in reader at specific page
+                    debugPrint('Tapped on page $pageNumber');
+                    // navigate to the reader page, passing the book and page number
+                    Navigator.pushNamed(
+                      context,
+                      Routes.reader, // path to reader
+                      arguments: {
+                        'book': widget.book,
+                        'startPage': pageNumber - 1, // zero-based index
+                      }, // object passed it
+                    );
                   },
                 ),
               ),
@@ -501,7 +510,10 @@ class CoverImage extends StatelessWidget {
           Navigator.pushNamed(
             context,
             Routes.reader, // path to reader
-            arguments: book, // object passed it
+            arguments: {
+              'book': book,
+              'startPage': 0, // start at the beginning
+            }, // object passed it
           );
         },
         child: AspectRatio(

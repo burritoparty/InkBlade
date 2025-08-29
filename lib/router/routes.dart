@@ -32,11 +32,16 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => BookDetails(book: book),
         );
+      // onGenerateRoute (fix this case)
       case Routes.reader:
-        final book = settings.arguments as Book;
+        final args = settings.arguments as Map<String, Object?>;
+        final book = args['book'] as Book;
+        final startPage = (args['startPage'] as int?) ?? 0;
+
         return MaterialPageRoute(
-          builder: (_) => BookReader(book: book),
+          builder: (_) => BookReader(book: book, startPage: startPage),
         );
+
       case Routes.author:
         // unpack the given map
         final args = settings.arguments as Map<String, dynamic>;

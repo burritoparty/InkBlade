@@ -171,7 +171,7 @@ class _TagDetailsState extends State<TagDetails> {
                   await Navigator.pushNamed(
                     context,
                     Routes.details,
-                    arguments: filteredBooks[index],
+                    arguments: index,
                   );
                   setState(() {}); // refresh the screen after returning
                 },

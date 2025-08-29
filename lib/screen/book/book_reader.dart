@@ -12,7 +12,8 @@ import '../../controllers/settings_controller.dart';
 
 class BookReader extends StatefulWidget {
   final Book book;
-  const BookReader({super.key, required this.book});
+  final int startPage;
+  const BookReader({super.key, required this.book, required this.startPage});
 
   @override
   BookReaderState createState() => BookReaderState();
@@ -44,11 +45,20 @@ class BookReaderState extends State<BookReader> {
   @override
   void initState() {
     super.initState();
+    // Clamp startPage to valid range (protects against out-of-bounds)
+    final pages = widget.book.getPageFiles();
+    final maxIndex = pages.isEmpty ? 0 : pages.length - 1;
+    final start = pages.isEmpty ? 0 : widget.startPage.clamp(0, maxIndex);
+
     // initialize the settings controller
+    _pageController = PageController(
+      initialPage: start,
+      keepPage: true,
+    );
     settingsController = context.read<SettingsController>();
-    _pageController = PageController();
     _scrollController = ScrollController();
     _keyboardFocusNode = FocusNode();
+
     // request focus once, after first frame:
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _keyboardFocusNode.requestFocus();
@@ -56,6 +66,14 @@ class BookReaderState extends State<BookReader> {
     if (settingsController.defaultZoom) {
       _zoomedIn = true;
     }
+
+    // set the current page
+    _currentPage = start;
+
+    // jump to the start page after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_pageController.hasClients) _pageController.jumpToPage(start);
+    });
   }
 
   // for clearing controllers
