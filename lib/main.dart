@@ -108,7 +108,8 @@ class _HomeScaffoldState extends State<HomeScaffold> {
                 onPressed: () => setState(() => _selectedIndex = 0),
               )
             : null,
-        title: Text(_pageTitles[_selectedIndex]), // app title
+        title: Text(_pageTitles[_selectedIndex]),
+        centerTitle: true,
       ),
 
       // main content
@@ -122,7 +123,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
               child: const Icon(Icons.add),
               onPressed: () {
                 Navigator.pushNamed(context, Routes.import);
-              }, // TODO: add new item
+              },
             )
           : null,
 
@@ -147,10 +148,10 @@ class MainBottomNav extends StatelessWidget {
   final ValueChanged<int> onTap;
 
   const MainBottomNav({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext c) {
@@ -171,7 +172,7 @@ class MainBottomNav extends StatelessWidget {
 // side drawer with extra navigation options
 class NavDrawer extends StatelessWidget {
   final ValueChanged<int> onTap;
-  const NavDrawer({Key? key, required this.onTap}) : super(key: key);
+  const NavDrawer({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

@@ -21,6 +21,8 @@ class ListEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    late TextEditingController acController;
+    late FocusNode acFocus;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -49,6 +51,9 @@ class ListEditor extends StatelessWidget {
           },
           onSelected: (item) {
             onAdded(item);
+            // clear the text field and keep focus
+            acController.clear(); // clear the actual field
+            acFocus.requestFocus(); // keep focus in the box
           },
           fieldViewBuilder: (
             BuildContext context,
@@ -56,6 +61,9 @@ class ListEditor extends StatelessWidget {
             FocusNode focusNode,
             VoidCallback onFieldSubmitted,
           ) {
+            // capture these for later use, see onSelected above
+            acController = textEditingController;
+            acFocus = focusNode;
             return Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
               child: TextField(
