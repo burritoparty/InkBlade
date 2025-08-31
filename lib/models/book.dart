@@ -84,47 +84,45 @@ class Book {
     return getPageFiles().length;
   }
 
-// get the book's pages and return as File objects
-  List<File> getPageFiles() {
-    final dir = Directory(path);
-    if (!dir.existsSync()) {
-      return [];
+  // use this to sort your page files naturally (1,2,3,...10,11)
+  int _pageCompare(File a, File b) {
+    int? na = _numericKey(p.basenameWithoutExtension(a.path));
+    int? nb = _numericKey(p.basenameWithoutExtension(b.path));
+
+    // if both have a numeric part, compare numerically
+    if (na != null && nb != null) {
+      final c = na.compareTo(nb);
+      if (c != 0) return c;
     }
 
-    final images = dir.listSync().whereType<File>().where((f) {
-      final ext = p.extension(f.path).toLowerCase();
-      return ['.jpg', '.jpeg', '.png', '.webp'].contains(ext);
-    }).toList();
+    // tie-break (or if no numbers), fall back to case-insensitive name compare
+    return p
+        .basename(a.path)
+        .toLowerCase()
+        .compareTo(p.basename(b.path).toLowerCase());
+  }
 
-    // Natural sort by filename
-    images.sort((a, b) {
-      final nameA = p.basenameWithoutExtension(a.path);
-      final nameB = p.basenameWithoutExtension(b.path);
+  // extracts the last number in the name (handles things like "page_002", "ch1-p12")
+  int? _numericKey(String name) {
+    final matches = RegExp(r'\d+').allMatches(name);
+    if (matches.isEmpty) return null;
+    return int.tryParse(matches.last.group(0)!);
+  }
 
-      // This regex needs to be more specific.
-      // It should target the *last* sequence of digits, ideally after an underscore.
-      // Let's use a regex that matches numbers at the end of the string, optionally prefixed by an underscore.
-      final regex = RegExp(r'_(\d+)$'); // This is the crucial change!
+  bool _isImage(String path) {
+    final ext = p.extension(path).toLowerCase();
+    return ext == '.jpg' || ext == '.jpeg' || ext == '.png' || ext == '.webp';
+  }
 
-      final matchA = regex.firstMatch(nameA);
-      final matchB = regex.firstMatch(nameB);
+  List<File> getPageFiles() {
+    final dir = Directory(path);
+    final files = dir
+        .listSync()
+        .whereType<File>()
+        .where((f) => _isImage(f.path))
+        .toList();
 
-      final numStringA =
-          matchA?.group(1); // Get the captured group (the digits)
-      final numStringB =
-          matchB?.group(1); // Get the captured group (the digits)
-          
-      if (numStringA != null && numStringB != null) {
-        final numA = int.tryParse(numStringA) ?? 0;
-        final numB = int.tryParse(numStringB) ?? 0;
-        return numA.compareTo(numB);
-      }
-
-      // Fallback to string comparison if no specific number is found or parsing fails
-      // This fallback will now only be used if the filenames DON'T conform to the expected pattern
-      return nameA.compareTo(nameB);
-    });
-
-    return images;
+    files.sort(_pageCompare);
+    return files;
   }
 }
