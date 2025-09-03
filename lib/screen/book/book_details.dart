@@ -161,6 +161,8 @@ class _BookDetailsState extends State<BookDetails> {
                                           widget.book.title = newTitle;
                                         });
                                       }
+                                      await libraryController
+                                          .sortLibraryJsonByTitle();
                                       // refocus keyboard, fix escape key issue
                                       _focusNode.requestFocus();
                                     },
