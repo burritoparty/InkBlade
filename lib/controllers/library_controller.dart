@@ -19,6 +19,7 @@ class LibraryController extends ChangeNotifier {
   final Set<String> _tags = {};
   final Set<String> _series = {};
   final Set<String> _characters = {};
+  final Map<String, String> _tagDescriptions = {};
 
   // Map of tag name to thumbnail path
   final Map<String, String> tagThumbnails = {};
@@ -32,6 +33,7 @@ class LibraryController extends ChangeNotifier {
   Set<String> get tags => _tags;
   Set<String> get series => _series;
   Set<String> get characters => _characters;
+  Map<String, String> get tagDescriptions => _tagDescriptions;
 
   // call this at startup
   Future<void> init() async {
@@ -69,16 +71,25 @@ class LibraryController extends ChangeNotifier {
       await thumbnailsDir.create(recursive: true);
     }
 
+    final tagDescJson = json['tagDescriptions'];
+    _tagDescriptions.clear();
+    if (tagDescJson is Map) {
+      _tagDescriptions.addAll(Map<String, String>.from(tagDescJson));
+    }
+
     _rebuildSets();
     notifyListeners();
   }
 
   // Save both books and tagThumbnails to the JSON file
   Future<void> _saveLibraryJson() async {
-    final Map<String, dynamic> json = {
-      'book': _books.map((b) => b.toJson()).toList(),
-      'tagThumbnails': tagThumbnails,
-    };
+    final Map<String, dynamic> json =
+        await _libraryRepository.loadLibraryJson();
+
+    json['book'] = _books.map((b) => b.toJson()).toList();
+    json['tagThumbnails'] = tagThumbnails;
+    json['tagDescriptions'] = _tagDescriptions;
+
     await _libraryRepository.saveLibraryJson(json);
   }
 
@@ -437,6 +448,19 @@ class LibraryController extends ChangeNotifier {
       }
     }
 
+    // Move tag description to the new tag name
+    if (_tagDescriptions.containsKey(oldTag)) {
+      final String oldDesc = _tagDescriptions[oldTag] ?? '';
+      final String existingNewDesc = _tagDescriptions[newTag] ?? '';
+
+      // Keep an existing newTag description if it already has one
+      if (existingNewDesc.trim().isEmpty) {
+        _tagDescriptions[newTag] = oldDesc;
+      }
+
+      _tagDescriptions.remove(oldTag);
+    }
+
     // 2) If there's a thumbnail mapped to the old tag, rename the file on disk
     if (tagThumbnails.containsKey(oldTag)) {
       final String? oldPath = tagThumbnails[oldTag];
@@ -550,6 +574,29 @@ class LibraryController extends ChangeNotifier {
   // Get thumbnail for a tag (returns null if not set)
   String? getTagThumbnail(String tag) {
     return tagThumbnails[tag];
+  }
+
+  // Set description for a tag
+  Future<void> setTagDescription(String tag, String description) async {
+    final Map<String, dynamic> json =
+        await _libraryRepository.loadLibraryJson();
+
+    final existing = json['tagDescriptions'];
+    final Map<String, dynamic> tagDesc = existing is Map
+        ? Map<String, dynamic>.from(existing)
+        : <String, dynamic>{};
+
+    tagDesc[tag] = description;
+    json['tagDescriptions'] = tagDesc;
+
+    await _libraryRepository.saveLibraryJson(json);
+
+    _tagDescriptions[tag] = description;
+    notifyListeners();
+  }
+
+  String getTagDescription(String tag) {
+    return _tagDescriptions[tag] ?? "";
   }
 
   Future<void> renameSeries(String from, String to) async {

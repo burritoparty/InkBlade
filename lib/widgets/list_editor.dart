@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_reader/router/routes.dart';
 
+import 'package:provider/provider.dart';
+import '../controllers/library_controller.dart';
+
 class ListEditor extends StatelessWidget {
   final String name;
   final List<String> item;
@@ -88,7 +91,12 @@ class ListEditor extends StatelessWidget {
           spacing: 8.0,
           runSpacing: 4.0,
           children: item.map((item) {
-            return InputChip(
+            final isTag = name == "tag";
+            final desc = isTag
+                ? context.watch<LibraryController>().getTagDescription(item)
+                : "";
+
+            final chip = InputChip(
               label: Text(item),
               onDeleted: () => onRemoved(item),
               onPressed: () {
@@ -96,25 +104,33 @@ class ListEditor extends StatelessWidget {
                   Navigator.pushNamed(
                     context,
                     Routes.author,
-                    // pass as a map
                     arguments: {'author': item, 'allAuthors': allItems},
                   );
                 } else if (name == "tag") {
                   Navigator.pushNamed(
                     context,
                     Routes.tag,
-                    // pass as a map
                     arguments: {'tag': item, 'allTags': allItems},
                   );
                 } else if (name == "character") {
                   Navigator.pushNamed(
                     context,
                     Routes.character,
-                    // pass as a map
                     arguments: {'character': item, 'allCharacters': allItems},
                   );
                 }
               },
+            );
+
+            if (!isTag || desc.trim().isEmpty) {
+              return chip;
+            }
+
+            return Tooltip(
+              message: desc,
+              waitDuration: const Duration(milliseconds: 250),
+              showDuration: const Duration(seconds: 5),
+              child: chip,
             );
           }).toList(),
         ),

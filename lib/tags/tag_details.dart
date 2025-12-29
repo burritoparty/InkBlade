@@ -26,15 +26,22 @@ class _TagDetailsState extends State<TagDetails> {
   late FocusNode _focusNode;
   late String _tag;
 
+  // Description text field
+  final TextEditingController descriptionController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    descriptionController.text =
+        context.read<LibraryController>().getTagDescription(widget.tag);
     _tag = widget.tag;
     _focusNode = FocusNode();
   }
 
   @override
   void dispose() {
+    // Clean up the controllers
+    descriptionController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -161,7 +168,24 @@ class _TagDetailsState extends State<TagDetails> {
                 ],
               ),
             ),
-
+            // Description editor
+            Padding(
+              // push from ltrb
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+              child: SizedBox(
+                height: 48,
+                child: StringEditor(
+                  name: "Description",
+                  controller: descriptionController,
+                  onSubmitted: (newDescription) {
+                    // Update the tag description
+                    context
+                        .read<LibraryController>()
+                        .setTagDescription(_tag, newDescription);
+                  },
+                ),
+              ),
+            ),
             // books grid
             Expanded(
               child: BookGrid(
