@@ -89,10 +89,24 @@ class _TagPageState extends State<TagPage> {
           ),
         ),
         // responsive grid for tag buttons
-        TagButtons(
-          filteredTags: filteredTags,
-          allTags: allTags,
-          tagThumbnails: libraryController.tagThumbnails,
+        // TagButtons(
+        //   filteredTags: filteredTags,
+        //   allTags: allTags,
+        //   tagThumbnails: libraryController.tagThumbnails,
+        // ),
+        Expanded(
+          child: filteredTags.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No matching tags.',
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : TagButtons(
+                  filteredTags: filteredTags,
+                  allTags: allTags,
+                  tagThumbnails: libraryController.tagThumbnails,
+                ),
         ),
       ],
     );

@@ -85,11 +85,20 @@ class _AuthorsState extends State<Authors> {
                 count: libraryController.authors.length),
           ),
         ),
-        AuthorButtons(
-          filteredAuthors: filteredAuthors,
-          allAuthors: allAuthors,
-          allBooks: libraryController.books, // Pass the books here
-        )
+        Expanded(
+          child: filteredAuthors.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No matching authors.',
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : AuthorButtons(
+                  filteredAuthors: filteredAuthors,
+                  allAuthors: allAuthors,
+                  allBooks: libraryController.books,
+                ),
+        ),
       ],
     );
   }

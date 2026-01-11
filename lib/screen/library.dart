@@ -78,17 +78,23 @@ class LibraryState extends State<Library> {
 
         // grid uses filteredBooks
         Expanded(
-          child: BookGrid(
-            books: filteredBooks,
-            onBookTap: (index) async {
-              await Navigator.pushNamed(
-                context,
-                Routes.details,
-                arguments: index,
-              );
-              setState(() {}); // pick up any changes on return
-            },
-          ),
+          child: filteredBooks.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No matching books.',
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : BookGrid(
+                  books: filteredBooks,
+                  onBookTap: (index) async {
+                    await Navigator.pushNamed(
+                      context,
+                      Routes.details,
+                      arguments: index,
+                    );
+                  },
+                ),
         ),
       ],
     );
