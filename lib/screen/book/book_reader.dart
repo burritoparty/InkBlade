@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -48,8 +47,6 @@ class BookReaderState extends State<BookReader> {
 
   static const Duration _rapidHoldDelay = Duration(milliseconds: 300);
   static const Duration _rapidFlipInterval = Duration(milliseconds: 90);
-
-  static const double _zoomWidthFactor = 1.05;
 
   ScrollController _controllerForPage(int pageIndex) {
     return _scrollControllers.putIfAbsent(pageIndex, () => ScrollController());
