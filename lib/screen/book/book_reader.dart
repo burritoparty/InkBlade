@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,44 +18,39 @@ class BookReader extends StatefulWidget {
 }
 
 class BookReaderState extends State<BookReader> {
-  late final SettingsController settingsController;
   late final PageController _pageController;
+  late final FocusNode _keyboardFocusNode;
+  late final SettingsController settingsController;
 
   int _currentPage = 0;
 
   bool _zoomedIn = false;
+
+  // Keep a separate ScrollController per page to avoid attaching one controller
+  // to multiple scroll views.
+  final Map<int, ScrollController> _pageScrollControllers = {};
+  ScrollController? _activeScrollController;
+
+  // Hotkey state for held keys
   bool _upHeld = false;
   bool _downHeld = false;
-
-  Timer? _scrollTimer;
-  Timer? _pageTurnDebounce;
-
-  Timer? _holdDelayTimer;
-  Timer? _rapidPageTurnTimer;
-
   bool _leftHeld = false;
   bool _rightHeld = false;
 
-  bool _cursorVisible = true;
+  // Timers
+  Timer? _scrollTimer;
   Timer? _cursorTimer;
+  Timer? _holdDelayTimer;
+  Timer? _rapidPageTurnTimer;
+  Timer? _pageTurnDebounce;
+
+  bool _cursorVisible = true;
+
+  // Rapid flip behavior
+  final Duration _rapidHoldDelay = const Duration(milliseconds: 400);
+  final Duration _rapidFlipInterval = const Duration(milliseconds: 100);
 
   bool _dialogOpen = false;
-
-  late final FocusNode _keyboardFocusNode;
-
-  final Map<int, ScrollController> _scrollControllers = {};
-  ScrollController? _activeScrollController;
-
-  static const Duration _rapidHoldDelay = Duration(milliseconds: 300);
-  static const Duration _rapidFlipInterval = Duration(milliseconds: 90);
-
-  ScrollController _controllerForPage(int pageIndex) {
-    return _scrollControllers.putIfAbsent(pageIndex, () => ScrollController());
-  }
-
-  void _setActiveScrollController(int pageIndex) {
-    _activeScrollController = _controllerForPage(pageIndex);
-  }
 
   @override
   void initState() {
@@ -89,49 +85,65 @@ class BookReaderState extends State<BookReader> {
   @override
   void dispose() {
     _scrollTimer?.cancel();
-    _pageTurnDebounce?.cancel();
-
+    _cursorTimer?.cancel();
     _holdDelayTimer?.cancel();
     _rapidPageTurnTimer?.cancel();
+    _pageTurnDebounce?.cancel();
 
-    _cursorTimer?.cancel();
-
-    _pageController.dispose();
     _keyboardFocusNode.dispose();
+    _pageController.dispose();
 
-    for (final c in _scrollControllers.values) {
+    for (final c in _pageScrollControllers.values) {
       c.dispose();
     }
-    _scrollControllers.clear();
+    _pageScrollControllers.clear();
 
     super.dispose();
+  }
+
+  ScrollController _controllerForPage(int index) {
+    return _pageScrollControllers.putIfAbsent(index, () => ScrollController());
+  }
+
+  void _setActiveScrollController(int pageIndex) {
+    _activeScrollController = _controllerForPage(pageIndex);
   }
 
   void _resetScroll() {
     final c = _activeScrollController;
     if (c == null) return;
     if (!c.hasClients) return;
+
     c.jumpTo(0);
   }
 
-  void _precacheAround(int index) {
+  void _precacheAround(int pageIndex) {
+    // keep this lightweight, only cache a small window
     final pages = widget.book.getPageFiles();
     if (pages.isEmpty) return;
 
-    final minIndex = (index - 2).clamp(0, pages.length - 1);
-    final maxIndex = (index + 2).clamp(0, pages.length - 1);
+    const buffer = 2;
+    final start = (pageIndex - buffer).clamp(0, pages.length - 1);
+    final end = (pageIndex + buffer).clamp(0, pages.length - 1);
 
-    for (var i = minIndex; i <= maxIndex; i++) {
-      final provider = FileImage(pages[i]);
-      precacheImage(provider, context);
+    for (int i = start; i <= end; i++) {
+      precacheImage(FileImage(pages[i]), context);
     }
   }
 
-  void _goToPage(int index) {
+  void _goToPage(int index, {bool animate = true}) {
     final target = index.clamp(0, widget.book.getPageCount() - 1);
     if (target == _currentPage) return;
 
-    _pageController.jumpToPage(target);
+    if (animate && _pageController.hasClients) {
+      _pageController.animateToPage(
+        target,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      _pageController.jumpToPage(target);
+    }
 
     setState(() {
       _currentPage = target;
@@ -142,8 +154,23 @@ class BookReaderState extends State<BookReader> {
     _precacheAround(target);
   }
 
+  void _handlePageJump(String text) {
+    final totalPages = widget.book.getPageCount();
+    final value = int.tryParse(text);
+    if (value == null) return;
+
+    final target = (value - 1).clamp(0, totalPages - 1);
+    _goToPage(target);
+  }
+
   void _showJumpToPageDialog() {
-    final controller = TextEditingController();
+    final controller = TextEditingController(text: '${_currentPage + 1}');
+    controller.selection =
+        TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+
+    setState(() {
+      _dialogOpen = true;
+    });
 
     showDialog(
       context: context,
@@ -175,19 +202,31 @@ class BookReaderState extends State<BookReader> {
           ],
         );
       },
-    );
+    ).then((_) {
+      if (!mounted) return;
+      setState(() {
+        _dialogOpen = false;
+      });
+    });
   }
 
-  void _handlePageJump(String value) {
-    if (value.isEmpty) return;
+  void _scrollByViewportFraction(double fraction) {
+    final c = _activeScrollController;
+    if (c == null) return;
+    if (!c.hasClients) return;
 
-    final page = int.tryParse(value);
-    if (page == null) return;
+    final viewport = c.position.viewportDimension;
+    final delta = viewport * fraction;
+    final target = (c.offset + delta).clamp(
+      c.position.minScrollExtent,
+      c.position.maxScrollExtent,
+    );
 
-    final target = page - 1;
-    if (target < 0 || target >= widget.book.getPageCount()) return;
-
-    _pageController.jumpToPage(target);
+    c.animateTo(
+      target,
+      duration: const Duration(milliseconds: 55),
+      curve: Curves.linear,
+    );
   }
 
   void _startScrollTimer(void Function() action) {
@@ -222,25 +261,19 @@ class BookReaderState extends State<BookReader> {
           _stopRapidFlipTimers();
           return;
         }
-        _goToPage(_currentPage + direction);
+        _goToPage(_currentPage + direction, animate: false);
       });
     });
   }
 
-  void _scrollByViewportFraction(double fraction) {
-    final c = _activeScrollController;
-    if (c == null) return;
-    if (!c.hasClients) return;
-
-    final viewport = c.position.viewportDimension;
-    final increment = viewport * fraction;
-
-    final target =
-        (c.offset + increment).clamp(0.0, c.position.maxScrollExtent);
-    c.jumpTo(target);
-  }
-
   void _handleKey(KeyEvent event) {
+    // ESC = back
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.escape) {
+      Navigator.maybePop(context);
+      return;
+    }
+
     if (_dialogOpen) return; // Ignore key events when dialog is open
 
     final key = event.logicalKey;
@@ -255,23 +288,19 @@ class BookReaderState extends State<BookReader> {
     if (isUp) {
       _upHeld = event is KeyDownEvent || event is KeyRepeatEvent;
       if (_upHeld && _zoomedIn) {
-        if (_scrollTimer == null) {
-          _startScrollTimer(() => _scrollByViewportFraction(-0.10));
-        }
-      } else {
-        if (!_downHeld) _stopScrollTimer();
+        _startScrollTimer(() => _scrollByViewportFraction(-0.12));
       }
+      if (event is KeyUpEvent) _stopScrollTimer();
+      return;
     }
 
     if (isDown) {
       _downHeld = event is KeyDownEvent || event is KeyRepeatEvent;
       if (_downHeld && _zoomedIn) {
-        if (_scrollTimer == null) {
-          _startScrollTimer(() => _scrollByViewportFraction(0.10));
-        }
-      } else {
-        if (!_upHeld) _stopScrollTimer();
+        _startScrollTimer(() => _scrollByViewportFraction(0.12));
       }
+      if (event is KeyUpEvent) _stopScrollTimer();
+      return;
     }
 
     final isLeft =
@@ -279,12 +308,18 @@ class BookReaderState extends State<BookReader> {
     final isRight =
         key == LogicalKeyboardKey.keyD || key == LogicalKeyboardKey.arrowRight;
 
-    if (event is KeyDownEvent) {
-      if (key == LogicalKeyboardKey.escape) {
-        Navigator.pop(context);
-        return;
+    if (event is KeyUpEvent) {
+      if (isLeft) {
+        _leftHeld = false;
+        if (!_rightHeld) _stopRapidFlipTimers();
       }
+      if (isRight) {
+        _rightHeld = false;
+        if (!_leftHeld) _stopRapidFlipTimers();
+      }
+    }
 
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
       if (key == LogicalKeyboardKey.space) {
         setState(() {
           _zoomedIn = !_zoomedIn;
@@ -312,27 +347,25 @@ class BookReaderState extends State<BookReader> {
         _startRapidFlipAfterDelay(direction: -1);
         return;
       }
-    }
 
-    if (isRight && !_rightHeld) {
-      _rightHeld = true;
-      _pageTurnDebounce?.cancel();
-      _pageTurnDebounce = Timer(const Duration(milliseconds: 60), () {
-        _goToPage(_currentPage + 1);
-      });
-      _startRapidFlipAfterDelay(direction: 1);
-      return;
-    }
-
-    if (event is KeyUpEvent) {
-      if (isLeft) {
-        _leftHeld = false;
-        if (!_rightHeld) _stopRapidFlipTimers();
+      if (isRight && !_rightHeld) {
+        _rightHeld = true;
+        _pageTurnDebounce?.cancel();
+        _pageTurnDebounce = Timer(const Duration(milliseconds: 60), () {
+          _goToPage(_currentPage + 1);
+        });
+        _startRapidFlipAfterDelay(direction: 1);
+        return;
       }
 
-      if (isRight) {
-        _rightHeld = false;
-        if (!_leftHeld) _stopRapidFlipTimers();
+      if (key == LogicalKeyboardKey.pageUp) {
+        _goToPage(_currentPage - 1);
+        return;
+      }
+
+      if (key == LogicalKeyboardKey.pageDown) {
+        _goToPage(_currentPage + 1);
+        return;
       }
     }
   }
@@ -348,6 +381,45 @@ class BookReaderState extends State<BookReader> {
         _cursorVisible = false;
       });
     });
+  }
+
+  Widget _buildPageTurnAnimation({required int index, required Widget child}) {
+    // Lightweight 3D turn effect driven by the PageController.
+    // Does not change AppBar styling, hotkeys, zoom, scroll behavior, or buttons.
+    return AnimatedBuilder(
+      animation: _pageController,
+      child: child,
+      builder: (context, page) {
+        double current = _currentPage.toDouble();
+
+        if (_pageController.hasClients) {
+          final p = _pageController.page;
+          if (p != null) current = p;
+        }
+
+        final delta = index - current;
+        final t = delta.clamp(-1.0, 1.0);
+
+        final rotationY = t * (math.pi / 18); // ~10°
+        final scale = (1.0 - delta.abs() * 0.035).clamp(0.965, 1.0);
+        final opacity = (1.0 - delta.abs() * 0.18).clamp(0.0, 1.0);
+
+        final alignment =
+            delta >= 0 ? Alignment.centerLeft : Alignment.centerRight;
+
+        return Opacity(
+          opacity: opacity,
+          child: Transform(
+            alignment: alignment,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.0015)
+              ..rotateY(rotationY)
+              ..scale(scale, 1.0, 1.0),
+            child: page,
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -401,11 +473,13 @@ class BookReaderState extends State<BookReader> {
             itemBuilder: (context, index) {
               final file = pages[index];
 
+              Widget pageChild;
+
               if (_zoomedIn) {
                 final controller = _controllerForPage(index);
                 final screenW = MediaQuery.of(context).size.width;
 
-                return SingleChildScrollView(
+                pageChild = SingleChildScrollView(
                   controller: controller,
                   physics: const ClampingScrollPhysics(),
                   child: Center(
@@ -419,18 +493,20 @@ class BookReaderState extends State<BookReader> {
                     ),
                   ),
                 );
+              } else {
+                pageChild = AspectRatio(
+                  aspectRatio: 2 / 3,
+                  child: Image.file(
+                    file,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                    errorBuilder: (_, __, ___) =>
+                        const Center(child: Text('Image not found')),
+                  ),
+                );
               }
 
-              return AspectRatio(
-                aspectRatio: 2 / 3,
-                child: Image.file(
-                  file,
-                  fit: BoxFit.contain,
-                  gaplessPlayback: true,
-                  errorBuilder: (_, __, ___) =>
-                      const Center(child: Text('Image not found')),
-                ),
-              );
+              return _buildPageTurnAnimation(index: index, child: pageChild);
             },
           ),
           bottomNavigationBar: Container(
@@ -458,9 +534,6 @@ class BookReaderState extends State<BookReader> {
                       _zoomedIn = !_zoomedIn;
                     });
                     _resetScroll();
-                    _stopRapidFlipTimers();
-                    _leftHeld = false;
-                    _rightHeld = false;
                   },
                 ),
                 IconButton(
