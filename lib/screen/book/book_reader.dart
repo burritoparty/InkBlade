@@ -314,16 +314,13 @@ class BookReaderState extends State<BookReader> {
                   ),
                 );
               } else {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: AspectRatio(
-                    aspectRatio: 2 / 3,
-                    child: Image.file(
-                      file,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) =>
-                          const Center(child: Text('Image not found')),
-                    ),
+                return AspectRatio(
+                  aspectRatio: 2 / 3,
+                  child: Image.file(
+                    file,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) =>
+                        const Center(child: Text('Image not found')),
                   ),
                 );
               }
