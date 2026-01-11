@@ -138,20 +138,16 @@ class _FilterState extends State<Filter> {
                 child: ListSearch(
                   name: "Tags",
                   all: allTags,
+                  tooltipBuilder: (tag) =>
+                      libraryController.getTagDescription(tag),
                   onAdded: (value) => setState(() {
-                    // update the value
                     tags.add(value);
-                    // call the function to update filtered
                     _applyFilters();
                   }),
-                  onRemoved: (value) => setState(
-                    () {
-                      // update the value
-                      tags.remove(value);
-                      // call the function to update filtered
-                      _applyFilters();
-                    },
-                  ),
+                  onRemoved: (value) => setState(() {
+                    tags.remove(value);
+                    _applyFilters();
+                  }),
                 ),
               ),
             ),
@@ -243,17 +239,23 @@ class _FilterState extends State<Filter> {
         // grid uses filteredBooks
 
         Expanded(
-          child: BookGrid(
-            books: filteredBooks,
-            onBookTap: (index) async {
-              await Navigator.pushNamed(
-                context,
-                Routes.details,
-                arguments: index,
-              );
-              setState(() {}); // pick up any changes on return
-            },
-          ),
+          child: filteredBooks.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No matching books.',
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : BookGrid(
+                  books: filteredBooks,
+                  onBookTap: (index) async {
+                    await Navigator.pushNamed(
+                      context,
+                      Routes.details,
+                      arguments: index,
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -310,6 +312,7 @@ class ListSearch extends StatefulWidget {
   final ValueChanged<String> onAdded;
   final ValueChanged<String> onRemoved;
   final int flex;
+  final String Function(String)? tooltipBuilder;
 
   const ListSearch({
     Key? key,
@@ -317,6 +320,7 @@ class ListSearch extends StatefulWidget {
     required this.all,
     required this.onAdded,
     required this.onRemoved,
+    this.tooltipBuilder,
     this.flex = 2,
   }) : super(key: key);
 
@@ -382,15 +386,26 @@ class ListSearchState extends State<ListSearch> {
             runSpacing: 4.0,
             children: _all.map(
               (item) {
-                return InputChip(
+                final tip = widget.tooltipBuilder?.call(item).trim() ?? '';
+
+                final chip = InputChip(
                   label: Text(item),
                   onDeleted: () {
-                    // remove from internal list
                     setState(() {
                       _all.remove(item);
                     });
                     widget.onRemoved(item);
                   },
+                );
+
+                if (tip.isEmpty) {
+                  return chip;
+                }
+
+                return Tooltip(
+                  message: tip,
+                  waitDuration: const Duration(milliseconds: 300),
+                  child: chip,
                 );
               },
             ).toList(),
