@@ -178,7 +178,45 @@ class _BookTile extends StatelessWidget {
                 ),
               ),
 
-              // Badge
+              // Badge for favorite should be opposite of page count badge
+              if (book.favorite == true)
+                switch (badgePosition) {
+                  'topLeft' => Positioned(
+                      top: edgeGap,
+                      right: edgeGap,
+                      child: Transform.scale(
+                        scale: badgeFontSize / 14.0,
+                        child: _FavoriteBadge(),
+                      ),
+                    ),
+                  'topRight' => Positioned(
+                      top: edgeGap,
+                      left: edgeGap,
+                      child: Transform.scale(
+                        scale: badgeFontSize / 14.0,
+                        child: _FavoriteBadge(),
+                      ),
+                    ),
+                  'bottomLeft' => Positioned(
+                      right: edgeGap,
+                      bottom: edgeGap,
+                      child: Transform.scale(
+                        scale: badgeFontSize / 14.0,
+                        child: _FavoriteBadge(),
+                      ),
+                    ),
+                  'bottomRight' => Positioned(
+                      left: edgeGap,
+                      bottom: edgeGap,
+                      child: Transform.scale(
+                        scale: badgeFontSize / 14.0,
+                        child: _FavoriteBadge(),
+                      ),
+                    ),
+                  _ => const SizedBox.shrink(),
+                },
+
+              // Badge for page count
               switch (badgePosition) {
                 'topLeft' => Positioned(
                     top: edgeGap,
@@ -258,6 +296,34 @@ class _PillBadge extends StatelessWidget {
           fontWeight: FontWeight.w700,
           fontFeatures: [FontFeature.tabularFigures()],
         ),
+      ),
+    );
+  }
+}
+
+class _FavoriteBadge extends StatelessWidget {
+  const _FavoriteBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.65),
+        borderRadius: BorderRadius.circular(999),
+        border:
+            Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1.5),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 6,
+            offset: Offset(0, 2),
+            color: Colors.black26,
+          ),
+        ],
+      ),
+      child: Icon(
+        Icons.favorite,
+        color: Colors.red,
       ),
     );
   }
