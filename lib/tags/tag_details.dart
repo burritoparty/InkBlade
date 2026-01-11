@@ -9,6 +9,7 @@ import '../controllers/library_controller.dart';
 import '../router/routes.dart';
 import '../widgets/book_grid.dart';
 import '../widgets/widgets.dart';
+import '../widgets/search_bar.dart';
 
 class TagDetails extends StatefulWidget {
   final String tag;
@@ -25,6 +26,7 @@ class TagDetails extends StatefulWidget {
 class _TagDetailsState extends State<TagDetails> {
   late FocusNode _focusNode;
   late String _tag;
+  final TextEditingController _searchController = TextEditingController();
 
   // Description text field
   final TextEditingController descriptionController = TextEditingController();
@@ -36,12 +38,16 @@ class _TagDetailsState extends State<TagDetails> {
         context.read<LibraryController>().getTagDescription(widget.tag);
     _tag = widget.tag;
     _focusNode = FocusNode();
+
+    _searchController.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
-    // Clean up the controllers
     descriptionController.dispose();
+    _searchController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -61,9 +67,18 @@ class _TagDetailsState extends State<TagDetails> {
     final libraryController = context.watch<LibraryController>();
 
     // filter books that contain this tag
-    final filteredBooks = libraryController.books
+    final booksForTag = libraryController.books
         .where((b) => b.tags.contains(_tag))
         .toList()
+      ..sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+
+    final query = _searchController.text.trim().toLowerCase();
+
+    final filteredBooks = query.isEmpty
+        ? booksForTag
+        : booksForTag
+            .where((b) => b.title.toLowerCase().contains(query))
+            .toList()
       ..sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
 
     // all tags
@@ -183,6 +198,18 @@ class _TagDetailsState extends State<TagDetails> {
                         .read<LibraryController>()
                         .setTagDescription(_tag, newDescription);
                   },
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: SizedBox(
+                width: double.infinity,
+                child: CustomSearchBar(
+                  controller: _searchController,
+                  hintText:
+                      '${booksForTag.length == 1 ? 'book' : 'books'} in $_tag',
+                  count: booksForTag.length,
                 ),
               ),
             ),

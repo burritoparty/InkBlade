@@ -8,6 +8,7 @@ import '../controllers/library_controller.dart';
 import '../router/routes.dart';
 import '../widgets/book_grid.dart';
 import '../widgets/widgets.dart';
+import '../widgets/search_bar.dart';
 
 class AuthorDetails extends StatefulWidget {
   final String author;
@@ -24,23 +25,24 @@ class AuthorDetails extends StatefulWidget {
 class AuthorDetailsState extends State<AuthorDetails> {
   late String _author;
   late FocusNode _focusNode;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _author = widget.author;
 
-    // set up focus node and request focus after build
+    _author = widget.author;
     _focusNode = FocusNode();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
+
+    _searchController.addListener(() {
+      if (mounted) setState(() {});
     });
   }
 
   // dispose focus node
   @override
   void dispose() {
-    // dispose focus node
+    _searchController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -59,10 +61,19 @@ class AuthorDetailsState extends State<AuthorDetails> {
     // set up the library controller, which holds the list of books
     // it watches for changes to the list of books, and rebuilds the widget tree
     final libraryController = context.watch<LibraryController>();
-    // Filter the books dynamically
-    final filteredBooks = libraryController.books
+
+    final authorBooks = libraryController.books
         .where((book) => book.authors.contains(_author))
         .toList();
+
+    final query = _searchController.text.trim().toLowerCase();
+
+    final filteredBooks = query.isEmpty
+        ? authorBooks
+        : authorBooks
+            .where((book) => (book.title).toLowerCase().contains(query))
+            .toList();
+
     // get all authors from the library controller
     final allAuthors = libraryController.authors.toList();
 
@@ -88,8 +99,10 @@ class AuthorDetailsState extends State<AuthorDetails> {
         ),
         body: Column(
           children: [
+            // top row with rename and delete buttons
             Row(
               children: [
+                // rename author dropdown
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -121,6 +134,21 @@ class AuthorDetailsState extends State<AuthorDetails> {
                     ),
                   ),
                 ),
+                // uncomment if you want the search bar in the middle of the row
+                // Expanded(
+                //   child: Padding(
+                //     padding: const EdgeInsets.all(8),
+                //     child: SizedBox(
+                //       width: double.infinity,
+                //       child: CustomSearchBar(
+                //         controller: _searchController,
+                //         hintText: 'books',
+                //         count: authorBooks.length,
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // delete author button
                 DeleteButton(onDelete: () async {
                   if (!mounted) return; // Ensure the widget is still mounted
                   final confirm = await showDialog<bool>(
@@ -158,6 +186,20 @@ class AuthorDetailsState extends State<AuthorDetails> {
                 }),
               ],
             ),
+            // search bar
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: SizedBox(
+                width: double.infinity,
+                child: CustomSearchBar(
+                  controller: _searchController,
+                  hintText:
+                      '${authorBooks.length == 1 ? 'book' : 'books'} by $_author',
+                  count: authorBooks.length,
+                ),
+              ),
+            ),
+            // grid of books by this author
             Expanded(
               child: BookGrid(
                 books: filteredBooks,
@@ -167,10 +209,10 @@ class AuthorDetailsState extends State<AuthorDetails> {
                     Routes.details,
                     arguments: index,
                   );
-                  setState(() {}); // Refresh UI on return
+                  setState(() {});
                 },
               ),
-            )
+            ),
           ],
         ),
       ),
