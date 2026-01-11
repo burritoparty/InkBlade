@@ -63,6 +63,12 @@ class Settings extends StatelessWidget {
               _SettingsSection(
                 title: 'Badges',
                 children: [
+                  SwitchListTile(
+                    title: const Text('Show favorite button'),
+                    value: settings.showFavoriteButton,
+                    onChanged: settings.setShowFavoriteButton,
+                    secondary: const Icon(Icons.favorite),
+                  ),
                   ListTile(
                     leading: const Icon(Icons.confirmation_number),
                     title: const Text('Page count badge position'),
@@ -94,7 +100,7 @@ class Settings extends StatelessWidget {
                     title: Row(
                       children: [
                         Text(
-                          'Badge font size: ${settings.badgeFontSize.toStringAsFixed(0)}',
+                          'Badge size: ${settings.badgeFontSize.toStringAsFixed(0)}',
                         ),
                         Expanded(
                           child: Slider(

@@ -10,6 +10,7 @@ class SettingsController extends ChangeNotifier {
   static const _badgeFontSizeKey = 'badgeFontSize';
   static const _authorButtonHeightKey = 'authorButtonHeight';
   static const _tagButtonHeightKey = 'tagButtonHeight';
+  static const _showFavoriteButtonKey = 'showFavoriteButton';
 
   bool _autoDelete = false;
   bool _defaultZoom = false;
@@ -18,6 +19,7 @@ class SettingsController extends ChangeNotifier {
   double _badgeFontSize = 12.0; // default value
   double _authorButtonHeight = 100.0; // default value
   double _tagButtonHeight = 50.0; // default value
+  bool _showFavoriteButton = true; // default value
 
   bool get autoDelete => _autoDelete;
   bool get defaultZoom => _defaultZoom;
@@ -26,6 +28,7 @@ class SettingsController extends ChangeNotifier {
   double get badgeFontSize => _badgeFontSize;
   double get authorButtonHeight => _authorButtonHeight;
   double get tagButtonHeight => _tagButtonHeight;
+  bool get showFavoriteButton => _showFavoriteButton;
 
   // call this on startup to load saved values
   Future<void> init() async {
@@ -37,6 +40,7 @@ class SettingsController extends ChangeNotifier {
     _badgeFontSize = prefs.getDouble(_badgeFontSizeKey) ?? 12.0;
     _authorButtonHeight = prefs.getDouble(_authorButtonHeightKey) ?? 100.0;
     _tagButtonHeight = prefs.getDouble(_tagButtonHeightKey) ?? 50.0;
+    _showFavoriteButton = prefs.getBool(_showFavoriteButtonKey) ?? true;
     notifyListeners();
   }
 
@@ -86,6 +90,13 @@ class SettingsController extends ChangeNotifier {
     _tagButtonHeight = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_tagButtonHeightKey, value);
+    notifyListeners();
+  }
+
+  Future<void> setShowFavoriteButton(bool value) async {
+    _showFavoriteButton = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showFavoriteButtonKey, value);
     notifyListeners();
   }
 }

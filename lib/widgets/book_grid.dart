@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/settings_controller.dart';
 
-// import 'package:your_app/models/book.dart';
-
 class BookGrid extends StatelessWidget {
   const BookGrid({
     super.key,
@@ -56,6 +54,8 @@ class _BookTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<SettingsController>(context);
+    final showFavoriteButton = settings.showFavoriteButton;
     final badgePosition =
         Provider.of<SettingsController>(context).badgePosition;
     final badgeFontSize =
@@ -179,7 +179,7 @@ class _BookTile extends StatelessWidget {
               ),
 
               // Badge for favorite should be opposite of page count badge
-              if (book.favorite == true)
+              if (book.favorite == true && showFavoriteButton)
                 switch (badgePosition) {
                   'topLeft' => Positioned(
                       top: edgeGap,
