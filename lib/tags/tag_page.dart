@@ -3,12 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 // Project-specific imports
 import '../controllers/library_controller.dart';
 import '../controllers/settings_controller.dart';
 import 'tag_details.dart';
+import '../widgets/search_bar.dart';
 
 class TagPage extends StatefulWidget {
   const TagPage({super.key});
@@ -54,10 +54,6 @@ class _TagPageState extends State<TagPage> {
     // get all tags dynamically
     final allTags = libraryController.tags.toList();
 
-    // Format the number of books with commas
-    final formatter = NumberFormat('#,###');
-    final formattedTagCount = formatter.format(libraryController.tags.length);
-
     // update filteredTags based on the current search query
     if (_searchController.text.isEmpty) {
       filteredTags = List.from(allTags)..sort();
@@ -75,13 +71,10 @@ class _TagPageState extends State<TagPage> {
         Center(
           child: Padding(
             padding: const EdgeInsets.all(8),
-            child: SearchBar(
-              controller: _searchController,
-              hintText: 'Search $formattedTagCount tags...',
-              onChanged: (value) {
-                filterTags(value, allTags);
-              },
-            ),
+            child: CustomSearchBar(
+                controller: _searchController,
+                hintText: 'tags',
+                count: libraryController.tags.length),
           ),
         ),
         // responsive grid for tag buttons
