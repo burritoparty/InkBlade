@@ -1,12 +1,10 @@
-// Standard Dart imports
 import 'dart:async';
+import 'dart:io';
 
-// Third-party package imports
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-// Project-specific imports
 import 'package:flutter_manga_reader/models/book.dart';
 import '../../controllers/settings_controller.dart';
 
@@ -21,227 +19,334 @@ class BookReader extends StatefulWidget {
 
 class BookReaderState extends State<BookReader> {
   late final SettingsController settingsController;
-  late PageController _pageController;
-  late ScrollController _scrollController;
+  late final PageController _pageController;
+
   int _currentPage = 0;
 
-  // check if zoomed in
   bool _zoomedIn = false;
-  // tracking for if up and down key are held
   bool _upHeld = false;
   bool _downHeld = false;
 
-  // scroll timer for smooth scrolling
-  // and page turn debounce timer
   Timer? _scrollTimer;
   Timer? _pageTurnDebounce;
 
-  // cursor visibility
+  Timer? _holdDelayTimer;
+  Timer? _rapidPageTurnTimer;
+
+  bool _leftHeld = false;
+  bool _rightHeld = false;
+
   bool _cursorVisible = true;
   Timer? _cursorTimer;
 
+  bool _dialogOpen = false;
+
   late final FocusNode _keyboardFocusNode;
+
+  final Map<int, ScrollController> _scrollControllers = {};
+  ScrollController? _activeScrollController;
+
+  static const Duration _rapidHoldDelay = Duration(milliseconds: 300);
+  static const Duration _rapidFlipInterval = Duration(milliseconds: 90);
+
+  static const double _zoomWidthFactor = 1.05;
+
+  ScrollController _controllerForPage(int pageIndex) {
+    return _scrollControllers.putIfAbsent(pageIndex, () => ScrollController());
+  }
+
+  void _setActiveScrollController(int pageIndex) {
+    _activeScrollController = _controllerForPage(pageIndex);
+  }
 
   @override
   void initState() {
     super.initState();
-    // Clamp startPage to valid range (protects against out-of-bounds)
+
     final pages = widget.book.getPageFiles();
     final maxIndex = pages.isEmpty ? 0 : pages.length - 1;
     final start = pages.isEmpty ? 0 : widget.startPage.clamp(0, maxIndex);
 
-    // initialize the settings controller
     _pageController = PageController(
       initialPage: start,
       keepPage: true,
     );
+
     settingsController = context.read<SettingsController>();
-    _scrollController = ScrollController();
     _keyboardFocusNode = FocusNode();
 
-    // request focus once, after first frame:
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _keyboardFocusNode.requestFocus();
-    });
     if (settingsController.defaultZoom) {
       _zoomedIn = true;
     }
 
-    // set the current page
     _currentPage = start;
+    _setActiveScrollController(_currentPage);
 
-    // jump to the start page after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+      _precacheAround(_currentPage);
       if (_pageController.hasClients) _pageController.jumpToPage(start);
     });
   }
 
-  // for clearing controllers
   @override
   void dispose() {
     _scrollTimer?.cancel();
     _pageTurnDebounce?.cancel();
+
+    _holdDelayTimer?.cancel();
+    _rapidPageTurnTimer?.cancel();
+
     _cursorTimer?.cancel();
+
     _pageController.dispose();
-    _scrollController.dispose();
     _keyboardFocusNode.dispose();
+
+    for (final c in _scrollControllers.values) {
+      c.dispose();
+    }
+    _scrollControllers.clear();
+
     super.dispose();
   }
 
-  // change scroll position to top
-  // for changing pages
   void _resetScroll() {
-    if (_scrollController.hasClients) {
-      _scrollController.jumpTo(0);
+    final c = _activeScrollController;
+    if (c == null) return;
+    if (!c.hasClients) return;
+    c.jumpTo(0);
+  }
+
+  void _precacheAround(int index) {
+    final pages = widget.book.getPageFiles();
+    if (pages.isEmpty) return;
+
+    final minIndex = (index - 2).clamp(0, pages.length - 1);
+    final maxIndex = (index + 2).clamp(0, pages.length - 1);
+
+    for (var i = minIndex; i <= maxIndex; i++) {
+      final provider = FileImage(pages[i]);
+      precacheImage(provider, context);
     }
   }
 
-  // jump to a page given the index, as long as in range
   void _goToPage(int index) {
     final target = index.clamp(0, widget.book.getPageCount() - 1);
     if (target == _currentPage) return;
-    // instant page jump without animation
+
     _pageController.jumpToPage(target);
-    _resetScroll();
+
     setState(() {
       _currentPage = target;
     });
+
+    _setActiveScrollController(target);
+    _resetScroll();
+    _precacheAround(target);
   }
 
-  // page jump dialog box
-  void _showJumpToPageDialog() async {
-    final input = TextEditingController();
-    final picked = await showDialog<int>(
+  void _showJumpToPageDialog() {
+    final controller = TextEditingController();
+
+    showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Go to page'),
-        content: TextField(
-          controller: input,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Page number'),
-          onSubmitted: (value) {
-            final num = int.tryParse(value);
-            Navigator.pop(context, num);
-          },
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              final num = int.tryParse(input.text);
-              Navigator.pop(context, num);
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Jump to page'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onSubmitted: (_) {
+              _handlePageJump(controller.text);
+              Navigator.of(context).pop();
             },
-            child: const Text('Go'),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _handlePageJump(controller.text);
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
-    if (picked != null) _goToPage(picked - 1);
   }
 
-// start a timer for scrolling, and call the action
+  void _handlePageJump(String value) {
+    if (value.isEmpty) return;
+
+    final page = int.tryParse(value);
+    if (page == null) return;
+
+    final target = page - 1;
+    if (target < 0 || target >= widget.book.getPageCount()) return;
+
+    _pageController.jumpToPage(target);
+  }
+
   void _startScrollTimer(void Function() action) {
     _scrollTimer?.cancel();
     _scrollTimer =
         Timer.periodic(const Duration(milliseconds: 50), (_) => action());
   }
 
-  // stop the scroll timer
   void _stopScrollTimer() {
     _scrollTimer?.cancel();
     _scrollTimer = null;
   }
 
-  // start a timer for rapid page turning, and call the action
-  void _startRapidPageTurnTimer(void Function() action) {
-    _scrollTimer?.cancel();
-    _scrollTimer =
-        Timer.periodic(const Duration(milliseconds: 200), (_) => action());
+  void _stopRapidFlipTimers() {
+    _holdDelayTimer?.cancel();
+    _holdDelayTimer = null;
+
+    _rapidPageTurnTimer?.cancel();
+    _rapidPageTurnTimer = null;
   }
 
-  // keyboard events for nav and zoom
+  void _startRapidFlipAfterDelay({required int direction}) {
+    _stopRapidFlipTimers();
+
+    _holdDelayTimer = Timer(_rapidHoldDelay, () {
+      final stillHeld = direction < 0 ? _leftHeld : _rightHeld;
+      if (!stillHeld) return;
+
+      _rapidPageTurnTimer = Timer.periodic(_rapidFlipInterval, (_) {
+        final still = direction < 0 ? _leftHeld : _rightHeld;
+        if (!still) {
+          _stopRapidFlipTimers();
+          return;
+        }
+        _goToPage(_currentPage + direction);
+      });
+    });
+  }
+
+  void _scrollByViewportFraction(double fraction) {
+    final c = _activeScrollController;
+    if (c == null) return;
+    if (!c.hasClients) return;
+
+    final viewport = c.position.viewportDimension;
+    final increment = viewport * fraction;
+
+    final target =
+        (c.offset + increment).clamp(0.0, c.position.maxScrollExtent);
+    c.jumpTo(target);
+  }
+
   void _handleKey(KeyEvent event) {
+    if (_dialogOpen) return; // Ignore key events when dialog is open
+
     final key = event.logicalKey;
 
-    // track the up/down or w/s states
-    if (key == LogicalKeyboardKey.keyW || key == LogicalKeyboardKey.arrowUp) {
-      _upHeld = event is KeyDownEvent;
-      if (_upHeld && _zoomedIn && _scrollController.hasClients) {
-        _startScrollTimer(() {
-          final increment =
-              MediaQuery.of(context).size.height * 0.1; // Reduced to 10%
-          final newOffset = (_scrollController.offset - increment)
-              .clamp(0.0, _scrollController.position.maxScrollExtent);
-          _scrollController.jumpTo(newOffset);
-        });
+    _resetCursorTimer();
+
+    final isUp =
+        key == LogicalKeyboardKey.keyW || key == LogicalKeyboardKey.arrowUp;
+    final isDown =
+        key == LogicalKeyboardKey.keyS || key == LogicalKeyboardKey.arrowDown;
+
+    if (isUp) {
+      _upHeld = event is KeyDownEvent || event is KeyRepeatEvent;
+      if (_upHeld && _zoomedIn) {
+        if (_scrollTimer == null) {
+          _startScrollTimer(() => _scrollByViewportFraction(-0.10));
+        }
       } else {
-        _stopScrollTimer();
+        if (!_downHeld) _stopScrollTimer();
       }
     }
-    if (key == LogicalKeyboardKey.keyS || key == LogicalKeyboardKey.arrowDown) {
-      _downHeld = event is KeyDownEvent;
-      if (_downHeld && _zoomedIn && _scrollController.hasClients) {
-        _startScrollTimer(() {
-          final increment =
-              MediaQuery.of(context).size.height * 0.1; // Reduced to 10%
-          final newOffset = (_scrollController.offset + increment)
-              .clamp(0.0, _scrollController.position.maxScrollExtent);
-          _scrollController.jumpTo(newOffset);
-        });
+
+    if (isDown) {
+      _downHeld = event is KeyDownEvent || event is KeyRepeatEvent;
+      if (_downHeld && _zoomedIn) {
+        if (_scrollTimer == null) {
+          _startScrollTimer(() => _scrollByViewportFraction(0.10));
+        }
       } else {
-        _stopScrollTimer();
+        if (!_upHeld) _stopScrollTimer();
       }
     }
+
+    final isLeft =
+        key == LogicalKeyboardKey.keyA || key == LogicalKeyboardKey.arrowLeft;
+    final isRight =
+        key == LogicalKeyboardKey.keyD || key == LogicalKeyboardKey.arrowRight;
 
     if (event is KeyDownEvent) {
       if (key == LogicalKeyboardKey.escape) {
-        // escape, go back a page
         Navigator.pop(context);
-      } else if (key == LogicalKeyboardKey.space) {
-        // alter zoom state, reset the scroll position to top
-        _zoomedIn = !_zoomedIn;
-        _resetScroll();
-        setState(() {});
-      } else if (key == LogicalKeyboardKey.keyA ||
-          key == LogicalKeyboardKey.arrowLeft) {
-        // immediate page turn
-        _goToPage(_currentPage - 1);
-        // start rapid page turning after 1 second
-        _scrollTimer?.cancel();
-        _scrollTimer = Timer(const Duration(milliseconds: 500), () {
-          _startRapidPageTurnTimer(() => _goToPage(_currentPage - 1));
-        });
-      } else if (key == LogicalKeyboardKey.keyD ||
-          key == LogicalKeyboardKey.arrowRight) {
-        // immediate page turn
-        _goToPage(_currentPage + 1);
-        // start rapid page turning after 1 second
-        _scrollTimer?.cancel();
-        _scrollTimer = Timer(const Duration(milliseconds: 500), () {
-          _startRapidPageTurnTimer(() => _goToPage(_currentPage + 1));
-        });
+        return;
       }
-    } else if (event is KeyUpEvent) {
-      if (key == LogicalKeyboardKey.keyA ||
-          key == LogicalKeyboardKey.arrowLeft ||
-          key == LogicalKeyboardKey.keyD ||
-          key == LogicalKeyboardKey.arrowRight) {
-        // stop rapid page turning
-        _stopScrollTimer();
+
+      if (key == LogicalKeyboardKey.space) {
+        setState(() {
+          _zoomedIn = !_zoomedIn;
+        });
+        _resetScroll();
+        return;
+      }
+
+      if (key == LogicalKeyboardKey.home) {
+        _goToPage(0);
+        return;
+      }
+
+      if (key == LogicalKeyboardKey.end) {
+        _goToPage(widget.book.getPageCount() - 1);
+        return;
+      }
+
+      if (isLeft && !_leftHeld) {
+        _leftHeld = true;
+        _pageTurnDebounce?.cancel();
+        _pageTurnDebounce = Timer(const Duration(milliseconds: 60), () {
+          _goToPage(_currentPage - 1);
+        });
+        _startRapidFlipAfterDelay(direction: -1);
+        return;
+      }
+    }
+
+    if (isRight && !_rightHeld) {
+      _rightHeld = true;
+      _pageTurnDebounce?.cancel();
+      _pageTurnDebounce = Timer(const Duration(milliseconds: 60), () {
+        _goToPage(_currentPage + 1);
+      });
+      _startRapidFlipAfterDelay(direction: 1);
+      return;
+    }
+
+    if (event is KeyUpEvent) {
+      if (isLeft) {
+        _leftHeld = false;
+        if (!_rightHeld) _stopRapidFlipTimers();
+      }
+
+      if (isRight) {
+        _rightHeld = false;
+        if (!_leftHeld) _stopRapidFlipTimers();
       }
     }
   }
 
-  // method to reset the cursor visibility timer
   void _resetCursorTimer() {
     _cursorTimer?.cancel();
     setState(() {
       _cursorVisible = true;
     });
     _cursorTimer = Timer(const Duration(seconds: 1), () {
+      if (!mounted) return;
       setState(() {
         _cursorVisible = false;
       });
@@ -250,16 +355,14 @@ class BookReaderState extends State<BookReader> {
 
   @override
   Widget build(BuildContext context) {
-    // get the list of pages from the book
     final pages = widget.book.getPageFiles();
-    // get the total number of pages
     final totalPages = pages.length;
+
     return MouseRegion(
       onHover: (_) => _resetCursorTimer(),
       cursor:
           _cursorVisible ? SystemMouseCursors.basic : SystemMouseCursors.none,
       child: KeyboardListener(
-        // makes sure this receives the key events
         focusNode: _keyboardFocusNode,
         onKeyEvent: _handleKey,
         child: Scaffold(
@@ -268,7 +371,6 @@ class BookReaderState extends State<BookReader> {
               IconButton(
                 icon: const Icon(Icons.home),
                 onPressed: () {
-                  // navigate back to the home screen
                   Navigator.popUntil(
                     context,
                     ModalRoute.withName('/'),
@@ -277,53 +379,61 @@ class BookReaderState extends State<BookReader> {
               ),
             ],
             leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context)),
-            // show page indicator, opens dialog on tap
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
             title: GestureDetector(
-                onTap: _showJumpToPageDialog,
-                child: Text('${_currentPage + 1} of $totalPages')),
+              onTap: _showJumpToPageDialog,
+              child: Text('${_currentPage + 1} of $totalPages'),
+            ),
             centerTitle: true,
           ),
           body: PageView.builder(
             controller: _pageController,
+            allowImplicitScrolling: true,
+            physics: _zoomedIn ? const NeverScrollableScrollPhysics() : null,
             itemCount: totalPages,
-            // reset scroll and update page
             onPageChanged: (i) {
-              _resetScroll();
               setState(() {
                 _currentPage = i;
               });
+              _setActiveScrollController(i);
+              _resetScroll();
+              _precacheAround(i);
             },
             itemBuilder: (context, index) {
-              // get the file for this page
               final file = pages[index];
+
               if (_zoomedIn) {
-                // scale zoomed in view to x of screen width
+                final controller = _controllerForPage(index);
                 final screenW = MediaQuery.of(context).size.width;
+
                 return SingleChildScrollView(
-                  controller: _scrollController,
+                  controller: controller,
+                  physics: const ClampingScrollPhysics(),
                   child: Center(
                     child: Image.file(
                       file,
-                      width: screenW * 0.6, // change screen width here
+                      width: screenW * 0.6,
                       fit: BoxFit.fitWidth,
+                      gaplessPlayback: true,
                       errorBuilder: (_, __, ___) =>
                           const Center(child: Text('Image not found')),
                     ),
                   ),
                 );
-              } else {
-                return AspectRatio(
-                  aspectRatio: 2 / 3,
-                  child: Image.file(
-                    file,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) =>
-                        const Center(child: Text('Image not found')),
-                  ),
-                );
               }
+
+              return AspectRatio(
+                aspectRatio: 2 / 3,
+                child: Image.file(
+                  file,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                  errorBuilder: (_, __, ___) =>
+                      const Center(child: Text('Image not found')),
+                ),
+              );
             },
           ),
           bottomNavigationBar: Container(
@@ -333,32 +443,37 @@ class BookReaderState extends State<BookReader> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // button to jump to first page
                 IconButton(
-                    icon: const Icon(Icons.first_page, color: Colors.white),
-                    onPressed: () => _goToPage(0)),
-                // button to jump to previous page
+                  icon: const Icon(Icons.first_page, color: Colors.white),
+                  onPressed: () => _goToPage(0),
+                ),
                 IconButton(
-                    icon: const Icon(Icons.chevron_left, color: Colors.white),
-                    onPressed: () => _goToPage(_currentPage - 1)),
-                // zoom toggle
+                  icon: const Icon(Icons.chevron_left, color: Colors.white),
+                  onPressed: () => _goToPage(_currentPage - 1),
+                ),
                 IconButton(
-                  icon: Icon(_zoomedIn ? Icons.zoom_out : Icons.zoom_in,
-                      color: Colors.white),
+                  icon: Icon(
+                    _zoomedIn ? Icons.zoom_out : Icons.zoom_in,
+                    color: Colors.white,
+                  ),
                   onPressed: () {
-                    _zoomedIn = !_zoomedIn;
+                    setState(() {
+                      _zoomedIn = !_zoomedIn;
+                    });
                     _resetScroll();
-                    setState(() {});
+                    _stopRapidFlipTimers();
+                    _leftHeld = false;
+                    _rightHeld = false;
                   },
                 ),
-                // button next page
                 IconButton(
-                    icon: const Icon(Icons.chevron_right, color: Colors.white),
-                    onPressed: () => _goToPage(_currentPage + 1)),
-                // button previous page
+                  icon: const Icon(Icons.chevron_right, color: Colors.white),
+                  onPressed: () => _goToPage(_currentPage + 1),
+                ),
                 IconButton(
-                    icon: const Icon(Icons.last_page, color: Colors.white),
-                    onPressed: () => _goToPage(totalPages - 1)),
+                  icon: const Icon(Icons.last_page, color: Colors.white),
+                  onPressed: () => _goToPage(totalPages - 1),
+                ),
               ],
             ),
           ),
