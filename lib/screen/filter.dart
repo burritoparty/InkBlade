@@ -7,6 +7,8 @@ import '../controllers/library_controller.dart';
 import '../models/book.dart';
 import '../router/routes.dart';
 import '../widgets/book_grid.dart';
+import '../widgets/favorite_button.dart';
+import '../widgets/later_button.dart';
 
 class Filter extends StatefulWidget {
   const Filter({super.key});
@@ -27,6 +29,9 @@ class _FilterState extends State<Filter> {
   List<String> allSeries = [];
   // grab the characters
   List<String> allCharacters = [];
+  // filter values
+  bool favoritesOnly = false;
+  bool readLaterOnly = false;
 
   // results
   String title = '';
@@ -82,10 +87,14 @@ class _FilterState extends State<Filter> {
             final matchesCharacters = characters.isEmpty ||
                 characters
                     .every((character) => book.characters.contains(character));
+            final matchesFavorites = !favoritesOnly || book.favorite == true;
+            final matchesReadLater = !readLaterOnly || book.readLater == true;
             return matchesAuthors &&
                 matchesSeries &&
                 matchesTags &&
-                matchesCharacters;
+                matchesCharacters &&
+                matchesFavorites &&
+                matchesReadLater;
           },
         ).toList();
       },
@@ -194,7 +203,45 @@ class _FilterState extends State<Filter> {
             ),
           ],
         ),
+        // button row
+        Row(children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FavoriteButton(
+                  isFavorite: favoritesOnly,
+                  onFavoriteToggle: (value) {
+                    setState(() {
+                      favoritesOnly = value;
+                    });
+                    _applyFilters();
+                  },
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: LaterButton(
+                  isReadLater: readLaterOnly,
+                  onReadLaterToggle: (value) {
+                    setState(() {
+                      readLaterOnly = value;
+                    });
+                    _applyFilters();
+                  },
+                ),
+              ),
+            ),
+          ),
+        ]),
         // grid uses filteredBooks
+
         Expanded(
           child: BookGrid(
             books: filteredBooks,
