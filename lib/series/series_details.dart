@@ -3,8 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../controllers/library_controller.dart';
 import '../widgets/book_grid.dart';
-import '../widgets/delete_button.dart'; // <- uses your existing delete button styling
+import '../widgets/delete_button.dart';
 import '../router/routes.dart';
+import '../widgets/search_bar.dart';
 
 class SeriesDetails extends StatefulWidget {
   final String seriesName;
@@ -17,8 +18,8 @@ class SeriesDetails extends StatefulWidget {
 enum _SaveState { neutral, dirty, saved }
 
 class _SeriesDetailsState extends State<SeriesDetails> {
-  String _query = '';
   bool _ascending = true;
+  final TextEditingController _searchController = TextEditingController();
 
   // rename
   late final TextEditingController _renameCtrl;
@@ -29,20 +30,22 @@ class _SeriesDetailsState extends State<SeriesDetails> {
   @override
   void initState() {
     super.initState();
+
     _currentSeriesName = widget.seriesName;
-    _renameCtrl = TextEditingController(text: _currentSeriesName);
-    _renameCtrl.addListener(() {
-      final now = _renameCtrl.text.trim();
-      final was = _currentSeriesName.trim();
-      setState(() {
-        _saveState = (now == was) ? _SaveState.neutral : _SaveState.dirty;
-      });
+
+    _renameCtrl = TextEditingController(
+      text: _currentSeriesName,
+    );
+
+    _searchController.addListener(() {
+      if (mounted) setState(() {});
     });
   }
 
   @override
   void dispose() {
     _renameCtrl.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -80,22 +83,22 @@ class _SeriesDetailsState extends State<SeriesDetails> {
         .toList();
 
     // filter by query
-    final q = _query.trim().toLowerCase();
+    final query = _searchController.text.trim().toLowerCase();
     bool listHas(dynamic list) {
-      if (q.isEmpty) return true;
+      if (query.isEmpty) return true;
       if (list is List) {
         for (final e in list) {
-          if (e is String && e.toLowerCase().contains(q)) return true;
+          if (e is String && e.toLowerCase().contains(query)) return true;
         }
       }
       return false;
     }
 
-    final filtered = q.isEmpty
+    final filtered = query.isEmpty
         ? booksInSeries
         : booksInSeries.where((b) {
             final name = (b.title).toLowerCase();
-            return name.contains(q) ||
+            return name.contains(query) ||
                 listHas(b.tags) ||
                 listHas(b.authors) ||
                 listHas(b.characters);
@@ -235,6 +238,20 @@ class _SeriesDetailsState extends State<SeriesDetails> {
               ],
             ),
           ),
+          // search bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: SizedBox(
+              width: double.infinity,
+              child: CustomSearchBar(
+                controller: _searchController,
+                hintText:
+                    '${booksInSeries.length == 1 ? 'book' : 'books'} in $_currentSeriesName',
+                count: booksInSeries.length,
+              ),
+            ),
+          ),
+          // book grid
           Expanded(
             child: filtered.isEmpty
                 ? const Center(child: Text('No matching books.'))

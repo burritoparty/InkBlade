@@ -6,6 +6,7 @@ import '../widgets/book_grid.dart';
 import '../router/routes.dart';
 
 import '../widgets/delete_button.dart';
+import '../widgets/search_bar.dart';
 
 class CharactersDetails extends StatefulWidget {
   final String characterName;
@@ -18,8 +19,8 @@ class CharactersDetails extends StatefulWidget {
 enum _SaveState { neutral, dirty, saved }
 
 class _CharactersDetailsState extends State<CharactersDetails> {
-  final String _query = '';
   bool _ascending = true;
+  final TextEditingController _searchController = TextEditingController();
 
   late final TextEditingController _renameCtrl;
   late String _currentCharacterName;
@@ -30,6 +31,7 @@ class _CharactersDetailsState extends State<CharactersDetails> {
   void initState() {
     super.initState();
     _currentCharacterName = widget.characterName;
+
     _renameCtrl = TextEditingController(text: _currentCharacterName);
     _renameCtrl.addListener(() {
       final now = _renameCtrl.text.trim();
@@ -38,11 +40,16 @@ class _CharactersDetailsState extends State<CharactersDetails> {
         _saveState = (now == was) ? _SaveState.neutral : _SaveState.dirty;
       });
     });
+
+    _searchController.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
     _renameCtrl.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -85,7 +92,7 @@ class _CharactersDetailsState extends State<CharactersDetails> {
     }).toList();
 
     // Filter by query across common metadata
-    final q = _query.trim().toLowerCase();
+    final q = _searchController.text.trim().toLowerCase();
     bool listHas(dynamic list) {
       if (q.isEmpty) return true;
       if (list is List) {
@@ -235,6 +242,18 @@ class _CharactersDetailsState extends State<CharactersDetails> {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: SizedBox(
+              width: double.infinity,
+              child: CustomSearchBar(
+                controller: _searchController,
+                hintText:
+                    '${booksForCharacter.length == 1 ? 'book' : 'books'} with $_currentCharacterName',
+                count: booksForCharacter.length,
+              ),
+            ),
+          ),
           const SizedBox(height: 4),
           Expanded(
             child: filtered.isEmpty
@@ -242,7 +261,7 @@ class _CharactersDetailsState extends State<CharactersDetails> {
                 : Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: BookGrid(
-                      books: booksForCharacter,
+                      books: filtered,
                       onBookTap: (index) async {
                         await Navigator.pushNamed(
                           context,
