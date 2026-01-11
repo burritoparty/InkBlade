@@ -78,7 +78,7 @@ class _SeriesPageState extends State<SeriesPage> {
       body: visibleSeries.isEmpty
           ? Center(
               child: Text(
-                q.isEmpty ? 'No series found.' : 'No series match "$_query".',
+                q.isEmpty ? 'No series found.' : 'No matching series.',
               ),
             )
           : ListView.separated(

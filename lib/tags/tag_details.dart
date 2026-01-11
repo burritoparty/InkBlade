@@ -215,19 +215,24 @@ class _TagDetailsState extends State<TagDetails> {
             ),
             // books grid
             Expanded(
-              child: BookGrid(
-                books: filteredBooks,
-                onBookTap: (index) async {
-                  // navigate to details and refresh on return
-                  await Navigator.pushNamed(
-                    context,
-                    Routes.details,
-                    arguments: index,
-                  );
-                  setState(() {}); // refresh the screen after returning
-                },
-              ),
-            )
+              child: filteredBooks.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No matching books.',
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : BookGrid(
+                      books: filteredBooks,
+                      onBookTap: (index) async {
+                        await Navigator.pushNamed(
+                          context,
+                          Routes.details,
+                          arguments: index,
+                        );
+                      },
+                    ),
+            ),
           ],
         ),
       ),

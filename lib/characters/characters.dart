@@ -80,9 +80,7 @@ class _CharactersPageState extends State<CharactersPage> {
       body: visibleChars.isEmpty
           ? Center(
               child: Text(
-                q.isEmpty
-                    ? 'No characters found.'
-                    : 'No characters match "$_query".',
+                q.isEmpty ? 'No characters found.' : 'No matching characters.',
               ),
             )
           : ListView.separated(
