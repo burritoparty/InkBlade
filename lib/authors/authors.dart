@@ -26,13 +26,23 @@ class _AuthorsState extends State<Authors> {
   @override
   void initState() {
     super.initState();
-    // initialize filteredAuthors with all authors from the LibraryController
+
+    _searchController.addListener(() {
+      setState(() {});
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final libraryController = context.read<LibraryController>();
       setState(() {
         filteredAuthors = libraryController.authors.toList();
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void filterAuthors(String query, List<String> allAuthors) {

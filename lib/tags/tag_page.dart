@@ -25,6 +25,11 @@ class _TagPageState extends State<TagPage> {
   @override
   void initState() {
     super.initState();
+
+    _searchController.addListener(() {
+      setState(() {});
+    });
+
     // initialize filteredTags with all tags from the LibraryController
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final libraryController = context.read<LibraryController>();
@@ -32,6 +37,12 @@ class _TagPageState extends State<TagPage> {
         filteredTags = libraryController.tags.toList();
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   // filter tags based on search query
