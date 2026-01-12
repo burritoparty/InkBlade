@@ -80,6 +80,9 @@ class BookReaderState extends State<BookReader> {
       _precacheAround(_currentPage);
       if (_pageController.hasClients) _pageController.jumpToPage(start);
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduleCursorHide();
+    });
   }
 
   @override
@@ -267,6 +270,16 @@ class BookReaderState extends State<BookReader> {
           return;
         }
         _goToPage(_currentPage + direction, animate: false);
+      });
+    });
+  }
+
+  void _scheduleCursorHide() {
+    _cursorTimer?.cancel();
+    _cursorTimer = Timer(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      setState(() {
+        _cursorVisible = false;
       });
     });
   }
