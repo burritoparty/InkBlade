@@ -283,7 +283,8 @@ class BookReaderState extends State<BookReader> {
 
     final key = event.logicalKey;
 
-    _resetCursorTimer();
+    // was causing bug with cursor visibility
+    // _resetCursorTimer();
 
     final isUp =
         key == LogicalKeyboardKey.keyW || key == LogicalKeyboardKey.arrowUp;
