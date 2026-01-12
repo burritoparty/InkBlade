@@ -11,6 +11,7 @@ class SettingsController extends ChangeNotifier {
   static const _authorButtonHeightKey = 'authorButtonHeight';
   static const _tagButtonHeightKey = 'tagButtonHeight';
   static const _showFavoriteButtonKey = 'showFavoriteButton';
+  static const _pageTurnSpeedKey = 'pageTurnSpeed';
 
   bool _autoDelete = false;
   bool _defaultZoom = false;
@@ -21,6 +22,8 @@ class SettingsController extends ChangeNotifier {
   double _tagButtonHeight = 50.0; // default value
   bool _showFavoriteButton = true; // default value
 
+  int _pageTurnSpeed = 6;
+
   bool get autoDelete => _autoDelete;
   bool get defaultZoom => _defaultZoom;
   double get pageSliderValue => _sliderValue;
@@ -29,6 +32,7 @@ class SettingsController extends ChangeNotifier {
   double get authorButtonHeight => _authorButtonHeight;
   double get tagButtonHeight => _tagButtonHeight;
   bool get showFavoriteButton => _showFavoriteButton;
+  int get pageTurnSpeed => _pageTurnSpeed;
 
   // call this on startup to load saved values
   Future<void> init() async {
@@ -41,6 +45,7 @@ class SettingsController extends ChangeNotifier {
     _authorButtonHeight = prefs.getDouble(_authorButtonHeightKey) ?? 100.0;
     _tagButtonHeight = prefs.getDouble(_tagButtonHeightKey) ?? 50.0;
     _showFavoriteButton = prefs.getBool(_showFavoriteButtonKey) ?? true;
+    _pageTurnSpeed = prefs.getInt(_pageTurnSpeedKey) ?? 6;
     notifyListeners();
   }
 
@@ -97,6 +102,13 @@ class SettingsController extends ChangeNotifier {
     _showFavoriteButton = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showFavoriteButtonKey, value);
+    notifyListeners();
+  }
+
+  Future<void> setPageTurnSpeed(double value) async {
+    _pageTurnSpeed = value.round().clamp(0, 15);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_pageTurnSpeedKey, _pageTurnSpeed);
     notifyListeners();
   }
 }

@@ -38,6 +38,27 @@ class Settings extends StatelessWidget {
                     secondary: const Icon(Icons.zoom_in),
                   ),
                   ListTile(
+                    leading: const Icon(Icons.speed),
+                    title: Row(
+                      children: [
+                        Text(
+                          'Page turn speed: ${settings.pageTurnSpeed} ms',
+                        ),
+                        Expanded(
+                          child: Slider(
+                            min: 0,
+                            max: 15,
+                            divisions: 15,
+                            label: settings.pageTurnSpeed.toString(),
+                            value: settings.pageTurnSpeed.toDouble(),
+                            onChanged: settings.setPageTurnSpeed,
+                          ),
+                        ),
+                      ],
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  ListTile(
                     leading: const Icon(Icons.grid_on),
                     title: Row(
                       children: [

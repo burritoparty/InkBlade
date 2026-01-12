@@ -136,9 +136,14 @@ class BookReaderState extends State<BookReader> {
     if (target == _currentPage) return;
 
     if (animate && _pageController.hasClients) {
+      final settings = context.read<SettingsController>();
+      final speed = settings.pageTurnSpeed;
+
+      final int ms = speed == 0 ? 1 : speed * 100;
+
       _pageController.animateToPage(
         target,
-        duration: const Duration(milliseconds: 600),
+        duration: Duration(milliseconds: ms),
         curve: Curves.easeInOut,
       );
     } else {
