@@ -116,126 +116,122 @@ class AuthorButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final buttonHeight =
-              context.watch<SettingsController>().authorButtonHeight;
-          int crossAxisCount = (constraints.maxHeight / buttonHeight).floor();
-          if (crossAxisCount < 1) {
-            crossAxisCount = 1;
-          }
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final buttonHeight =
+            context.watch<SettingsController>().authorButtonHeight;
+        int crossAxisCount = (constraints.maxHeight / buttonHeight).floor();
+        if (crossAxisCount < 1) {
+          crossAxisCount = 1;
+        }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(8.0),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              childAspectRatio: 1 / 1.5, // adjust aspect ratio of button
-              crossAxisSpacing: 8.0,
-              mainAxisSpacing: 8.0,
-            ),
-            itemCount: filteredAuthors.length,
-            itemBuilder: (context, index) {
-              final author = filteredAuthors[index];
-              // Find the first book for this author
-              final book = allBooks.firstWhere(
-                (b) => b.authors.contains(author),
-              );
-              final coverPath = book.getCoverPath();
+        return GridView.builder(
+          padding: const EdgeInsets.all(8.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 1 / 1.5, // adjust aspect ratio of button
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
+          ),
+          itemCount: filteredAuthors.length,
+          itemBuilder: (context, index) {
+            final author = filteredAuthors[index];
+            // Find the first book for this author
+            final book = allBooks.firstWhere(
+              (b) => b.authors.contains(author),
+            );
+            final coverPath = book.getCoverPath();
 
-              return TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    Routes.author,
-                    arguments: {'author': author, 'allAuthors': allAuthors},
-                  );
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
+            return TextButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  Routes.author,
+                  arguments: {'author': author, 'allAuthors': allAuthors},
+                );
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey[800],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Background image or placeholder with padding
-                    Positioned.fill(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: coverPath.isNotEmpty
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.file(
-                                  File(coverPath),
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[700],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Center(
-                                  child: Icon(Icons.person,
-                                      color: Colors.white, size: 48),
-                                ),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Background image or placeholder with padding
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: coverPath.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                File(coverPath),
+                                fit: BoxFit.cover,
                               ),
-                      ),
-                    ),
-                    // Overlay for readability
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.4),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    // Author name centered with backdrop
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.black
-                                .withOpacity(0.35), // subtle backdrop
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            author,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              shadows: [
-                                Shadow(
-                                  blurRadius: 4,
-                                  color: Colors.black54,
-                                  offset: Offset(1, 1),
-                                ),
-                              ],
+                            )
+                          : Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[700],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Center(
+                                child: Icon(Icons.person,
+                                    color: Colors.white, size: 48),
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
+                    ),
+                  ),
+                  // Overlay for readability
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  // Author name centered with backdrop
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.35),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          author,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 4,
+                                color: Colors.black54,
+                                offset: Offset(1, 1),
+                              ),
+                            ],
                           ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

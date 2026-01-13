@@ -142,117 +142,115 @@ class TagButtons extends StatelessWidget {
     // Derive the actual square size that fits evenly
     final double buttonSize = ((screenSize.width - 32) / crossAxisCount) - 8;
 
-    return Expanded(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return GridView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 1,
-            ),
-            itemCount: filteredTags.length,
-            itemBuilder: (context, index) {
-              final tag = filteredTags[index];
-              final thumbnailPath = tagThumbnails[tag];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GridView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 1,
+          ),
+          itemCount: filteredTags.length,
+          itemBuilder: (context, index) {
+            final tag = filteredTags[index];
+            final thumbnailPath = tagThumbnails[tag];
 
-              return SizedBox(
-                width: buttonSize.toDouble(),
-                height: buttonSize.toDouble(),
-                child: TextButton(
-                  onPressed: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => TagDetails(tag: tag)),
-                    );
-                    if (context.mounted) {
-                      // Rebuild so a rename shows/hides the right tag immediately
-                      (context as Element).markNeedsBuild();
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.grey[800],
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // thumbnail image or placeholder, inset by 4px
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: thumbnailPath != null &&
-                                  File(thumbnailPath).existsSync()
-                              ? Image.file(
-                                  File(thumbnailPath),
-                                  fit: BoxFit.cover,
-                                )
-                              : Container(color: Colors.grey[700]),
-                        ),
-                      ),
-
-                      // dim the edges a bit for contrast
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withOpacity(0.15),
-                              Colors.black.withOpacity(0.25),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // text with its own backdrop
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.35),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              tag,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 4,
-                                    color: Colors.black54,
-                                    offset: Offset(1, 1),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+            return SizedBox(
+              width: buttonSize.toDouble(),
+              height: buttonSize.toDouble(),
+              child: TextButton(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => TagDetails(tag: tag)),
+                  );
+                  if (context.mounted) {
+                    // Rebuild so a rename shows/hides the right tag immediately
+                    (context as Element).markNeedsBuild();
+                  }
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.grey[800],
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-              );
-            },
-          );
-        },
-      ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // thumbnail image or placeholder, inset by 4px
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: thumbnailPath != null &&
+                                File(thumbnailPath).existsSync()
+                            ? Image.file(
+                                File(thumbnailPath),
+                                fit: BoxFit.cover,
+                              )
+                            : Container(color: Colors.grey[700]),
+                      ),
+                    ),
+
+                    // dim the edges a bit for contrast
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.15),
+                            Colors.black.withOpacity(0.25),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // text with its own backdrop
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.35),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            tag,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 4,
+                                  color: Colors.black54,
+                                  offset: Offset(1, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
