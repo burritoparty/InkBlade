@@ -52,6 +52,9 @@ class BookReaderState extends State<BookReader> {
 
   bool _dialogOpen = false;
 
+  // Temporarily disable hotkeys while a page-turn animation is running.
+  bool _pageTurnInProgress = false;
+
   @override
   void initState() {
     super.initState();
@@ -134,9 +137,10 @@ class BookReaderState extends State<BookReader> {
     }
   }
 
-  void _goToPage(int index, {bool animate = true}) {
+  Future<void> _goToPage(int index, {bool animate = true}) async {
     final target = index.clamp(0, widget.book.getPageCount() - 1);
     if (target == _currentPage) return;
+    if (_pageTurnInProgress) return;
 
     if (animate && _pageController.hasClients) {
       final settings = context.read<SettingsController>();
@@ -144,11 +148,16 @@ class BookReaderState extends State<BookReader> {
 
       final int ms = speed == 0 ? 1 : speed * 100;
 
-      _pageController.animateToPage(
-        target,
-        duration: Duration(milliseconds: ms),
-        curve: Curves.easeInOut,
-      );
+      _pageTurnInProgress = true;
+      try {
+        await _pageController.animateToPage(
+          target,
+          duration: Duration(milliseconds: ms),
+          curve: Curves.easeInOut,
+        );
+      } finally {
+        _pageTurnInProgress = false;
+      }
     } else {
       _pageController.jumpToPage(target);
     }
@@ -295,6 +304,30 @@ class BookReaderState extends State<BookReader> {
     if (_dialogOpen) return; // Ignore key events when dialog is open
 
     final key = event.logicalKey;
+
+    // TODO: find a better way to handle this?
+    // While a page-turn animation is in progress, ignore keys that would
+    // initiate another page turn so fast repeated presses don't get lost.
+    final pageTurnKeys = {
+      LogicalKeyboardKey.keyA,
+      LogicalKeyboardKey.arrowLeft,
+      LogicalKeyboardKey.keyD,
+      LogicalKeyboardKey.arrowRight,
+      // prevent vertical scroll keys while animation is running
+      LogicalKeyboardKey.keyW,
+      LogicalKeyboardKey.arrowUp,
+      LogicalKeyboardKey.keyS,
+      LogicalKeyboardKey.arrowDown,
+      LogicalKeyboardKey.pageUp,
+      LogicalKeyboardKey.pageDown,
+      LogicalKeyboardKey.home,
+      LogicalKeyboardKey.end,
+    };
+    if (_pageTurnInProgress &&
+        (event is KeyDownEvent || event is KeyRepeatEvent) &&
+        pageTurnKeys.contains(key)) {
+      return;
+    }
 
     // was causing bug with cursor visibility
     // _resetCursorTimer();
