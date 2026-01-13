@@ -72,10 +72,16 @@ class _StringEditorsState extends State<StringEditor> {
   void _onTextChanged() {
     final current = widget.controller.text;
     final bool isDirty = current != _lastSubmittedText;
-    if (isDirty != _dirty || _submitted) {
+    // Only update state when the dirty flag actually changes, or when the
+    // text becomes dirty (we should clear the submitted/saved state).
+    // This avoids clearing `_submitted` on selection-only updates which
+    // also notify the controller.
+    if (isDirty != _dirty) {
       setState(() {
         _dirty = isDirty;
-        _submitted = false;
+        if (isDirty) {
+          _submitted = false;
+        }
       });
     }
   }
