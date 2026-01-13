@@ -127,6 +127,23 @@ class LibraryController extends ChangeNotifier {
     }
   }
 
+  // Sanitize a string for use as a filesystem directory name on Windows.
+  // Keeps the original book.title unchanged for JSON storage.
+  String _sanitizeFileName(String input) {
+    var s = input.replaceAll(RegExp(r'[<>:\"/\\|?*]'), '');
+    s = s.trim();
+    // Remove trailing dots and spaces which are invalid on Windows
+    s = s.replaceAll(RegExp(r'[\. ]+$'), '');
+    if (s.isEmpty) s = '_';
+    // Avoid reserved device names like CON, PRN, AUX, NUL, COM1..COM9, LPT1..LPT9
+    final reserved =
+        RegExp(r'^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$', caseSensitive: false);
+    if (reserved.hasMatch(s)) s = '_$s';
+    // Optionally enforce a reasonable length
+    if (s.length > 200) s = s.substring(0, 200);
+    return s;
+  }
+
   // Method to check if a book title already exists
   bool doesBookTitleExist(String title) {
     return _books
@@ -213,18 +230,31 @@ class LibraryController extends ChangeNotifier {
   Future<void> addBook(Book book) async {
     // determine your app documents dir
     final docsDir = await getApplicationDocumentsDirectory();
-    // build the target Library/<bookTitle> path
+
+    // ensure source exists before attempting to copy
+    final sourceDir = Directory(book.path);
+    if (!await sourceDir.exists()) {
+      // source missing — nothing to copy
+      return;
+    }
+
+    // build the target Library/<sanitizedBookTitle> path
+    final sanitizedTitle = _sanitizeFileName(book.title);
     final targetDir = Directory(
-      p.join(docsDir.path, 'InkBlade', 'Library', book.title),
+      p.join(docsDir.path, 'InkBlade', 'Library', sanitizedTitle),
     );
+
     // copy the entire folder over
-    await _copyDirectory(Directory(book.path), targetDir);
+    await _copyDirectory(sourceDir, targetDir);
+
     // update the book’s path to the new internal location
     book.path = targetDir.path;
+
     // check if the book already exists in the list
     if (_books.any((b) => b.path == book.path)) {
       return;
     }
+
     // add the book to the list
     _books.add(book);
     // update the sets with the new book
