@@ -9,6 +9,8 @@ class StringEditor extends StatefulWidget {
   final ValueChanged<String> onSubmitted;
   // for following a link
   final VoidCallback? onTap;
+  // optional version toggle to mark the current controller text as saved
+  final int? savedVersion;
 
   const StringEditor({
     Key? key,
@@ -16,6 +18,7 @@ class StringEditor extends StatefulWidget {
     required this.controller,
     required this.onSubmitted,
     this.onTap,
+    this.savedVersion,
   }) : super(key: key);
 
   @override
@@ -49,6 +52,20 @@ class _StringEditorsState extends State<StringEditor> {
     widget.controller.removeListener(_onTextChanged);
     _focusNode.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant StringEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If parent toggles the savedVersion (increments), treat current text as submitted/saved
+    if (widget.savedVersion != null &&
+        widget.savedVersion != oldWidget.savedVersion) {
+      setState(() {
+        _submitted = true;
+        _lastSubmittedText = widget.controller.text;
+        _dirty = false;
+      });
+    }
   }
 
   // handle text update
@@ -108,4 +125,3 @@ class _StringEditorsState extends State<StringEditor> {
     );
   }
 }
-

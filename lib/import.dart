@@ -41,6 +41,8 @@ class _ImportState extends State<Import> {
 
   // Added to track if a valid folder with images has been selected
   bool _isValidFolderSelected = false;
+  // version counter to notify title field that the parent programmatically saved the text
+  int _titleSavedVersion = 0;
 
   @override
   void initState() {
@@ -216,6 +218,8 @@ class _ImportState extends State<Import> {
                               titleController.text = title;
                               newBook.title = title;
                               _isValidFolderSelected = true;
+                              // Notify the title editor that the parent has programmatically set and "saved" the title
+                              _titleSavedVersion++;
                             } else {
                               newBook.path = ""; // Clear path if no images
                               _isValidFolderSelected = false;
@@ -254,6 +258,7 @@ class _ImportState extends State<Import> {
                           child: StringEditor(
                             name: "Title",
                             controller: titleController,
+                            savedVersion: _titleSavedVersion,
                             onSubmitted: (newTitle) => setState(
                               () {
                                 newBook.title = newTitle;
